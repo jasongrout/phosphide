@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "phosphor-plugins": "git://github.com/blink1073/phosphor-plugins#a31749c1078a88c6fb9917c0cb66d6b466696a30",
+    "phosphor-plugins": "git://github.com/phosphorjs/phosphor-plugins.git",
     "phosphor-disposable": "^1.0.4",
     "phosphor-dockpanel": "^0.9.2",
     "phosphor-menus": "^0.9.5",
@@ -35,7 +35,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/phosphide/phosphide.git"
+    "url": "https://github.com/phosphorjs/phosphide.git"
   },
   "files": [
     "lib/*/*.js",
@@ -45,7 +45,7 @@
     "plugin",
     "application"
   ],
-  "phosphide": {
+  "phosphor-plugin": {
     "extensionPoints": [
       {
         "module": "lib/menus/index",
@@ -64,7 +64,7 @@
   "author": "Dave Willmer <dave.willmer@gmail.com>",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/phosphide/phosphide/issues"
+    "url": "https://github.com/phosphorjs/phosphide/issues"
   },
-  "homepage": "https://github.com/phosphide/phosphide"
+  "homepage": "https://github.com/phosphorjs/phosphide"
 }
