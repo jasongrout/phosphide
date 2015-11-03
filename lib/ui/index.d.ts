@@ -1,7 +1,7 @@
 import { IDisposable } from 'phosphor-disposable';
+import { IExtension } from 'phosphor-plugins';
 import { Tab } from 'phosphor-tabs';
 import { Widget } from 'phosphor-widget';
-import { IExtension } from 'phosphor-plugins';
 /**
  * The interface for `ui` extension point.
  */

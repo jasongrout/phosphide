@@ -16,16 +16,16 @@ import {
 } from 'phosphor-dockpanel';
 
 import {
+  IExtension
+} from 'phosphor-plugins';
+
+import {
   Tab
 } from 'phosphor-tabs';
 
 import {
   Widget
 } from 'phosphor-widget';
-
-import {
-  IExtension
-} from 'phosphor-plugins';
 
 import './index.css';
 

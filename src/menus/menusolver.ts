@@ -27,6 +27,7 @@ import {
   TopSort
 } from 'phosphor-topsort';
 
+
 /**
  * Solve the relationships between menu items and allow custom menu creation.
  *
@@ -85,6 +86,7 @@ function shallowFlatten(nested: any): any {
   return [].concat.apply([], nested);
 }
 
+
 /**
  * When combined with filter, returns the unique items in a flattened array.
  *
@@ -98,6 +100,7 @@ function unique<T>(val: T, i: number, self: any): boolean {
   return self.indexOf(val) === i;
 }
 
+
 /**
  * Takes an item and returns the location with the item attached as 'menuItem'
  */
@@ -107,16 +110,18 @@ function itemTranspose(item: any): any {
   return ret;
 }
 
+
 /**
  * Takes a transposed menu item and builds a phosphor MenuItem object for
  * direct use in the menus.
  */
 function buildItem(item: any): MenuItem {
   return new MenuItem({
-    text: item[item.length-1],
+    text: item[item.length - 1],
     shortcut: item.menuItem.shortcut
   });
 }
+
 
 /**
  * Builds a phosphor submenu (an array of menu items inside a Menu object)
@@ -128,6 +133,7 @@ function buildSubmenu(items: MenuItem[], text: string): MenuItem {
   return new MenuItem({text: text, submenu: menuObj});
 }
 
+
 /**
  * Returns true if the arrays are equal, false otherwise.
  */
@@ -136,6 +142,7 @@ function arrayEquality(a: any[], b: any[]): boolean {
     return x === b[y];
   });
 }
+
 
 /**
  * Returns the all the items at a given level in the tree.
@@ -167,6 +174,7 @@ function matchesPrefix(prefix: string[], item: string[]): boolean {
   return item.length >= prefix.length && arrayEquality(item.slice(0, prefix.length), prefix);
 }
 
+
 /**
  * Returns items that are in 'first' but not 'second' array. This is not symmetric.
  */
@@ -174,13 +182,13 @@ function difference(first: string[], second: string[]): string[] {
   return first.filter((i) => second.indexOf(i) < 0);
 }
 
+
 /**
- * Returns the constraints for all items at a given level in the 
- * tree. 
+ * Returns the constraints for all items at a given level in the tree. 
  *
- * Eg. if the constraints for ['File','New','Document'] include
+ * Eg. if the constraints for ['File', 'New', 'Document'] include
  * 'file': before('edit'), 'new': before('open'), then
- * the constraints at level 0 will be ['File','Edit'], and the
+ * the constraints at level 0 will be ['File', 'Edit'], and the
  * constraints at level 1 will be ['New', 'Open']
  */
 function getConstraintsAtLevel(item: string[], level: number): [string, string][] {
@@ -196,6 +204,7 @@ function getConstraintsAtLevel(item: string[], level: number): [string, string][
   }
   return constraints;
 }
+
 
 /**
  * Returns the constraints as an unordered array of directed edges for the objects
@@ -231,6 +240,7 @@ function getConstraints(items: string[][], prefix: string[]): [string, string][]
   // TODO : do this properly - should be based on position defined.
   return constraints;
 }
+
 
 /**
  * Takes a list of IMenuItems and a prefix and returns a fully formed menu for
