@@ -12,26 +12,21 @@
  *
  * Menu items can be declared in an external JSON file, with the only
  * required fields being "location" and "command". 
- *
- *  
- *
  */
 export interface ICommandMenuItem {
   /**
    * This is a menubar-specific array of strings to denote the location
-   * in the menu hierarchy where this command shoul be placed.
+   * in the menu hierarchy where this command should be placed.
    */
   location: string[];
 
   /**
-   * The command that this menu item would like invoked when called.
+   * The command that this menu item should invoke when called.
    */
   command: string;
 
   /**
-   * An (optional) string denoting the shortcut for this specific command.
-   * In the case of a command to be shown in a menu, this could be
-   * something like 'Ctrl+Shift+T'
+   * The shortcut(s) for this specific command.
    */
   shortcut?: string[];
 
@@ -43,12 +38,12 @@ export interface ICommandMenuItem {
    * in order that the constraints can be defined for any level in the
    * hierarchy.
    */
-  constraints?: any;
+  constraints?: [string, string][];
 
   /**
    * Allows menu items to override the default text from the command
    * to be show shown in the menu.
    */
-  title_override?: string;
+  titleOverride?: string;
 
 }

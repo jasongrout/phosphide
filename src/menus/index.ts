@@ -12,11 +12,7 @@ import {
 } from './menuiteminterface';
 
 import {
-  IMenuManager
-} from './menumanagerinterface'
-
-import {
-  MenuSolver
+  solveMenu
 } from './menusolver';
 
 import {
@@ -41,11 +37,6 @@ import {
 
 
 import './index.css';
-
-export * from './menuiteminterface';
-export * from './menumanagerinterface';
-export * from './menusolver';
-export * from './menusolverfunctions';
 
 
 /**
@@ -76,9 +67,7 @@ function receiveItems(extension: IExtension<IItems>): IDisposable {
       disposables.push(disp);
     });
   }
-  if (menuBar) Widget.detach(menuBar);
-  menuBar = MenuSolver.solve(menuItems);
-  Widget.attach(menuBar, document.body);
+  menuBar.items = solveMenu(menuItems);
   return new DisposableSet(disposables);
 }
 
@@ -89,7 +78,6 @@ function receiveItems(extension: IExtension<IItems>): IDisposable {
 export
 function initialize(): Promise<IDisposable> {
   return new Promise((resolve, reject) => {
-    menuBar = MenuSolver.solve(menuItems);
     Widget.attach(menuBar, document.body);
 
     if (menuBar.isAttached) {
@@ -151,4 +139,4 @@ function compareArrays(first: string[], second: string[]): boolean {
 var menuItems: ICommandMenuItem[] = [];
 
 // Global menu bar.
-var menuBar: MenuBar = null;
+var menuBar = new MenuBar();
