@@ -1,3 +1,17 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) 2014-2015, PhosphorJS Contributors
+|
+| Distributed under the terms of the BSD 3-Clause License.
+|
+| The full license is in the file LICENSE, distributed with this software.
+|----------------------------------------------------------------------------*/
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+
 .p-Menu {
   background: white;
   color: rgba(0, 0, 0, 0.87);
@@ -16,19 +30,6 @@
   color: rgba(0, 0, 0, 0.26);
 }
 
-
-/*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
-|
-| Distributed under the terms of the BSD 3-Clause License.
-|
-| The full license is in the file LICENSE, distributed with this software.
-|----------------------------------------------------------------------------*/
-body {
-  font-family: sans-serif;
-  margin: 0;
-  padding: 0;
-}
 
 .p-Menu-item.p-mod-separator-type > span::after {
   border-top: 1px solid #DDDDDD;

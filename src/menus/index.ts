@@ -36,7 +36,7 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  attachWidget, detachWidget
+  Widget
 } from 'phosphor-widget';
 
 
@@ -49,7 +49,7 @@ export * from './menusolverfunctions';
 
 
 /**
- * The interface required for menu items.
+ * The interface required for `menu:items` extension point.
  */
 export
 interface IItems {
@@ -57,12 +57,14 @@ interface IItems {
 }
 
 
+/**
+ * Extension point receiver for `menu:items`.
+ */
 export
 function receiveItems(extension: IExtension<IItems>): IDisposable {
   var disposables: IDisposable[] = [];
 
   if (extension.object && extension.object.hasOwnProperty('items')) {
-    console.log('got items', extension.object.items.length);
     extension.object.items.forEach(item => {
       var disp = addToMenuItems(item);
       disposables.push(disp);
@@ -74,23 +76,25 @@ function receiveItems(extension: IExtension<IItems>): IDisposable {
       disposables.push(disp);
     });
   }
-  if (menuBar) detachWidget(menuBar);
+  if (menuBar) Widget.detach(menuBar);
   menuBar = MenuSolver.solve(menuItems);
-  attachWidget(menuBar, document.body);
-  console.log('attached', menuItems.length);
+  Widget.attach(menuBar, document.body);
   return new DisposableSet(disposables);
 }
 
 
+/**
+ * Extension point initializer for `menu:items`.
+ */
 export
 function initialize(): Promise<IDisposable> {
   return new Promise((resolve, reject) => {
     menuBar = MenuSolver.solve(menuItems);
-    attachWidget(menuBar, document.body);
+    Widget.attach(menuBar, document.body);
 
     if (menuBar.isAttached) {
       var disposable = new DisposableDelegate(() => {
-        detachWidget(menuBar);
+        Widget.detach(menuBar);
       });
       resolve(disposable);
     } else {
@@ -99,6 +103,10 @@ function initialize(): Promise<IDisposable> {
   });                
 }
 
+
+/**
+ * Add an item to the menu.
+ */
 function addToMenuItems(item: ICommandMenuItem): IDisposable {
   menuItems.push(item);
   return new DisposableDelegate(() => {
@@ -109,6 +117,10 @@ function addToMenuItems(item: ICommandMenuItem): IDisposable {
   });
 }
 
+
+/**
+ * Get the index of an item in the menu.
+ */
 function indexOfItem(item: ICommandMenuItem): number {
   for (var i = 0; i < menuItems.length; ++i) {
     if (compareArrays(menuItems[i].location, item.location)) {
@@ -120,6 +132,10 @@ function indexOfItem(item: ICommandMenuItem): number {
   return -1;
 }
 
+
+/**
+ * Check whether two arrays are equal.
+ */
 function compareArrays(first: string[], second: string[]): boolean {
   if (first.length !== second.length) return false;
   for (var i = 0; i < first.length; ++i) {
@@ -131,5 +147,8 @@ function compareArrays(first: string[], second: string[]): boolean {
 }
 
 
+// Menu items store.
 var menuItems: ICommandMenuItem[] = [];
+
+// Global menu bar.
 var menuBar: MenuBar = null;

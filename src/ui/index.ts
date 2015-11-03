@@ -20,7 +20,7 @@ import {
 } from 'phosphor-tabs';
 
 import {
-  Widget, attachWidget
+  Widget
 } from 'phosphor-widget';
 
 import {
@@ -30,26 +30,19 @@ import {
 import './index.css';
 
 
-function createContent(title: string): Widget {
-  var widget = new Widget();
-  var tab = new Tab(title);
-  tab.closable = true;
-  DockPanel.setTab(widget, tab);
-  return widget;
-}
-
-
 /**
- * The interface that must be adhered to in order to interact
- * with the DockAreaExtensionPoint.
+ * The interface for `ui:items` extension point.
  */
 export 
 interface IItems {
-  items: Widget[]; // Widget?
+  items: Widget[];
   tabs: Tab[];
 }
 
 
+/**
+ * The receiver for the `ui:items` extension point.
+ */
 export
 function receiveItems(extension: IExtension<IItems>): IDisposable {
   if (extension.object && extension.object.hasOwnProperty('items')) {
@@ -64,16 +57,17 @@ function receiveItems(extension: IExtension<IItems>): IDisposable {
 }
 
 
+/**
+ * The initializer for the `ui:items extension point.
+ */
 export
 function initialize(): Promise<IDisposable> {
-  attachWidget(dockarea, document.body);
+  Widget.attach(dockarea, document.body);
   window.onresize = () => dockarea.update();
   return Promise.resolve(void 0);
 }
 
 
+// global dockpanel
 var dockarea = new DockPanel();
 dockarea.id = 'main';
-var initialView = createContent('Initial Tab');
-dockarea.addWidget(initialView);
-
