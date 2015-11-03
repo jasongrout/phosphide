@@ -46,14 +46,16 @@ interface IUIExtension {
 export
 function receiveMain(extension: IExtension<IUIExtension>): IDisposable {
   if (extension.object && extension.object.hasOwnProperty('items')) {
-    var items = extension.object.items;
-    var tabs = extension.object.tabs;
-    for (var i = 0; i < items.length; ++i) {
+    let items = extension.object.items;
+    let tabs = extension.object.tabs;
+    for (let i = 0; i < items.length; ++i) {
       DockPanel.setTab(items[i], tabs[i]);
       dockarea.addWidget(items[i]);
     }
   }
-  return void 0;
+  return new DisposableDelegate(() => {
+    // TODO: remove the items from the dockarea once the API is updated.
+  });
 }
 
 
