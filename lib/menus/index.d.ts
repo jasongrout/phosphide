@@ -2,16 +2,16 @@ import { ICommandMenuItem } from './menuiteminterface';
 import { IExtension } from 'phosphor-plugins';
 import { IDisposable } from 'phosphor-disposable';
 /**
- * The interface required for `menu:items` extension point.
+ * The interface required for `menus` extension points.
  */
-export interface IItems {
+export interface IMenuExtension {
     items: ICommandMenuItem[];
 }
 /**
- * Extension point receiver for `menu:items`.
+ * Extension receiver for `menus:main`.
  */
-export declare function receiveItems(extension: IExtension<IItems>): IDisposable;
+export declare function receiveMain(extension: IExtension<IMenuExtension>): IDisposable;
 /**
- * Extension point initializer for `menu:items`.
+ * Extension point initializer for `menus:main`.
  */
-export declare function initialize(): Promise<IDisposable>;
+export declare function initializeMain(): Promise<IDisposable>;

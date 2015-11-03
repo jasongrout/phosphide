@@ -12,24 +12,20 @@ import {
 } from './menuiteminterface';
 
 import {
-  solveMenu
-} from './menusolver';
-
-import {
   IExtension
 } from 'phosphor-plugins';
 
 import {
-  IDisposable, DisposableDelegate, DisposableSet
+  solveMenu
+} from './menusolver';
+
+import {
+  IDisposable
 } from 'phosphor-disposable';
 
 import {
-  Menu, MenuBar, MenuItem
+  MenuBar
 } from 'phosphor-menus';
-
-import {
-  Signal, ISignal
-} from 'phosphor-signaling';
 
 import {
   Widget
@@ -40,103 +36,104 @@ import './index.css';
 
 
 /**
- * The interface required for `menu:items` extension point.
+ * The interface required for `menus` extension points.
  */
 export
-interface IItems {
+interface IMenuExtension {
   items: ICommandMenuItem[];
 }
 
 
 /**
- * Extension point receiver for `menu:items`.
+ * Extension receiver for `menus:main`.
  */
 export
-function receiveItems(extension: IExtension<IItems>): IDisposable {
-  var disposables: IDisposable[] = [];
-
-  if (extension.object && extension.object.hasOwnProperty('items')) {
-    extension.object.items.forEach(item => {
-      var disp = addToMenuItems(item);
-      disposables.push(disp);
-    });
-  } 
-  if (extension.data && extension.data.hasOwnProperty('items')) {
-    extension.data.items.forEach((item: ICommandMenuItem) => {
-      var disp = addToMenuItems(item);
-      disposables.push(disp);
-    });
+function receiveMain(extension: IExtension<IMenuExtension>): IDisposable {
+  if (!('main' in menuMap)) {
+    menuMap['main'] = new MenuExtensionPoint('main');
   }
-  menuBar.items = solveMenu(menuItems);
-  return new DisposableSet(disposables);
+  let main = menuMap['main'];
+  main.receive(extension);
+  return void 0;
 }
 
 
 /**
- * Extension point initializer for `menu:items`.
+ * Extension point initializer for `menus:main`.
  */
 export
-function initialize(): Promise<IDisposable> {
-  return new Promise((resolve, reject) => {
-    Widget.attach(menuBar, document.body);
+function initializeMain(): Promise<IDisposable> {
+  if (!('main' in menuMap)) return Promise.resolve(void 0);
+  let main = menuMap['main'];
+  return main.initialize(document.body);
+}
 
-    if (menuBar.isAttached) {
-      var disposable = new DisposableDelegate(() => {
-        Widget.detach(menuBar);
+
+
+/**
+ * Menu extension point handler.
+ */
+class MenuExtensionPoint implements IDisposable {
+
+  constructor(name: string) {
+    this._name = name;
+    this._commandItems = null;
+    this._menu = new MenuBar();
+  }
+
+  /**
+   * Receive an extension for this menu.
+   */
+  receive(extension: IExtension<IMenuExtension>): void {
+    if (extension.object && extension.object.hasOwnProperty('items')) {
+      extension.object.items.forEach(item => {
+        this._commandItems.push(item);
       });
-      resolve(disposable);
-    } else {
-      reject(new Error("Error initialising menu plugin."));
+    } 
+    if (extension.data && extension.data.hasOwnProperty('items')) {
+      extension.data.items.forEach((item: ICommandMenuItem) => {
+        this._commandItems.push(item);
+      });
     }
-  });                
-}
-
-
-/**
- * Add an item to the menu.
- */
-function addToMenuItems(item: ICommandMenuItem): IDisposable {
-  menuItems.push(item);
-  return new DisposableDelegate(() => {
-    var index = indexOfItem(item);
-    if (index > -1) {
-      menuItems.splice(index, 1);
-    }
-  });
-}
-
-
-/**
- * Get the index of an item in the menu.
- */
-function indexOfItem(item: ICommandMenuItem): number {
-  for (var i = 0; i < menuItems.length; ++i) {
-    if (compareArrays(menuItems[i].location, item.location)) {
-      if (menuItems[i].command === item.command) {
-        return i;
-      }
+    if (this._initialized) {
+      this._menu.items = solveMenu(this._commandItems);
     }
   }
-  return -1;
-}
 
-
-/**
- * Check whether two arrays are equal.
- */
-function compareArrays(first: string[], second: string[]): boolean {
-  if (first.length !== second.length) return false;
-  for (var i = 0; i < first.length; ++i) {
-    if (first[i] !== second[i]) {
-      return false;
-    }
+  /**
+   * Initialize the extension point.
+   *
+   * @param element - DOM Element to attach the menu.
+   */
+  initialize(element: HTMLElement): Promise<IDisposable> {
+    this._menu.items = solveMenu(this._commandItems);
+    this._initialized = true;
+    Widget.attach(this._menu, element);
+    return Promise.resolve(this);
   }
-  return true;
+
+  /**
+   * Return whether the extension point has been disposed.
+   */
+  get isDisposed(): boolean {
+    return (this._commandItems === null);
+  }
+
+  /** 
+   * Dispose of the resources held by the extension point.
+   */
+  dispose() {
+    this._commandItems = null;
+    this._menu.dispose();
+    delete menuMap[this._name];
+  }
+
+  private _commandItems: ICommandMenuItem[] = null;
+  private _initialized = false;
+  private _menu: MenuBar = null;
+  private _name = '';
 }
 
 
-// Menu items store.
-var menuItems: ICommandMenuItem[] = [];
-
-// Global menu bar.
-var menuBar = new MenuBar();
+// Menu extension point store.
+var menuMap: { [key: string]: MenuExtensionPoint} = {};

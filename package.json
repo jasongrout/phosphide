@@ -49,15 +49,15 @@
     "extensionPoints": [
       {
         "module": "lib/menus/index",
-        "id": "menu:items",
-        "receiver": "receiveItems",
-        "initializer": "initialize"
+        "id": "menus:main",
+        "receiver": "receiveMain",
+        "initializer": "initializeMain"
       },
       {
         "module": "lib/ui/index",
-        "id": "ui:items",
-        "receiver": "receiveItems",
-        "initializer": "initialize"
+        "id": "ui:main",
+        "receiver": "receiveMain",
+        "initializer": "initializeMain"
       }
     ]
   },

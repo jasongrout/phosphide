@@ -31,20 +31,20 @@ import './index.css';
 
 
 /**
- * The interface for `ui:items` extension point.
+ * The interface for `ui` extension point.
  */
 export 
-interface IItems {
+interface IUIExtension {
   items: Widget[];
   tabs: Tab[];
 }
 
 
 /**
- * The receiver for the `ui:items` extension point.
+ * The receiver for the `ui:main` extension point.
  */
 export
-function receiveItems(extension: IExtension<IItems>): IDisposable {
+function receiveMain(extension: IExtension<IUIExtension>): IDisposable {
   if (extension.object && extension.object.hasOwnProperty('items')) {
     var items = extension.object.items;
     var tabs = extension.object.tabs;
@@ -58,13 +58,13 @@ function receiveItems(extension: IExtension<IItems>): IDisposable {
 
 
 /**
- * The initializer for the `ui:items extension point.
+ * The initializer for the `ui:main` extension point.
  */
 export
-function initialize(): Promise<IDisposable> {
+function initializeMain(): Promise<IDisposable> {
   Widget.attach(dockarea, document.body);
   window.onresize = () => dockarea.update();
-  return Promise.resolve(void 0);
+  return Promise.resolve(dockarea);
 }
 
 

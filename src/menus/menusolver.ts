@@ -12,13 +12,20 @@ import {
 } from './menuiteminterface';
 
 import {
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
   Menu, MenuBar, MenuItem
 } from 'phosphor-menus';
 
 import {
+  IExtension
+} from 'phosphor-plugins';
+
+import {
   TopSort
 } from 'phosphor-topsort';
-
 
 /**
  * Solve the relationships between menu items and allow custom menu creation.
@@ -32,7 +39,7 @@ import {
  * time because the menu is just a simple tree, for which we need the
  * results one branch at a time.
  */
-export
+ export
 function solveMenu(items: ICommandMenuItem[]): MenuItem[] {
   /**
    * The very top level of a menu is a MenuBar which contains menu items.
