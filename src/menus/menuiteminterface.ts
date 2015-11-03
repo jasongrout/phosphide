@@ -7,13 +7,15 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
+
 /**
  * An interface describing attributes of a menu item.
  *
  * Menu items can be declared in an external JSON file, with the only
  * required fields being "location" and "command". 
  */
-export interface ICommandMenuItem {
+export 
+interface ICommandMenuItem {
   /**
    * This is a menubar-specific array of strings to denote the location
    * in the menu hierarchy where this command should be placed.
@@ -45,5 +47,4 @@ export interface ICommandMenuItem {
    * to be show shown in the menu.
    */
   titleOverride?: string;
-
 }
