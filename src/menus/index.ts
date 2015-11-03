@@ -12,10 +12,6 @@ import {
 } from './menuiteminterface';
 
 import {
-  IExtension
-} from 'phosphor-plugins';
-
-import {
   solveMenu
 } from './menusolver';
 
@@ -28,9 +24,12 @@ import {
 } from 'phosphor-menus';
 
 import {
+  IExtension
+} from 'phosphor-plugins';
+
+import {
   Widget
 } from 'phosphor-widget';
-
 
 import './index.css';
 
@@ -136,4 +135,4 @@ class MenuExtensionPoint implements IDisposable {
 
 
 // Menu extension point store.
-var menuMap: { [key: string]: MenuExtensionPoint} = {};
+var menuMap: { [key: string]: MenuExtensionPoint } = { };
