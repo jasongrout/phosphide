@@ -1,6 +1,6 @@
 import { ICommandMenuItem } from './menuiteminterface';
-import { IExtension } from 'phosphor-plugins';
 import { IDisposable } from 'phosphor-disposable';
+import { IExtension } from 'phosphor-plugins';
 /**
  * The interface required for `menus` extension points.
  */

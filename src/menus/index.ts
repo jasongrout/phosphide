@@ -16,7 +16,7 @@ import {
 } from './menusolver';
 
 import {
-  IDisposable
+  IDisposable, DisposableSet, DisposableDelegate
 } from 'phosphor-disposable';
 
 import {
@@ -52,8 +52,7 @@ function receiveMain(extension: IExtension<IMenuExtension>): IDisposable {
     menuMap['main'] = new MenuExtensionPoint('main');
   }
   let main = menuMap['main'];
-  main.receive(extension);
-  return void 0;
+  return main.receive(extension);
 }
 
 
@@ -83,10 +82,12 @@ class MenuExtensionPoint implements IDisposable {
   /**
    * Receive an extension for this menu.
    */
-  receive(extension: IExtension<IMenuExtension>): void {
+  receive(extension: IExtension<IMenuExtension>): IDisposable {
+    let items: ICommandMenuItem[] = [];
     if (extension.object && extension.object.hasOwnProperty('items')) {
       extension.object.items.forEach(item => {
         this._commandItems.push(item);
+        items.push(item);
       });
     } 
     if (extension.data && extension.data.hasOwnProperty('items')) {
@@ -97,6 +98,14 @@ class MenuExtensionPoint implements IDisposable {
     if (this._initialized) {
       this._menu.items = solveMenu(this._commandItems);
     }
+    if (!items) return void 0;
+    return new DisposableDelegate(() => {
+      for (let i of items) {
+        this._commandItems.splice(this._commandItems.indexOf(i), 1);
+      }
+      this._menu.items = solveMenu(this._commandItems);
+      this._menu.update();
+    });
   }
 
   /**

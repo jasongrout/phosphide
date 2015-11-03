@@ -3,17 +3,17 @@ import { Tab } from 'phosphor-tabs';
 import { Widget } from 'phosphor-widget';
 import { IExtension } from 'phosphor-plugins';
 /**
- * The interface for `ui:items` extension point.
+ * The interface for `ui` extension point.
  */
-export interface IItems {
+export interface IUIExtension {
     items: Widget[];
     tabs: Tab[];
 }
 /**
- * The receiver for the `ui:items` extension point.
+ * The receiver for the `ui:main` extension point.
  */
-export declare function receiveItems(extension: IExtension<IItems>): IDisposable;
+export declare function receiveMain(extension: IExtension<IUIExtension>): IDisposable;
 /**
- * The initializer for the `ui:items extension point.
+ * The initializer for the `ui:main` extension point.
  */
-export declare function initialize(): Promise<IDisposable>;
+export declare function initializeMain(): Promise<IDisposable>;
