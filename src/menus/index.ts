@@ -86,10 +86,11 @@ class MenuExtensionPoint implements IDisposable {
     let items: ICommandMenuItem[] = [];
     if (extension.object && extension.object.hasOwnProperty('items')) {
       extension.object.items.forEach(item => {
+        console.log("Adding menu item: " + item.location.toString());
         this._commandItems.push(item);
         items.push(item);
       });
-    } 
+    }
     if (extension.data && extension.data.hasOwnProperty('items')) {
       extension.data.items.forEach((item: ICommandMenuItem) => {
         this._commandItems.push(item);
@@ -127,7 +128,7 @@ class MenuExtensionPoint implements IDisposable {
     return (this._commandItems === null);
   }
 
-  /** 
+  /**
    * Dispose of the resources held by the extension point.
    */
   dispose() {
