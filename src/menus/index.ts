@@ -83,6 +83,7 @@ class MenuExtensionPoint implements IDisposable {
    * Receive an extension for this menu.
    */
   receive(extension: IExtension<IMenuExtension>): IDisposable {
+    console.log("RECEIVED: " + extension.toString());
     let items: ICommandMenuItem[] = [];
     if (extension.object && extension.object.hasOwnProperty('items')) {
       extension.object.items.forEach(item => {
