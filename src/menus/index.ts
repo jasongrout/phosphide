@@ -75,7 +75,7 @@ class MenuExtensionPoint implements IDisposable {
 
   constructor(name: string) {
     this._name = name;
-    this._commandItems = null;
+    this._commandItems = [];
     this._menu = new MenuBar();
   }
 
