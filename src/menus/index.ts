@@ -61,6 +61,7 @@ function receiveMain(extension: IExtension<IMenuExtension>): IDisposable {
  */
 export
 function initializeMain(): Promise<IDisposable> {
+  console.log("Initialize main menu");
   if (!('main' in menuMap)) return Promise.resolve(void 0);
   let main = menuMap['main'];
   return main.initialize(document.body);
