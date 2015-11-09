@@ -62,7 +62,9 @@ function receiveMain(extension: IExtension<IMenuExtension>): IDisposable {
 export
 function initializeMain(): Promise<IDisposable> {
   console.log("Initialize main menu");
-  if (!('main' in menuMap)) return Promise.resolve(void 0);
+  if (!('main' in menuMap)) {
+    menuMap['main'] = new MenuExtensionPoint('main');
+  }
   let main = menuMap['main'];
   return main.initialize(document.body);
 }
@@ -117,9 +119,10 @@ class MenuExtensionPoint implements IDisposable {
    * @param element - DOM Element to attach the menu.
    */
   initialize(element: HTMLElement): Promise<IDisposable> {
-    this._menu.items = solveMenu(this._commandItems);
     this._initialized = true;
+    this._menu.items = solveMenu(this._commandItems);
     Widget.attach(this._menu, element);
+    this._menu.update();
     return Promise.resolve(this);
   }
 
