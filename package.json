@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "dependencies": {
-    "phosphor-disposable": "^1.0.4",
+    "phosphor-disposable": "^1.0.5",
     "phosphor-dockpanel": "^0.9.2",
     "phosphor-menus": "^0.9.5",
     "phosphor-plugins": "git://github.com/phosphorjs/phosphor-plugins.git",
@@ -29,7 +29,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build:src": "tsc --project src/ui && tsc --project src/menus",
-    "build": "npm run build:src",
+    "build": "npm run build:src && node scripts/copycss.js",
     "prepublish": "npm run build",
     "postinstall": "npm dedupe"
   },
@@ -39,7 +39,8 @@
   },
   "files": [
     "lib/*/*.js",
-    "lib/*/*.d.ts"
+    "lib/*/*.d.ts",
+    "lib/*/*.css"
   ],
   "keywords": [
     "plugin",

@@ -61,7 +61,9 @@ function receiveMain(extension: IExtension<IMenuExtension>): IDisposable {
  */
 export
 function initializeMain(): Promise<IDisposable> {
-  if (!('main' in menuMap)) return Promise.resolve(void 0);
+  if (!('main' in menuMap)) {
+    menuMap['main'] = new MenuExtensionPoint('main');
+  }
   let main = menuMap['main'];
   return main.initialize(document.body);
 }
@@ -75,7 +77,7 @@ class MenuExtensionPoint implements IDisposable {
 
   constructor(name: string) {
     this._name = name;
-    this._commandItems = null;
+    this._commandItems = [];
     this._menu = new MenuBar();
   }
 
@@ -89,7 +91,7 @@ class MenuExtensionPoint implements IDisposable {
         this._commandItems.push(item);
         items.push(item);
       });
-    } 
+    }
     if (extension.data && extension.data.hasOwnProperty('items')) {
       extension.data.items.forEach((item: ICommandMenuItem) => {
         this._commandItems.push(item);
@@ -114,9 +116,10 @@ class MenuExtensionPoint implements IDisposable {
    * @param element - DOM Element to attach the menu.
    */
   initialize(element: HTMLElement): Promise<IDisposable> {
-    this._menu.items = solveMenu(this._commandItems);
     this._initialized = true;
+    this._menu.items = solveMenu(this._commandItems);
     Widget.attach(this._menu, element);
+    this._menu.update();
     return Promise.resolve(this);
   }
 
@@ -127,7 +130,7 @@ class MenuExtensionPoint implements IDisposable {
     return (this._commandItems === null);
   }
 
-  /** 
+  /**
    * Dispose of the resources held by the extension point.
    */
   dispose() {
