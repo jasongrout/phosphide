@@ -61,7 +61,6 @@ function receiveMain(extension: IExtension<IMenuExtension>): IDisposable {
  */
 export
 function initializeMain(): Promise<IDisposable> {
-  console.log("Initialize main menu");
   if (!('main' in menuMap)) {
     menuMap['main'] = new MenuExtensionPoint('main');
   }
@@ -86,11 +85,9 @@ class MenuExtensionPoint implements IDisposable {
    * Receive an extension for this menu.
    */
   receive(extension: IExtension<IMenuExtension>): IDisposable {
-    console.log("RECEIVED: " + extension.toString());
     let items: ICommandMenuItem[] = [];
     if (extension.object && extension.object.hasOwnProperty('items')) {
       extension.object.items.forEach(item => {
-        console.log("Adding menu item: " + item.location.toString());
         this._commandItems.push(item);
         items.push(item);
       });
