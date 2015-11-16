@@ -28,7 +28,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "build:src": "tsc --project src/ui && tsc --project src/menus",
+    "build:src": "tsc --project src",
     "build": "npm run build:src && node scripts/copycss.js",
     "prepublish": "npm run build",
     "postinstall": "npm dedupe"
