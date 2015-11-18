@@ -7,9 +7,6 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
-// import {
-//   IDelegateCommandOptions
-// } from 'phosphor-command';
 
 import {
   IDisposable, DisposableDelegate
@@ -45,16 +42,43 @@ function receiveMain(extension: IExtension<ICommandExtension>): IDisposable {
   }
 }
 
+
 /**
- * The invoker for the `command:main` extension point.
+ * The initializer for the `command:main` extension point.
+ */
+export function initializeMain(): Promise<IDisposable> {
+  commandMap = {};
+  var disposable = new DisposableDelegate(() => {
+    for (var item in commandMap) {
+      delete commandMap[item];
+    }
+  });
+  return Promise.resolve(disposable);
+}
+
+/**
+ * The invoker for the `command:invoke` extension point.
  */
 export
 function receiveInvoke(name: string): Promise<IDisposable> {
+  console.log("COMMAND INVOKED: " + name);
   if (name in commandMap) {
     commandMap[name].handler();
     return Promise.resolve(void 0);
   }
   return Promise.reject(void 0);
+}
+
+
+/**
+ * The initializer for the `command:invoke` extension point.
+ *
+ * #### Notes
+ * This is a no-op, and shouldn't be required.
+ */
+export
+function initializeInvoker(): Promise<IDisposable> {
+  return Promise.resolve(void 0);
 }
 
 // global command manager

@@ -33,7 +33,7 @@ import './index.css';
 /**
  * The interface for `ui` extension point.
  */
-export 
+export
 interface IUIExtension {
   items: Widget[];
   tabs: Tab[];

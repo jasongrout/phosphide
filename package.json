@@ -67,12 +67,14 @@
       {
         "module": "lib/commands/index",
         "id": "commands:main",
-        "receiver": "receiveMain"
+        "receiver": "receiveMain",
+        "initializer": "initializeMain"
       },
       {
         "module": "lib/commands/index",
         "id": "commands:invoke",
-        "receiver": "invokeMain"
+        "receiver": "invokeMain",
+        "initializer": "initializeInvoker"
       }
     ]
   },

@@ -10,6 +10,17 @@ export interface ICommandExtension {
  */
 export declare function receiveMain(extension: IExtension<ICommandExtension>): IDisposable;
 /**
- * The invoker for the `command:main` extension point.
+ * The initializer for the `command:main` extension point.
+ */
+export declare function initializeMain(): Promise<IDisposable>;
+/**
+ * The invoker for the `command:invoke` extension point.
  */
 export declare function receiveInvoke(name: string): Promise<IDisposable>;
+/**
+ * The initializer for the `command:invoke` extension point.
+ *
+ * #### Notes
+ * This is a no-op, and shouldn't be required.
+ */
+export declare function initializeInvoker(): Promise<IDisposable>;
