@@ -115,8 +115,8 @@ function itemTranspose(item: any): any {
  * Takes a transposed menu item and builds a phosphor MenuItem object for
  * direct use in the menus.
  */
-function buildItem(item: any): MenuItem {
-  return new MenuItem({
+function buildItem(item: any): CommandMenuItem {
+  return new CommandMenuItem({
     text: item[item.length - 1],
     shortcut: item.menuItem.shortcut
   });
@@ -127,10 +127,10 @@ function buildItem(item: any): MenuItem {
  * Builds a phosphor submenu (an array of menu items inside a Menu object)
  * from the items passed in and the text string for this MenuItem.
  */
-function buildSubmenu(items: MenuItem[], text: string): MenuItem {
+function buildSubmenu(items: CommandMenuItem[], text: string): CommandMenuItem {
   var menuObj = new Menu();
   menuObj.items = items;
-  return new MenuItem({text: text, submenu: menuObj});
+  return new CommandMenuItem({text: text, submenu: menuObj});
 }
 
 
@@ -246,7 +246,7 @@ function getConstraints(items: string[][], prefix: string[]): [string, string][]
  * Takes a list of IMenuItems and a prefix and returns a fully formed menu for
  * all objects below that tree level.
  */
-function partialSolve(items: ICommandMenuItem[], prefix: string[]): MenuItem[] {
+function partialSolve(items: ICommandMenuItem[], prefix: string[]): CommandMenuItem[] {
   var menuItems: any[] = [];
   var levelItems: string[][] = getItemsAtLevel(items, prefix);
 

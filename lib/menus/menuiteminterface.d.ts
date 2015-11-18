@@ -41,6 +41,6 @@ export declare class CommandMenuItem extends MenuItem {
     /**
      * Construct a command menu item.
      */
-    constructor(options?: ICommandMenuItem);
+    constructor(options?: any);
     private _command;
 }

@@ -66,7 +66,7 @@ class CommandMenuItem extends MenuItem {
   /**
    * Construct a command menu item.
    */
-  constructor(options?: ICommandMenuItem) {
+  constructor(options?: any) {
     super(options as IMenuItemOptions);
     this._command = options.command;
     if (this._command) {
