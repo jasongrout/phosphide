@@ -38,7 +38,9 @@ interface ICommandExtension {
  */
 export
 function receiveMain(extension: IExtension<ICommandExtension>): IDisposable {
+  console.log("COMMAND RECEIVE MAIN");
   if (extension.object && extension.object.hasOwnProperty('id')) {
+    console.log("COMMAND RECEIVE MAIN ID: " + extension.object.id);
     let id = extension.object.id;
     if (id in commandMap) {
       throw new Error('Command already exists');
