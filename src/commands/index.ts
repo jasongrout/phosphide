@@ -34,27 +34,6 @@ interface ICommandExtension {
 
 
 /**
- * A menu item which takes a command name to be fired when selected.
- */
-export
-class CommandMenuItem extends MenuItem {
-  /**
-   * Construct a command menu item.
-   */
-  constructor(options?: ICommandMenuItem) {
-    super(options as IMenuItemOptions);
-    this._command = options.command;
-    this.handler = () => {
-      console.log('COMMAND MENU ITEM INVOKED: ' + this._command);
-      receiveInvoke(this._command);
-    };
-  }
-
-  private _command: string;
-}
-
-
-/**
  * The receiver for the `command:main` extension point.
  */
 export
@@ -90,8 +69,9 @@ export function initializeMain(): Promise<IDisposable> {
  */
 export
 function receiveInvoke(name: string): Promise<IDisposable> {
-  console.log("COMMAND INVOKED: " + name);
+  console.log("receiveInvoke called: " + name);
   if (name in commandMap) {
+    console.log("NAME FOUND... calling." )
     commandMap[name].handler();
     return Promise.resolve(void 0);
   }
