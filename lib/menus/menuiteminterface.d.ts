@@ -1,3 +1,4 @@
+import { MenuItem } from 'phosphor-menus';
 /**
  * An interface describing attributes of a menu item.
  *
@@ -32,4 +33,14 @@ export interface ICommandMenuItem {
      * to be show shown in the menu.
      */
     titleOverride?: string;
+}
+/**
+ * A menu item which takes a command name to be fired when selected.
+ */
+export declare class CommandMenuItem extends MenuItem {
+    /**
+     * Construct a command menu item.
+     */
+    constructor(options?: ICommandMenuItem);
+    private _command;
 }

@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  ICommandMenuItem
+  ICommandMenuItem, CommandMenuItem
 } from './menuiteminterface';
 
 import {

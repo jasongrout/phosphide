@@ -7,6 +7,14 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
+import {
+  IMenuItemOptions, MenuItem
+} from 'phosphor-menus';
+
+import {
+  receiveInvoke
+} from '../commands/index';
+
 
 /**
  * An interface describing attributes of a menu item.
@@ -47,4 +55,27 @@ interface ICommandMenuItem {
    * to be show shown in the menu.
    */
   titleOverride?: string;
+}
+
+
+/**
+ * A menu item which takes a command name to be fired when selected.
+ */
+export
+class CommandMenuItem extends MenuItem {
+  /**
+   * Construct a command menu item.
+   */
+  constructor(options?: ICommandMenuItem) {
+    super(options as IMenuItemOptions);
+    this._command = options.command;
+    if (this._command) {
+      this.handler = () => {
+        console.log('COMMAND MENU ITEM INVOKED: ' + this._command);
+        receiveInvoke(this._command);
+      };
+    }
+  }
+
+  private _command: string;
 }
