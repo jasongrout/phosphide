@@ -71,9 +71,11 @@ export
 function receiveInvoke(name: string): Promise<IDisposable> {
   console.log("receiveInvoke called: " + name);
   if (name in commandMap) {
-    console.log("NAME FOUND... calling." )
+    console.log("NAME FOUND... calling.");
     commandMap[name].handler();
     return Promise.resolve(void 0);
+  } else {
+    console.log("MISS: " + Object.keys(commandMap).toString());
   }
   return Promise.reject(void 0);
 }
