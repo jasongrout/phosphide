@@ -73,7 +73,7 @@
       {
         "module": "lib/commands/index",
         "id": "commands:invoke",
-        "receiver": "invokeMain",
+        "receiver": "receiveInvoke",
         "initializer": "initializeInvoker"
       }
     ]
