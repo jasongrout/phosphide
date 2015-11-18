@@ -17,7 +17,7 @@ export interface ICommandMenuItem {
     /**
      * The shortcut(s) for this specific command.
      */
-    shortcut?: string[];
+    shortcut?: string;
     /**
      * Menu constraints are a list of items which denote the position of a
      * given menu item in each 1-D array.

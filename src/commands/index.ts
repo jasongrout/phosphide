@@ -13,8 +13,16 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  MenuItem, IMenuItemOptions
+} from 'phosphor-menus';
+
+import {
   IExtension
 } from 'phosphor-plugins';
+
+import {
+  ICommandMenuItem
+} from '../menus/menuiteminterface.ts';
 
 
 export
@@ -22,6 +30,27 @@ interface ICommandExtension {
   id: string;
   caption: string;
   handler: () => void;
+}
+
+
+/**
+ * A menu item which takes a command name to be fired when selected.
+ */
+export
+class CommandMenuItem extends MenuItem {
+  /**
+   * Construct a command menu item.
+   */
+  constructor(options?: ICommandMenuItem) {
+    super(options as IMenuItemOptions);
+    this._command = options.command;
+    this.handler = () => {
+      console.log('COMMAND MENU ITEM INVOKED: ' + this._command);
+      receiveInvoke(this._command);
+    };
+  }
+
+  private _command: string;
 }
 
 

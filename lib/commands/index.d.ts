@@ -1,9 +1,21 @@
 import { IDisposable } from 'phosphor-disposable';
+import { MenuItem } from 'phosphor-menus';
 import { IExtension } from 'phosphor-plugins';
+import { ICommandMenuItem } from '../menus/menuiteminterface.ts';
 export interface ICommandExtension {
     id: string;
     caption: string;
     handler: () => void;
+}
+/**
+ * A menu item which takes a command name to be fired when selected.
+ */
+export declare class CommandMenuItem extends MenuItem {
+    /**
+     * Construct a command menu item.
+     */
+    constructor(options?: ICommandMenuItem);
+    private _command;
 }
 /**
  * The receiver for the `command:main` extension point.

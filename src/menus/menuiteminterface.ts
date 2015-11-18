@@ -12,9 +12,9 @@
  * An interface describing attributes of a menu item.
  *
  * Menu items can be declared in an external JSON file, with the only
- * required fields being "location" and "command". 
+ * required fields being "location" and "command".
  */
-export 
+export
 interface ICommandMenuItem {
   /**
    * This is a menubar-specific array of strings to denote the location
@@ -30,9 +30,9 @@ interface ICommandMenuItem {
   /**
    * The shortcut(s) for this specific command.
    */
-  shortcut?: string[];
+  shortcut?: string;
 
-  /** 
+  /**
    * Menu constraints are a list of items which denote the position of a
    * given menu item in each 1-D array.
    *
