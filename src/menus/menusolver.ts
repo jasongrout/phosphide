@@ -118,7 +118,8 @@ function itemTranspose(item: any): any {
 function buildItem(item: any): CommandMenuItem {
   return new CommandMenuItem({
     text: item[item.length - 1],
-    shortcut: item.menuItem.shortcut
+    shortcut: item.menuItem.shortcut,
+    command: item.menuItem.command
   });
 }
 
