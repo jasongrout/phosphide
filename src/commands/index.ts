@@ -38,7 +38,6 @@ interface ICommandExtension {
  */
 export
 function receiveMain(extension: IExtension<ICommandExtension>): IDisposable {
-  console.log("COMMAND RECEIVE MAIN" + extension.object.toString());
   console.log("COMMAND RECEIVE MAIN" + Object.keys(extension).toString());
   if (extension.object && extension.object.hasOwnProperty('id')) {
     console.log("COMMAND RECEIVE MAIN ID: " + extension.object.id);
