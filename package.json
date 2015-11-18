@@ -65,12 +65,12 @@
         "initializer": "initializeMain"
       },
       {
-        "module": "lib/ui/index",
+        "module": "lib/commands/index",
         "id": "commands:main",
         "receiver": "receiveMain"
       },
       {
-        "module": "lib/ui/index",
+        "module": "lib/commands/index",
         "id": "commands:invoke",
         "receiver": "invokeMain"
       }
