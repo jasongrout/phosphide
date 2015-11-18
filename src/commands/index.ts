@@ -20,11 +20,19 @@ import {
 } from 'phosphor-plugins';
 
 
+export
+interface ICommandExtension {
+  id: string;
+  caption: string;
+  handler: () => void;
+}
+
+
 /**
  * The receiver for the `command:main` extension point.
  */
 export
-function receiveMain(extension: IExtension<any>): IDisposable {
+function receiveMain(extension: IExtension<ICommandExtension>): IDisposable {
   if (extension.object && extension.object.hasOwnProperty('id')) {
     let id = extension.object.id;
     if (id in commandMap) {
