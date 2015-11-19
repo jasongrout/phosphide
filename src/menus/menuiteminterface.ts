@@ -71,7 +71,6 @@ class CommandMenuItem extends MenuItem {
     this._command = options.command;
     if (this._command) {
       this.handler = () => {
-        console.log('COMMAND MENU ITEM INVOKED: ' + this._command);
         receiveInvoke(this._command);
       };
     }

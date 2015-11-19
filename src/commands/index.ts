@@ -38,9 +38,7 @@ interface ICommandExtension {
  */
 export
 function receiveMain(extension: IExtension<ICommandExtension>): IDisposable {
-  console.log("COMMAND RECEIVE MAIN" + Object.keys(extension).toString());
   if (extension.object && extension.object.hasOwnProperty('id')) {
-    console.log("COMMAND RECEIVE MAIN ID: " + extension.object.id);
     let id = extension.object.id;
     if (id in commandMap) {
       throw new Error('Command already exists');
@@ -56,7 +54,8 @@ function receiveMain(extension: IExtension<ICommandExtension>): IDisposable {
 /**
  * The initializer for the `command:main` extension point.
  */
-export function initializeMain(): Promise<IDisposable> {
+export
+function initializeMain(): Promise<IDisposable> {
   commandMap = {};
   var disposable = new DisposableDelegate(() => {
     for (var item in commandMap) {
@@ -71,13 +70,11 @@ export function initializeMain(): Promise<IDisposable> {
  */
 export
 function receiveInvoke(name: string): Promise<IDisposable> {
-  console.log("receiveInvoke called: " + name);
   if (name in commandMap) {
-    console.log("NAME FOUND... calling.");
     commandMap[name].handler();
     return Promise.resolve(void 0);
   } else {
-    console.log("MISS: " + Object.keys(commandMap).toString());
+    return Promise.reject(new Error("Invoker - name not found: " + name));
   }
   return Promise.reject(void 0);
 }
