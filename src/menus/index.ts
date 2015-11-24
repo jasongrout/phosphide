@@ -47,7 +47,7 @@ interface IMenuExtension {
  * Extension receiver for `menus:main`.
  */
 export
-function receiveMain(extension: IExtension<IMenuExtension>): IDisposable {
+function receiveMain(extension: IExtension): IDisposable {
   if (!('main' in menuMap)) {
     menuMap['main'] = new MenuExtensionPoint('main');
   }
@@ -69,7 +69,6 @@ function initializeMain(): Promise<IDisposable> {
 }
 
 
-
 /**
  * Menu extension point handler.
  */
@@ -84,10 +83,10 @@ class MenuExtensionPoint implements IDisposable {
   /**
    * Receive an extension for this menu.
    */
-  receive(extension: IExtension<IMenuExtension>): IDisposable {
+  receive(extension: IExtension): IDisposable {
     let items: ICommandMenuItem[] = [];
-    if (extension.object && extension.object.hasOwnProperty('items')) {
-      extension.object.items.forEach(item => {
+    if (extension.item && extension.item.hasOwnProperty('items')) {
+      extension.item.items.forEach((item: any) => {
         this._commandItems.push(item);
         items.push(item);
       });

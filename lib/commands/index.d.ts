@@ -20,7 +20,7 @@ export interface ICommandExtension {
 /**
  * The receiver for the `command:main` extension point.
  */
-export declare function receiveMain(extension: IExtension<ICommandExtension>): IDisposable;
+export declare function receiveMain(extension: IExtension): IDisposable;
 /**
  * The initializer for the `command:main` extension point.
  */

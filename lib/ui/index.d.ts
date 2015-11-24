@@ -12,7 +12,7 @@ export interface IUIExtension {
 /**
  * The receiver for the `ui:main` extension point.
  */
-export declare function receiveMain(extension: IExtension<IUIExtension>): IDisposable;
+export declare function receiveMain(extension: IExtension): IDisposable;
 /**
  * The initializer for the `ui:main` extension point.
  */

@@ -10,7 +10,7 @@ export interface IMenuExtension {
 /**
  * Extension receiver for `menus:main`.
  */
-export declare function receiveMain(extension: IExtension<IMenuExtension>): IDisposable;
+export declare function receiveMain(extension: IExtension): IDisposable;
 /**
  * Extension point initializer for `menus:main`.
  */

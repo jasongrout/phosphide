@@ -44,10 +44,10 @@ interface IUIExtension {
  * The receiver for the `ui:main` extension point.
  */
 export
-function receiveMain(extension: IExtension<IUIExtension>): IDisposable {
-  if (extension.object && extension.object.hasOwnProperty('items')) {
-    let items = extension.object.items;
-    let tabs = extension.object.tabs;
+function receiveMain(extension: IExtension): IDisposable {
+  if (extension.item && extension.item.hasOwnProperty('items')) {
+    let items = extension.item.items;
+    let tabs = extension.item.tabs;
     for (let i = 0; i < items.length; ++i) {
       DockPanel.setTab(items[i], tabs[i]);
       dockarea.addWidget(items[i]);

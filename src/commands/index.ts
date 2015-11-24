@@ -49,13 +49,13 @@ interface ICommandExtension {
  * The receiver for the `command:main` extension point.
  */
 export
-function receiveMain(extension: IExtension<ICommandExtension>): IDisposable {
-  if (extension.object && extension.object.hasOwnProperty('id')) {
-    let id = extension.object.id;
+function receiveMain(extension: IExtension): IDisposable {
+  if (extension.item && extension.item.hasOwnProperty('id')) {
+    let id = extension.item.id;
     if (id in commandMap) {
       throw new Error('Command already exists');
     }
-    commandMap[id] = extension.object;
+    commandMap[id] = extension.item;
     return new DisposableDelegate(() => {
       delete commandMap[id];
     });
