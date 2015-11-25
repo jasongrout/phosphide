@@ -48,6 +48,7 @@ interface IMenuExtension {
  */
 export
 function createMenuReceiver(): IReceiver {
+  console.log("Phosphide: create menu receiver");
   if (!('main' in menuMap)) {
     menuMap['main'] = new MenuExtensionPoint('main');
   }

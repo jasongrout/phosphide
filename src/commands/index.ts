@@ -68,7 +68,7 @@ function createCommandReceiver(): IReceiver {
     dispose: function() {
       // TODO
     }
-  }
+  };
 
 }
 //   if (extension.item && extension.item.hasOwnProperty('id')) {
