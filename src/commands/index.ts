@@ -17,7 +17,7 @@ import {
 } from 'phosphor-menus';
 
 import {
-  IExtension
+  IExtension, IReceiver
 } from 'phosphor-plugins';
 
 import {
@@ -49,47 +49,68 @@ interface ICommandExtension {
  * The receiver for the `command:main` extension point.
  */
 export
-function receiveMain(extension: IExtension): IDisposable {
-  if (extension.item && extension.item.hasOwnProperty('id')) {
-    let id = extension.item.id;
-    if (id in commandMap) {
-      throw new Error('Command already exists');
+function createCommandReceiver(): IReceiver {
+  return {
+    add: function(extension: IExtension) {
+      let id = extension.item.id;
+      if (id in commandMap) {
+        throw new Error('Command already exists');
+      }
+      commandMap[id] = extension.item;
+
+      return new DisposableDelegate(() => {
+        delete commandMap[id];
+      });
+    },
+    remove: function(id) {
+      // TODO
+    },
+    dispose: function() {
+      // TODO
     }
-    commandMap[id] = extension.item;
-    return new DisposableDelegate(() => {
-      delete commandMap[id];
-    });
   }
+
 }
+//   if (extension.item && extension.item.hasOwnProperty('id')) {
+//     let id = extension.item.id;
+//     if (id in commandMap) {
+//       throw new Error('Command already exists');
+//     }
+//     commandMap[id] = extension.item;
+//     return new DisposableDelegate(() => {
+//       delete commandMap[id];
+//     });
+//   }
+// }
 
 
 /**
  * The initializer for the `command:main` extension point.
  */
-export
-function initializeMain(): Promise<IDisposable> {
-  commandMap = {};
-  var disposable = new DisposableDelegate(() => {
-    for (var item in commandMap) {
-      delete commandMap[item];
-    }
-  });
-  return Promise.resolve(disposable);
-}
+// export
+// function initializeMain(): Promise<IDisposable> {
+//   commandMap = {};
+//   var disposable = new DisposableDelegate(() => {
+//     for (var item in commandMap) {
+//       delete commandMap[item];
+//     }
+//   });
+//   return Promise.resolve(disposable);
+// }
 
 /**
  * The invoker for the `command:invoke` extension point.
  */
-export
-function receiveInvoke(name: string): Promise<IDisposable> {
-  if (name in commandMap) {
-    commandMap[name].handler();
-    return Promise.resolve(void 0);
-  } else {
-    return Promise.reject(new Error("Invoker - name not found: " + name));
-  }
-  return Promise.reject(void 0);
-}
+// export
+// function receiveInvoke(name: string): Promise<IDisposable> {
+//   if (name in commandMap) {
+//     commandMap[name].handler();
+//     return Promise.resolve(void 0);
+//   } else {
+//     return Promise.reject(new Error("Invoker - name not found: " + name));
+//   }
+//   return Promise.reject(void 0);
+// }
 
 
 /**
@@ -98,10 +119,10 @@ function receiveInvoke(name: string): Promise<IDisposable> {
  * #### Notes
  * This is a no-op, and shouldn't be required.
  */
-export
-function initializeInvoker(): Promise<IDisposable> {
-  return Promise.resolve(void 0);
-}
+// export
+// function initializeInvoker(): Promise<IDisposable> {
+//   return Promise.resolve(void 0);
+// }
 
 // global command manager
 var commandMap: { [key: string]: any } = {};

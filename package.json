@@ -55,26 +55,17 @@
       {
         "module": "lib/menus/index",
         "id": "menus:main",
-        "receiver": "receiveMain",
-        "initializer": "initializeMain"
+        "factory": "createMenuReceiver"
       },
       {
         "module": "lib/ui/index",
         "id": "ui:main",
-        "receiver": "receiveMain",
-        "initializer": "initializeMain"
+        "factory": "createUIReceiver"
       },
       {
         "module": "lib/commands/index",
         "id": "commands:main",
-        "receiver": "receiveMain",
-        "initializer": "initializeMain"
-      },
-      {
-        "module": "lib/commands/index",
-        "id": "commands:invoke",
-        "receiver": "receiveInvoke",
-        "initializer": "initializeInvoker"
+        "factory": "createCommandReceiver"
       }
     ]
   },

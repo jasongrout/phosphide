@@ -11,9 +11,9 @@ import {
   IMenuItemOptions, MenuItem
 } from 'phosphor-menus';
 
-import {
-  receiveInvoke
-} from '../commands/index';
+// import {
+//   receiveInvoke
+// } from '../commands/index';
 
 
 /**
@@ -69,11 +69,11 @@ class CommandMenuItem extends MenuItem {
   constructor(options?: any) {
     super(options as IMenuItemOptions);
     this._command = options.command;
-    if (this._command) {
-      this.handler = () => {
-        receiveInvoke(this._command);
-      };
-    }
+    // if (this._command) {
+    //   this.handler = () => {
+    //     receiveInvoke(this._command);
+    //   };
+    // }
   }
 
   private _command: string;
