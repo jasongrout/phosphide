@@ -7,14 +7,22 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
+import {
+  IMenuItemOptions, MenuItem
+} from 'phosphor-menus';
+
+// import {
+//   receiveInvoke
+// } from '../commands/index';
+
 
 /**
  * An interface describing attributes of a menu item.
  *
  * Menu items can be declared in an external JSON file, with the only
- * required fields being "location" and "command". 
+ * required fields being "location" and "command".
  */
-export 
+export
 interface ICommandMenuItem {
   /**
    * This is a menubar-specific array of strings to denote the location
@@ -30,9 +38,9 @@ interface ICommandMenuItem {
   /**
    * The shortcut(s) for this specific command.
    */
-  shortcut?: string[];
+  shortcut?: string;
 
-  /** 
+  /**
    * Menu constraints are a list of items which denote the position of a
    * given menu item in each 1-D array.
    *
@@ -47,4 +55,26 @@ interface ICommandMenuItem {
    * to be show shown in the menu.
    */
   titleOverride?: string;
+}
+
+
+/**
+ * A menu item which takes a command name to be fired when selected.
+ */
+export
+class CommandMenuItem extends MenuItem {
+  /**
+   * Construct a command menu item.
+   */
+  constructor(options?: any) {
+    super(options as IMenuItemOptions);
+    this._command = options.command;
+    // if (this._command) {
+    //   this.handler = () => {
+    //     receiveInvoke(this._command);
+    //   };
+    // }
+  }
+
+  private _command: string;
 }

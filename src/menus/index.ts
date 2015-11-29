@@ -24,7 +24,7 @@ import {
 } from 'phosphor-menus';
 
 import {
-  IExtension
+  IExtension, IReceiver
 } from 'phosphor-plugins';
 
 import {
@@ -44,36 +44,47 @@ interface IMenuExtension {
 
 
 /**
- * Extension receiver for `menus:main`.
+ * Create menu receiver
  */
 export
-function receiveMain(extension: IExtension<IMenuExtension>): IDisposable {
+function createMenuReceiver(): IReceiver {
+  console.log("Phosphide: create menu receiver");
   if (!('main' in menuMap)) {
     menuMap['main'] = new MenuExtensionPoint('main');
   }
-  let main = menuMap['main'];
-  return main.receive(extension);
+  return menuMap['main'];
 }
+
+/**
+ * Extension receiver for `menus:main`.
+ */
+// export
+// function (extension: IExtension): IDisposable {
+//   if (!('main' in menuMap)) {
+//     menuMap['main'] = new MenuExtensionPoint('main');
+//   }
+//   let main = menuMap['main'];
+//   return main.receive(extension);
+// }
 
 
 /**
  * Extension point initializer for `menus:main`.
  */
-export
-function initializeMain(): Promise<IDisposable> {
-  if (!('main' in menuMap)) {
-    menuMap['main'] = new MenuExtensionPoint('main');
-  }
-  let main = menuMap['main'];
-  return main.initialize(document.body);
-}
-
+// export
+// function initializeMain(): Promise<IDisposable> {
+//   if (!('main' in menuMap)) {
+//     menuMap['main'] = new MenuExtensionPoint('main');
+//   }
+//   let main = menuMap['main'];
+//   return main.initialize(document.body);
+// }
 
 
 /**
  * Menu extension point handler.
  */
-class MenuExtensionPoint implements IDisposable {
+class MenuExtensionPoint implements IReceiver, IDisposable {
 
   constructor(name: string) {
     this._name = name;
@@ -84,10 +95,10 @@ class MenuExtensionPoint implements IDisposable {
   /**
    * Receive an extension for this menu.
    */
-  receive(extension: IExtension<IMenuExtension>): IDisposable {
+  add(extension: IExtension): IDisposable {
     let items: ICommandMenuItem[] = [];
-    if (extension.object && extension.object.hasOwnProperty('items')) {
-      extension.object.items.forEach(item => {
+    if (extension.item && extension.item.hasOwnProperty('items')) {
+      extension.item.items.forEach((item: any) => {
         this._commandItems.push(item);
         items.push(item);
       });
@@ -108,6 +119,10 @@ class MenuExtensionPoint implements IDisposable {
       this._menu.items = solveMenu(this._commandItems);
       this._menu.update();
     });
+  }
+
+  remove(id: string) {
+    // TODO
   }
 
   /**

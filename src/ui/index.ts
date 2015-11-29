@@ -16,7 +16,7 @@ import {
 } from 'phosphor-dockpanel';
 
 import {
-  IExtension
+  IExtension, IReceiver
 } from 'phosphor-plugins';
 
 import {
@@ -33,7 +33,7 @@ import './index.css';
 /**
  * The interface for `ui` extension point.
  */
-export 
+export
 interface IUIExtension {
   items: Widget[];
   tabs: Tab[];
@@ -41,35 +41,56 @@ interface IUIExtension {
 
 
 /**
- * The receiver for the `ui:main` extension point.
+ * The factory function for the `ui:main` extension point.
  */
 export
-function receiveMain(extension: IExtension<IUIExtension>): IDisposable {
-  if (extension.object && extension.object.hasOwnProperty('items')) {
-    let items = extension.object.items;
-    let tabs = extension.object.tabs;
-    for (let i = 0; i < items.length; ++i) {
-      DockPanel.setTab(items[i], tabs[i]);
-      dockarea.addWidget(items[i]);
+function createUIReceiver(): IReceiver {
+  return {
+    add: function(extension: IExtension) {
+      if (extension.item && extension.item.hasOwnProperty('items')) {
+        let items = extension.item.items;
+        let tabs = extension.item.tabs;
+        for (let i = 0; i < items.length; ++i) {
+          DockPanel.setTab(items[i], tabs[i]);
+          dockarea.addWidget(items[i]);
+        }
+      }
+      return new DisposableDelegate(() => {
+        // TODO: remove the items from the dockarea once the API is updated.
+      });
+    },
+    remove: function(id) {
+
+    },
+    dispose: function() {
+
     }
   }
-  return new DisposableDelegate(() => {
-    // TODO: remove the items from the dockarea once the API is updated.
-  });
 }
+
+
+/**
+ * The receiver for the `ui:main` extension point.
+ */
+// export
+// function receiveMain(extension: IExtension): IDisposable {
+//
+// }
 
 
 /**
  * The initializer for the `ui:main` extension point.
  */
-export
-function initializeMain(): Promise<IDisposable> {
-  Widget.attach(dockarea, document.body);
-  window.onresize = () => dockarea.update();
-  return Promise.resolve(dockarea);
-}
+// export
+// function initializeMain(): Promise<IDisposable> {
+//   Widget.attach(dockarea, document.body);
+//   window.onresize = () => dockarea.update();
+//   return Promise.resolve(dockarea);
+// }
 
 
 // global dockpanel
 var dockarea = new DockPanel();
 dockarea.id = 'main';
+Widget.attach(dockarea, document.body);
+window.onresize = () => dockarea.update();

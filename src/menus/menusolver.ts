@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  ICommandMenuItem
+  ICommandMenuItem, CommandMenuItem
 } from './menuiteminterface';
 
 import {
@@ -31,8 +31,8 @@ import {
 /**
  * Solve the relationships between menu items and allow custom menu creation.
  *
- * #### Notes 
- * We use topsort (topological sorting) to find the order of menu items 
+ * #### Notes
+ * We use topsort (topological sorting) to find the order of menu items
  * based on their names and constraints.
  * The constrains form dependencies (Before(y) means directed edge x->y)
  * and therefore we can use topsort to find a suitable order. We won't
@@ -40,18 +40,18 @@ import {
  * time because the menu is just a simple tree, for which we need the
  * results one branch at a time.
  */
- export
+export
 function solveMenu(items: ICommandMenuItem[]): MenuItem[] {
   /**
    * The very top level of a menu is a MenuBar which contains menu items.
    * Below this, everything is a MenuItem, either with 'text' and 'submenu'
    * (submenu contains a Menu() with a list of MenuItems) if it's not a
    * leaf node, or 'text' and 'shortcut' if it is a leaf node.
-   * We therefore explicitly create the top-level here, and recursively 
+   * We therefore explicitly create the top-level here, and recursively
    * solve for the rest inside partialSolve.
    *
    * We could alternatively build this menu by putting an instance of a
-   * solver at each non-leaf node in the tree to solve for its 
+   * solver at each non-leaf node in the tree to solve for its
    * children. I stayed away from that implementation because
    * it will clearly use more memory than a single solver solution; if
    * the performance of this version is sufficient, there's no need for
@@ -79,7 +79,7 @@ function solveMenu(items: ICommandMenuItem[]): MenuItem[] {
  * #### Notes
  *
  * This is called `shallowFlatten` because it will not flatten arrays
- * to arbitrary levels of nesting, this only works 2 levels deep. This 
+ * to arbitrary levels of nesting, this only works 2 levels deep. This
  * is sufficient for topsort as we're only dealing with edge lists.
  */
 function shallowFlatten(nested: any): any {
@@ -115,10 +115,11 @@ function itemTranspose(item: any): any {
  * Takes a transposed menu item and builds a phosphor MenuItem object for
  * direct use in the menus.
  */
-function buildItem(item: any): MenuItem {
-  return new MenuItem({
+function buildItem(item: any): CommandMenuItem {
+  return new CommandMenuItem({
     text: item[item.length - 1],
-    shortcut: item.menuItem.shortcut
+    shortcut: item.menuItem.shortcut,
+    command: item.menuItem.command
   });
 }
 
@@ -127,10 +128,10 @@ function buildItem(item: any): MenuItem {
  * Builds a phosphor submenu (an array of menu items inside a Menu object)
  * from the items passed in and the text string for this MenuItem.
  */
-function buildSubmenu(items: MenuItem[], text: string): MenuItem {
+function buildSubmenu(items: CommandMenuItem[], text: string): CommandMenuItem {
   var menuObj = new Menu();
   menuObj.items = items;
-  return new MenuItem({text: text, submenu: menuObj});
+  return new CommandMenuItem({text: text, submenu: menuObj});
 }
 
 
@@ -167,7 +168,7 @@ function getItemsAtLevel(items: ICommandMenuItem[], level: string[]): string[][]
 
 
 /**
- * Tests whether the initial values in the given item match the ones in the 
+ * Tests whether the initial values in the given item match the ones in the
  * prefix argument. Essentially 'is this menu item in this part of the tree?'.
  */
 function matchesPrefix(prefix: string[], item: string[]): boolean {
@@ -184,7 +185,7 @@ function difference(first: string[], second: string[]): string[] {
 
 
 /**
- * Returns the constraints for all items at a given level in the tree. 
+ * Returns the constraints for all items at a given level in the tree.
  *
  * Eg. if the constraints for ['File', 'New', 'Document'] include
  * 'file': before('edit'), 'new': before('open'), then
@@ -225,7 +226,7 @@ function getConstraints(items: string[][], prefix: string[]): [string, string][]
   // In order to have a reliable, consistent mechanism for forming menus, we
   // therefore find all the items which have no constraints defined, and use
   // their position in the menu declaration to define their constraints.
-  // This allows the user to only define constraints for the first item, and 
+  // This allows the user to only define constraints for the first item, and
   // the rest will automatically fall into place, if defined in the required
   // order.
 
@@ -246,7 +247,7 @@ function getConstraints(items: string[][], prefix: string[]): [string, string][]
  * Takes a list of IMenuItems and a prefix and returns a fully formed menu for
  * all objects below that tree level.
  */
-function partialSolve(items: ICommandMenuItem[], prefix: string[]): MenuItem[] {
+function partialSolve(items: ICommandMenuItem[], prefix: string[]): CommandMenuItem[] {
   var menuItems: any[] = [];
   var levelItems: string[][] = getItemsAtLevel(items, prefix);
 
@@ -261,7 +262,7 @@ function partialSolve(items: ICommandMenuItem[], prefix: string[]): MenuItem[] {
   while (endIdx < levelItems.length) {
     var currentVal = levelItems[startIdx];
 
-    // This is the real centre of the menu solver - 
+    // This is the real centre of the menu solver -
     // if the prefix passed in is one less than the location length, then this
     // is a leaf node, so we build a menu item and push it onto the array (order
     // solving is done later). If the location length is longer than (prefix
@@ -301,4 +302,4 @@ function partialSolve(items: ICommandMenuItem[], prefix: string[]): MenuItem[] {
     return order.indexOf(a.text) - order.indexOf(b.text);
   });
   return menuItems;
-} 
+}

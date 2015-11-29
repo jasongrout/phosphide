@@ -1,5 +1,4 @@
-import { IDisposable } from 'phosphor-disposable';
-import { IExtension } from 'phosphor-plugins';
+import { IReceiver } from 'phosphor-plugins';
 import { Tab } from 'phosphor-tabs';
 import { Widget } from 'phosphor-widget';
 /**
@@ -10,10 +9,6 @@ export interface IUIExtension {
     tabs: Tab[];
 }
 /**
- * The receiver for the `ui:main` extension point.
+ * The factory function for the `ui:main` extension point.
  */
-export declare function receiveMain(extension: IExtension<IUIExtension>): IDisposable;
-/**
- * The initializer for the `ui:main` extension point.
- */
-export declare function initializeMain(): Promise<IDisposable>;
+export declare function createUIReceiver(): IReceiver;
