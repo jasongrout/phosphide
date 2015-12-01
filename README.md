@@ -1,9 +1,10 @@
 phosphide
 =========
-Slightly opinionated scaffolding for building plugin-based IDE-style applications.
 
 [![Build Status](https://travis-ci.org/phosphorjs/phosphide.svg)](https://travis-ci.org/phosphorjs/phosphide?branch=master)
 [![Coverage Status](https://coveralls.io/repos/phosphorjs/phosphide/badge.svg?branch=master&service=github)](https://coveralls.io/github/phosphorjs/phosphide?branch=master)
+
+Slightly opinionated scaffolding for building plugin-based IDE-style applications.
 
 [API Docs](http://phosphorjs.github.io/phosphide/api/)
 

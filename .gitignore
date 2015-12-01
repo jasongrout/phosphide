@@ -1,1 +1,8 @@
-node_modules/
+*.suo
+*.user
+.DS_Store
+docs/api
+lib
+node_modules
+test/build
+test/coverage

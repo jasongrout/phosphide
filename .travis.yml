@@ -5,13 +5,12 @@ sudo: false
 env:
   matrix:
     - GROUP=
-before_install:
-  - chmod +x ./scripts/travis_install.sh
-  - chmod +x ./scripts/travis_script.sh
-  - chmod +x ./scripts/travis_after_success.sh
+  global:
+    - GHREPO=github.com/phosphorjs/phosphide
+    - secure:
 install:
-  - ./scripts/travis_install.sh
+  - bash ./scripts/travis_install.sh
 script:
-  - ./scripts/travis_script.sh
+  - bash ./scripts/travis_script.sh
 after_success:
-  - ./scripts/travis_after_success.sh
+  - bash ./scripts/travis_after_success.sh
