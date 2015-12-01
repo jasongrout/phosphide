@@ -9,7 +9,7 @@
     "outDir": "../lib/"
   },
   "files": [
-    "../typings/es6-promise.d.ts",
-    "index.ts"
+    "index.ts",
+    "sidebar.ts"
   ]
 }
