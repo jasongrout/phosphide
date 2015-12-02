@@ -57,5 +57,29 @@
   "bugs": {
     "url": "https://github.com/phosphorjs/phosphide/issues"
   },
-  "homepage": "https://github.com/phosphorjs/phosphide"
+  "homepage": "https://github.com/phosphorjs/phosphide",
+  "phosphor-plugin": {
+    "extensionPoints": [
+      {
+        "id": "phosphide:ui:menubar",
+        "main": "lib/plugin.js",
+        "factory": "createMenuBarReceiver"
+      },
+      {
+        "id": "phosphide:ui:main",
+        "main": "lib/plugin.js",
+        "factory": "createMainReceiver"
+      },
+      {
+        "id": "phosphide:ui:left",
+        "main": "lib/plugin.js",
+        "factory": "createLeftReceiver"
+      },
+      {
+        "id": "phosphide:ui:right",
+        "main": "lib/plugin.js",
+        "factory": "createRightReceiver"
+      }
+    ]
+  }
 }

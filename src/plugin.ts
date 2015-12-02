@@ -46,7 +46,7 @@ function createMenuBarReceiver(): IReceiver {
  *
  */
 export
-function createDockPanelReceiver(): IReceiver {
+function createMainReceiver(): IReceiver {
   let main = ensureMainPanel();
   return new DockPanelReceiver(main.dockPanel);
 }
@@ -56,7 +56,7 @@ function createDockPanelReceiver(): IReceiver {
  *
  */
 export
-function createLeftSideBarReceiver(): IReceiver {
+function createLeftReceiver(): IReceiver {
   let main = ensureMainPanel();
   return new SideBarReceiver(main.leftSideBar, main.leftStackedPanel);
 }
@@ -66,7 +66,7 @@ function createLeftSideBarReceiver(): IReceiver {
  *
  */
 export
-function createRightSideBarReceiver(): IReceiver {
+function createRightReceiver(): IReceiver {
   let main = ensureMainPanel();
   return new SideBarReceiver(main.rightSideBar, main.rightStackedPanel);
 }
