@@ -29,8 +29,8 @@ class MenuBarReceiver implements IReceiver {
    *
    */
   constructor(menuBar: MenuBar) {
-    this._map = Object.create(null);
     this._menuBar = menuBar;
+    this._map = Object.create(null);
     menuBar.hidden = true;
     menuBar.items = [];
   }
