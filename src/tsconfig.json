@@ -10,6 +10,7 @@
   },
   "files": [
     "index.ts",
+    "dockpanelreceiver.ts",
     "mainpanel.ts",
     "menubarreceiver.ts",
     "plugin.ts",
