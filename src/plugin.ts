@@ -136,7 +136,13 @@ class MainPanel extends BoxPanel {
    *
    */
   static instance(): MainPanel {
-    return this._instance || (this._instance = new MainPanel());
+    if (this._instance) {
+      return this._instance;
+    }
+    let panel = new MainPanel();
+    Widget.attach(panel, document.body);
+    window.addEventListener('resize', () => panel.update());
+    return this._instance = panel;
   }
 
   /**
