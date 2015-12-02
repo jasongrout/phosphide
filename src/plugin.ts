@@ -12,6 +12,10 @@ import {
 } from 'phosphor-boxpanel';
 
 import {
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
   DockPanel
 } from 'phosphor-dockpanel';
 
@@ -20,12 +24,108 @@ import {
 } from 'phosphor-menus';
 
 import {
+  IChangedArgs
+} from 'phosphor-properties';
+
+import {
+  clearSignalData
+} from 'phosphor-signaling';
+
+import {
   Orientation, SplitPanel
 } from 'phosphor-splitpanel';
 
 import {
-  SidePanel
-} from './sidepanel';
+  StackedPanel
+} from 'phosphor-stackedpanel';
+
+import {
+  IChildWidgetList, Widget
+} from 'phosphor-widget';
+
+import {
+  SideBar
+} from './sidebar';
+
+
+/**
+ *
+ */
+const MAIN_PANEL_CLASS = 'p-MainPanel';
+
+
+/**
+ *
+ */
+class SideBarHandler implements IDisposable {
+  /**
+   *
+   */
+  constructor() {
+    this._bar = new SideBar<Widget>();
+    this._stack = new StackedPanel();
+
+    this._bar.hidden = true;
+    this._stack.hidden = true;
+
+    this._bar.items = this._stack.children;
+    this._bar.currentItemChanged.connect(this._onCurrentItemChanged, this);
+    this._stack.children.changed.connect(this._onChildrenChanged, this);
+  }
+
+  /**
+   *
+   */
+  dispose(): void {
+    this._bar = null;
+    this._stack = null;
+    clearSignalData(this);
+  }
+
+  /**
+   *
+   */
+  get isDisposed(): boolean {
+    return this._bar === null;
+  }
+
+  /**
+   *
+   */
+  get sideBar(): SideBar<Widget> {
+    return this._bar;
+  }
+
+  /**
+   *
+   */
+  get stackedPanel(): StackedPanel {
+    return this._stack;
+  }
+
+  /**
+   *
+   */
+  private _onCurrentItemChanged(sender: SideBar<Widget>, args: IChangedArgs<Widget>): void {
+    this._stack.currentWidget = args.newValue;
+    this._stack.hidden = !!args.newValue;
+  }
+
+  /**
+   *
+   */
+  private _onChildrenChanged(sender: IChildWidgetList): void {
+    if (sender.length === 0) {
+      this._bar.hidden = true;
+      this._stack.hidden = true;
+    } else {
+      this._bar.hidden = false;
+    }
+  }
+
+  private _bar: SideBar<Widget>;
+  private _stack: StackedPanel;
+}
 
 
 /**
@@ -49,41 +149,48 @@ class MainPanel extends BoxPanel {
    */
   constructor() {
     super();
-    this.id = 'phosphide-main-panel';
+    this.addClass(MAIN_PANEL_CLASS);
     this.direction = Direction.TopToBottom;
     this.spacing = 0;
 
     this._menuBar = new MenuBar();
-
+    this._outerBox = new BoxPanel();
     this._dockPanel = new DockPanel();
+    this._innerSplit = new SplitPanel();
+    this._leftHandler = new SideBarHandler();
+    this._rightHandler = new SideBarHandler();
 
-    this._leftPanel = new SidePanel();
-    this._leftPanel.direction = Direction.LeftToRight;
+    this._outerBox.direction = Direction.LeftToRight;
+    this._outerBox.spacing = 0;
 
-    this._rightPanel = new SidePanel();
-    this._rightPanel.direction = Direction.RightToLeft;
+    this._innerSplit = new SplitPanel();
+    this._innerSplit.orientation = Orientation.Horizontal;
+    this._innerSplit.spacing = 1;
 
-    this._splitPanel = new SplitPanel();
-    this._splitPanel.orientation = Orientation.Horizontal;
-    this._splitPanel.spacing = 1;
+    this._innerSplit.children.add(this._leftHandler.stackedPanel);
+    this._innerSplit.children.add(this._dockPanel);
+    this._innerSplit.children.add(this._rightHandler.stackedPanel);
 
-    this._splitPanel.children.add(this._leftPanel);
-    this._splitPanel.children.add(this._dockPanel);
-    this._splitPanel.children.add(this._rightPanel);
+    this._outerBox.children.add(this._leftHandler.sideBar);
+    this._outerBox.children.add(this._innerSplit);
+    this._outerBox.children.add(this._rightHandler.sideBar);
 
     this.children.add(this._menuBar);
-    this.children.add(this._splitPanel);
+    this.children.add(this._outerBox);
   }
 
   /**
    *
    */
   dispose(): void {
+    this._leftHandler.dispose();
+    this._rightHandler.dispose();
     this._menuBar = null;
+    this._outerBox = null;
     this._dockPanel = null;
-    this._leftPanel = null;
-    this._rightPanel = null;
-    this._splitPanel = null;
+    this._innerSplit = null;
+    this._leftHandler = null;
+    this._rightHandler = null;
     super.dispose();
   }
 
@@ -104,27 +211,21 @@ class MainPanel extends BoxPanel {
   /**
    *
    */
-  get leftPanel(): SidePanel {
-    return this._leftPanel;
+  get leftSideBar(): SideBar<Widget> {
+    return this._leftHandler.sideBar;
   }
 
   /**
    *
    */
-  get rightPanel(): SidePanel {
-    return this._rightPanel;
-  }
-
-  /**
-   *
-   */
-  get splitPanel(): SplitPanel {
-    return this._splitPanel;
+  get rightSideBar(): SideBar<Widget> {
+    return this._rightHandler.sideBar;
   }
 
   private _menuBar: MenuBar;
+  private _outerBox: BoxPanel;
   private _dockPanel: DockPanel;
-  private _leftPanel: SidePanel;
-  private _rightPanel: SidePanel;
-  private _splitPanel: SplitPanel;
+  private _innerSplit: SplitPanel;
+  private _leftHandler: SideBarHandler;
+  private _rightHandler: SideBarHandler;
 }
