@@ -20,6 +20,10 @@ import {
 } from './mainpanel';
 
 import {
+  MenuBarReceiver
+} from './menubarreceiver';
+
+import {
   SideBarReceiver
 } from './sidebarreceiver';
 
@@ -27,11 +31,11 @@ import {
 /**
  *
  */
-// export
-// function createMenuBarReceiver(): IReceiver {
-//   let main = ensureMainPanel();
-//   return new MenuBarReceiver(main.menuBar);
-// }
+export
+function createMenuBarReceiver(): IReceiver {
+  let main = ensureMainPanel();
+  return new MenuBarReceiver(main.menuBar);
+}
 
 
 /**

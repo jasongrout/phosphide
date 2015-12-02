@@ -11,6 +11,7 @@
   "files": [
     "index.ts",
     "mainpanel.ts",
+    "menubarreceiver.ts",
     "plugin.ts",
     "sidebar.ts",
     "sidebarreceiver.ts"
