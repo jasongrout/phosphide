@@ -14,6 +14,7 @@
     "phosphor-messaging": "^1.0.5",
     "phosphor-nodewrapper": "^1.0.4",
     "phosphor-observablelist": "^1.0.0-beta",
+    "phosphor-plugins": "^0.3.0",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
     "phosphor-splitpanel": "^1.0.0-beta",

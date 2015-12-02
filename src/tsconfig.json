@@ -10,7 +10,9 @@
   },
   "files": [
     "index.ts",
+    "mainpanel.ts",
     "plugin.ts",
-    "sidebar.ts"
+    "sidebar.ts",
+    "sidebarreceiver.ts"
   ]
 }

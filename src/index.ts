@@ -7,4 +7,6 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
+export * from './mainpanel';
 export * from './sidebar';
+export * from './sidebarreceiver';
