@@ -14,4 +14,5 @@ System.import('phosphor-plugins').then(lib => {
   lib.registerPlugin('green');
   lib.registerPlugin('red');
   lib.registerPlugin('yellow');
+  lib.registerPlugin('editor');
 });
