@@ -1,0 +1,24 @@
+{
+  "extensionPoints": [
+    {
+      "id": "phosphide:ui:menubar",
+      "main": "lib/plugin.js",
+      "factory": "createMenuBarReceiver"
+    },
+    {
+      "id": "phosphide:ui:main",
+      "main": "lib/plugin.js",
+      "factory": "createMainReceiver"
+    },
+    {
+      "id": "phosphide:ui:left",
+      "main": "lib/plugin.js",
+      "factory": "createLeftReceiver"
+    },
+    {
+      "id": "phosphide:ui:right",
+      "main": "lib/plugin.js",
+      "factory": "createRightReceiver"
+    }
+  ]
+}

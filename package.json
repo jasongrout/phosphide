@@ -14,7 +14,7 @@
     "phosphor-messaging": "^1.0.5",
     "phosphor-nodewrapper": "^1.0.4",
     "phosphor-observablelist": "^1.0.0-beta",
-    "phosphor-plugins": "^0.3.0",
+    "phosphor-plugins": "^0.4.0",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
     "phosphor-splitpanel": "^1.0.0-beta",
@@ -45,7 +45,8 @@
   "files": [
     "lib/*.css",
     "lib/*.d.ts",
-    "lib/*.js"
+    "lib/*.js",
+    "phosphor-plugin.json"
   ],
   "keywords": [
     "application",
@@ -57,29 +58,5 @@
   "bugs": {
     "url": "https://github.com/phosphorjs/phosphide/issues"
   },
-  "homepage": "https://github.com/phosphorjs/phosphide",
-  "phosphor-plugin": {
-    "extensionPoints": [
-      {
-        "id": "phosphide:ui:menubar",
-        "main": "lib/plugin.js",
-        "factory": "createMenuBarReceiver"
-      },
-      {
-        "id": "phosphide:ui:main",
-        "main": "lib/plugin.js",
-        "factory": "createMainReceiver"
-      },
-      {
-        "id": "phosphide:ui:left",
-        "main": "lib/plugin.js",
-        "factory": "createLeftReceiver"
-      },
-      {
-        "id": "phosphide:ui:right",
-        "main": "lib/plugin.js",
-        "factory": "createRightReceiver"
-      }
-    ]
-  }
+  "homepage": "https://github.com/phosphorjs/phosphide"
 }
