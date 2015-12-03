@@ -80,7 +80,7 @@ body {
 
 
 .p-SideBarButton:hover:not(.p-mod-current) {
-  background: #F0F0F0;
+  background: white;
 }
 
 
@@ -141,7 +141,7 @@ body {
 
 
 #p-main-dock-panel {
-  padding: 6px;
+  padding: 8px;
 }
 
 
@@ -150,9 +150,10 @@ body {
 }
 
 .p-DockTabPanel {
-  border: 1px solid #C0C0C0;
-  border-top: none;
-  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.2);
+  border-left: 1px solid #C0C0C0;
+  border-right: 1px solid #C0C0C0;
+  border-bottom: 1px solid #B0B0B0;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -185,6 +186,8 @@ body {
 
 .p-TabBar > .p-TabBar-body {
   top: 1px;
+  left: -1px;
+  right: -1px;
   bottom: 1px;
 }
 
@@ -192,7 +195,7 @@ body {
 .p-TabBar > .p-TabBar-header {
   display: block;
   height: 1px;
-  background: #C0C0C0;
+  background: #D0D0D0;
 }
 
 
@@ -212,11 +215,19 @@ body {
   flex-basis: 125px;
   min-width: 35px;
   margin-left: -1px;
+  min-height: 23px;
+  border-top: 1px solid #C0C0C0;
   border-left: 1px solid #C0C0C0;
   border-right: 1px solid #C0C0C0;
   padding: 0px 10px;
-  background: #E5E5E5;
+  background: #EBEBEB;
   font: 12px Helvetica, Arial, sans-serif;
+  transform: translateY(-1px);
+}
+
+
+.p-Tab.p-mod-first {
+  margin-left: 0px;
 }
 
 
@@ -236,7 +247,7 @@ body {
 .p-Tab-icon,
 .p-Tab-text,
 .p-Tab-close {
-  line-height: 21px;
+  line-height: 23px;
 }
 
 
@@ -267,4 +278,6 @@ body {
 
 .editor-CodeMirrorWidget {
   border: 1px solid #C0C0C0;
+  min-width: 100px;
+  min-height: 100px;
 }
