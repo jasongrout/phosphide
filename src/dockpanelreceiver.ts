@@ -69,7 +69,7 @@ class DockPanelReceiver implements IReceiver {
       throw new Error(`Extension ${ext.id} contributed invalid item type.`);
     }
     this._map[ext.id] = ext.item;
-    this._dockPanel.insertLeft(ext.item); // TODO handle initial position
+    this._dockPanel.insertTabAfter(ext.item); // TODO handle initial position
   }
 
   /**
