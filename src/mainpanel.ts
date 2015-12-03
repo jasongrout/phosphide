@@ -78,6 +78,14 @@ class MainPanel extends BoxPanel {
     this._splitPanel.orientation = Orientation.Horizontal;
     this._splitPanel.spacing = 1;
 
+    BoxPanel.setStretch(this._leftSideBar, 0);
+    BoxPanel.setStretch(this._rightSideBar, 0);
+    BoxPanel.setStretch(this._splitPanel, 1);
+
+    SplitPanel.setStretch(this._leftStackedPanel, 0);
+    SplitPanel.setStretch(this._rightStackedPanel, 0);
+    SplitPanel.setStretch(this._dockPanel, 1);
+
     this._splitPanel.children.add(this._leftStackedPanel);
     this._splitPanel.children.add(this._dockPanel);
     this._splitPanel.children.add(this._rightStackedPanel);
