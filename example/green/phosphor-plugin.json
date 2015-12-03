@@ -1,0 +1,10 @@
+{
+  "extensions": [
+    {
+      "id": "green:content",
+      "point": "phosphide:ui:right",
+      "main": "index.js",
+      "factory": "createContent"
+    }
+  ]
+}

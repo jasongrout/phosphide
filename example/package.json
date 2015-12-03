@@ -3,7 +3,7 @@
   "name": "phosphide-example",
   "dependencies": {
     "phosphide": "file:..",
-    "phosphor-plugins": "^0.3.0",
+    "phosphor-plugins": "^0.4.0",
     "phosphor-widget": "^1.0.0-beta"
   },
   "devDependencies": {
@@ -12,35 +12,7 @@
     "typescript": "^1.6.2"
   },
   "scripts": {
-    "build": "tsc --project src",
+    "build": "tsc --project blue && tsc --project green && tsc --project red && tsc --project yellow",
     "postinstall": "npm dedupe"
-  },
-  "phosphor-plugin": {
-    "extensions": [
-      {
-        "id": "example:ext-0",
-        "point": "phosphide:ui:left",
-        "main": "src/index.js",
-        "factory": "createRed"
-      },
-      {
-        "id": "example:ext-1",
-        "point": "phosphide:ui:left",
-        "main": "src/index.js",
-        "factory": "createGreen"
-      },
-      {
-        "id": "example:ext-2",
-        "point": "phosphide:ui:right",
-        "main": "src/index.js",
-        "factory": "createBlue"
-      },
-      {
-        "id": "example:ext-3",
-        "point": "phosphide:ui:right",
-        "main": "src/index.js",
-        "factory": "createYellow"
-      }
-    ]
   }
 }

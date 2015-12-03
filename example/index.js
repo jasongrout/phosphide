@@ -5,8 +5,13 @@
 |
 | The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
+'use strict';
+
+
 System.import('phosphor-plugins').then(lib => {
   lib.registerPlugin('phosphide');
-  lib.registerPlugin('example');
-  console.log('ran');
+  lib.registerPlugin('blue');
+  lib.registerPlugin('green');
+  lib.registerPlugin('red');
+  lib.registerPlugin('yellow');
 });
