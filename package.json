@@ -1,6 +1,6 @@
 {
   "name": "phosphide",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Slightly opinionated scaffolding for building plugin-based IDE-style applications.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -32,6 +32,7 @@
   },
   "scripts": {
     "clean": "rimraf lib && rimraf test/build && rimraf test/coverage",
+    "build:example": "cd example && npm install && npm run build",
     "build:src": "tsc --project src",
     "build": "npm run build:src",
     "docs": "rimraf docs/api && typedoc --options scripts/tdoptions.json",

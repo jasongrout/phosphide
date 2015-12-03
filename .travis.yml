@@ -7,7 +7,7 @@ env:
     - GROUP=
   global:
     - GHREPO=github.com/phosphorjs/phosphide
-    - secure:
+    - secure: t0bosxEldD0KwiW55tfzVP17QxldTW09iu88e+7uqhaHR7Yv0Qxt3BDDbsvg37XHZ9+LBXU3DrQOm2AmLyxGTxZe16UUI3x94rfb+gS1FYVC/bjCp1XwdmgaOFlnOjzWyULaVqHTvs2e2dO6aj7Q0OZiHNcW5dvLTpiHU1Kaf7B3zVKPASNh4ti8junHJq1rP7O6U1T8K1dIXu4psMI6gHsIwEu2tTfIhDUSA+wvejf5jqHRSJrBsJnA48UQNAVnSY/lS70gK3j6atlyidsxWE6FHeWwONZzoSCbVPI/B/vqxlAbf9WCD1YTGljlCbqEXRDmhyVpP2YWbua6VaLCarNn/HK2Mp3SpNcnHwiKt+Bp0idlO31VqBPBuqDH9HmYIO9EBYiqYSCE50X64n4OHWS7gPj+KPMh3t17xeBLzfYokrz/gk3wAWaNpg7sdWOLHJtzQWdwPgDfkEW5mda2zmfZqi8/hycQsgAe8R5hnvl9+6NFJ3qKqhyU5LPvEqxyCZT+qxLKx7aPeoVw2vnjMOaf+2JHGgh3mwYAz2Ap2FcNC+z0TjeSNLOrphLgwNfsUIfA828PLhCOoQjcJuukcGgx8nj85q73NQ0GBwHrpvfcfTm7Fw0DdMdnElcnmEWitPCXJy/PLrYgRpGXL0G5VHvFwSJTS117eai9v7nJl3g=
 install:
   - bash ./scripts/travis_install.sh
 script:
