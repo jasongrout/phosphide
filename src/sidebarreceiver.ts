@@ -113,7 +113,7 @@ class SideBarReceiver implements IReceiver {
    */
   private _onCurrentChanged(sender: SideBar<Widget>, args: IChangedArgs<Widget>): void {
     this._stack.currentWidget = args.newValue;
-    this._stack.hidden = !!args.newValue;
+    this._stack.hidden = !args.newValue;
   }
 
   /**
