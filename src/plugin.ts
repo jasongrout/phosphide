@@ -79,7 +79,23 @@ const ensureMainPanel = (() => {
   let main: MainPanel = null;
   return () => {
     if (main) return main;
+
     main = new MainPanel();
+
+    // temporary ids untils we figure out how best to tag things.
+    main.id = 'p-main-panel';
+    main.leftSideBar.id = 'p-left-sidebar';
+    main.rightSideBar.id = 'p-right-sidebar';
+    main.leftStackedPanel.id = 'p-left-stack';
+    main.rightStackedPanel.id = 'p-right-stack';
+    main.splitPanel.id = 'p-main-split-panel';
+    main.dockPanel.id = 'p-main-dock-panel';
+    main.boxPanel.id = 'p-main-box-panel';
+
+    // temporary classes until we figure out how best to tag things.
+    main.leftSideBar.addClass('p-mod-left');
+    main.rightSideBar.addClass('p-mod-right');
+
     Widget.attach(main, document.body);
     window.addEventListener('resize', () => { main.update(); });
     return main;
