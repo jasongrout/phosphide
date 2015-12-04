@@ -20,6 +20,10 @@ import {
 } from './mainpanel';
 
 import {
+  CSSReceiver
+} from './cssreceiver';
+
+import {
   DockPanelReceiver
 } from './dockpanelreceiver';
 
@@ -69,6 +73,15 @@ export
 function createRightReceiver(): IReceiver {
   let main = ensureMainPanel();
   return new SideBarReceiver(main.rightSideBar, main.rightStackedPanel);
+}
+
+
+/**
+ *
+ */
+export
+function createCSSReceiver(): IReceiver {
+  return new CSSReceiver();
 }
 
 

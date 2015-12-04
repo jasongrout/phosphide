@@ -19,6 +19,11 @@
       "id": "phosphide:ui:right",
       "main": "lib/plugin.js",
       "factory": "createRightReceiver"
+    },
+    {
+      "id": "phosphide:ui:css",
+      "main": "lib/plugin.js",
+      "factory": "createCSSReceiver"
     }
   ]
 }
