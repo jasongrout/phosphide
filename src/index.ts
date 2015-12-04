@@ -7,6 +7,7 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
+export * from './cssreceiver';
 export * from './dockpanelreceiver';
 export * from './mainpanel';
 export * from './menubarreceiver';
