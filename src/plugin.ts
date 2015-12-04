@@ -81,7 +81,8 @@ function createRightReceiver(): IReceiver {
  */
 export
 function createCSSReceiver(): IReceiver {
-  return new CSSReceiver();
+  let main = ensureMainPanel();
+  return new CSSReceiver(main);
 }
 
 

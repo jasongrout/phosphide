@@ -12,8 +12,16 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  postMessage
+} from 'phosphor-messaging';
+
+import {
   IExtension, IReceiver
 } from 'phosphor-plugins';
+
+import {
+  Panel
+} from 'phosphor-widget';
 
 
 /**
@@ -24,7 +32,8 @@ class CSSReceiver implements IReceiver {
   /**
    *
    */
-  constructor() {
+  constructor(main: Panel) {
+    this._main = main;
     this._map = Object.create(null);
   }
 
@@ -40,6 +49,7 @@ class CSSReceiver implements IReceiver {
       this._map[id].dispose();
     }
     this._map = null;
+    this._main = null;
   }
 
   /**
@@ -69,7 +79,7 @@ class CSSReceiver implements IReceiver {
     } else {
       path = ext.config.path;
     }
-    this._map[ext.id] = new CSSHandler(path);
+    this._map[ext.id] = new CSSHandler(path, this._main);
   }
 
   /**
@@ -87,6 +97,7 @@ class CSSReceiver implements IReceiver {
     handler.dispose();
   }
 
+  private _main: Panel;
   private _disposed = false;
   private _map: { [id: string]: CSSHandler };
 }
@@ -110,8 +121,9 @@ class CSSHandler implements IDisposable {
   /**
    *
    */
-  constructor(name: string) {
+  constructor(name: string, main: Panel) {
     this._name = name;
+    this._main = main;
     this._load();
   }
 
@@ -123,6 +135,7 @@ class CSSHandler implements IDisposable {
       return;
     }
     this._disposed = true;
+    this._main = null;
     this._unload();
   }
 
@@ -144,6 +157,7 @@ class CSSHandler implements IDisposable {
         return;
       }
       this._link = createLink(path);
+      this._link.onload = () => this._onload();
       document.head.appendChild(this._link);
     });
   }
@@ -160,7 +174,30 @@ class CSSHandler implements IDisposable {
     this._link = null;
   }
 
+  /**
+   *
+   */
+  private _onload(): void {
+    refreshPanels(this._main);
+  }
+
+  private _main: Panel;
   private _name: string;
   private _disposed = false;
   private _link: HTMLLinkElement = null;
+}
+
+
+/**
+ *
+ */
+function refreshPanels(panel: Panel): void {
+  postMessage(panel, Panel.MsgLayoutRequest);
+  let children = panel.children;
+  for (let i = 0, n = children.length; i < n; ++i) {
+    let child = children.get(i);
+    if (child instanceof Panel) {
+      refreshPanels(child);
+    }
+  }
 }
