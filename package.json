@@ -32,7 +32,7 @@
   },
   "scripts": {
     "clean": "rimraf lib && rimraf test/build && rimraf test/coverage",
-    "build:example": "cd example && npm install && npm run build",
+    "build:example": "rimraf example/node_modules/phosphide && cd example && npm install && npm run build",
     "build:src": "tsc --project src",
     "build": "npm run build:src",
     "docs": "rimraf docs/api && typedoc --options scripts/tdoptions.json",
