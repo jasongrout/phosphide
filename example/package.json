@@ -16,5 +16,8 @@
   "scripts": {
     "build": "tsc --project blue && tsc --project green && tsc --project red && tsc --project yellow && tsc --project editor",
     "postinstall": "npm dedupe"
+  },
+  "system": {
+    "npmIgnore": ["devDependencies"]
   }
 }
