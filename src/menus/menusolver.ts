@@ -100,12 +100,21 @@ function unique<T>(val: T, i: number, self: any): boolean {
   return self.indexOf(val) === i;
 }
 
+/**
+ * An array type used in the constraints-based menu layout.
+ */
+class LocationArray extends Array {
+  /**
+   * The menu item which stores the data for this LocationArray.
+   */
+  menuItem: ICommandMenuItem;
+}
 
 /**
  * Takes an item and returns the location with the item attached as 'menuItem'
  */
-function itemTranspose(item: any): any {
-  let ret = item.location;
+function itemTranspose(item: ICommandMenuItem): LocationArray {
+  let ret = item.location as LocationArray;
   ret.menuItem = item;
   return ret;
 }
@@ -115,7 +124,7 @@ function itemTranspose(item: any): any {
  * Takes a transposed menu item and builds a phosphor MenuItem object for
  * direct use in the menus.
  */
-function buildItem(item: any): CommandMenuItem {
+function buildItem(item: LocationArray): CommandMenuItem {
   return new CommandMenuItem({
     text: item[item.length - 1],
     shortcut: item.menuItem.shortcut,
@@ -153,14 +162,14 @@ function arrayEquality(a: any[], b: any[]): boolean {
  * and once for the filter. It would be nice to reduce this to a single
  * iteration, if we can do it without obscuring what's really going on.
  */
-function getItemsAtLevel(items: ICommandMenuItem[], level: string[]): string[][] {
+function getItemsAtLevel(items: ICommandMenuItem[], level: string[]): LocationArray[] {
   let num = level.length;
   return items
     .map(function(val){
-      let vloc = val.location;
+      let vloc = val.location as LocationArray;
       if((vloc.length > num) && arrayEquality(vloc.slice(0,num), level)) {
-        (<any>vloc).menuItem = val;
-        return <string[]>vloc;
+        vloc.menuItem = val;
+        return vloc;
       }
     })
     .filter((val) => val !== undefined);
@@ -183,24 +192,43 @@ function difference(first: string[], second: string[]): string[] {
   return first.filter((i) => second.indexOf(i) < 0);
 }
 
+/**
+ * Given an object containing declarative constraints, such as:
+ * {
+ *   before: ['Edit', 'Help'],
+ *   after: ['File']
+ * }
+ * this will return the set of graph edges corresponding to those constraints.
+ */
+function formatConstraints(constraints: any, against: string): [string, string][] {
+  var result: [string, string][] = [];
+  if (constraints.before) {
+    for (var i = 0; i < constraints.before.length; ++i) {
+      result.push([against, constraints.before[i]]);
+    }
+  }
+  if (constraints.after) {
+    for (var j = 0; j < constraints.after.length; ++j) {
+      result.push([constraints.after[j], against]);
+    }
+  }
+  return result;
+}
+
 
 /**
  * Returns the constraints for all items at a given level in the tree.
- *
- * Eg. if the constraints for ['File', 'New', 'Document'] include
- * 'file': before('edit'), 'new': before('open'), then
- * the constraints at level 0 will be ['File', 'Edit'], and the
- * constraints at level 1 will be ['New', 'Open']
  */
-function getConstraintsAtLevel(item: string[], level: number): [string, string][] {
+function getConstraintsAtLevel(item: LocationArray, level: number): [string, string][] {
   let constraints: [string, string][] = [];
-  let menuItem = (<any>(item)).menuItem;
+  let menuItem: ICommandMenuItem = item.menuItem;
   let levelText = menuItem.location[level];
   if (menuItem.constraints === undefined) { return constraints; }
-  let cons = menuItem.constraints[levelText];
+  let cons: any = menuItem.constraints[levelText];
   if (cons) {
-    for (let c = 0; c < cons.length; ++c) {
-      constraints.push(cons[c].constrain(levelText));
+    var formatted = formatConstraints(cons, levelText);
+    for (let c = 0; c < formatted.length; ++c) {
+      constraints.push(formatted[c]);
     }
   }
   return constraints;
@@ -211,12 +239,12 @@ function getConstraintsAtLevel(item: string[], level: number): [string, string][
  * Returns the constraints as an unordered array of directed edges for the objects
  * in the level of the tree at 'prefix', for every item in 'items'.
  */
-function getConstraints(items: string[][], prefix: string[]): [string, string][] {
+function getConstraints(items: LocationArray[], prefix: string[]): [string, string][] {
   var constraints: [string,string][] = [];
   for(var i=0; i<items.length; ++i) {
     if(matchesPrefix(prefix, items[i])) {
       var allCons = getConstraintsAtLevel(items[i], prefix.length);
-      allCons.map((x) => { constraints.push(x); })
+      allCons.map((x: any) => { constraints.push(x); })
     }
   }
 
@@ -230,15 +258,7 @@ function getConstraints(items: string[][], prefix: string[]): [string, string][]
   // the rest will automatically fall into place, if defined in the required
   // order.
 
-  // var flattened = shallowFlatten(constraints);
-  // var allConstrained = flattened.filter(unique);
-  // var unconstrained = difference(allItems, allConstrained);
-  // unconstrained.sort();
-  // for (var i=0; i<unconstrained.length - 1; i++) {
-  //   constraints.push([unconstrained[i], unconstrained[i + 1]]);
-  // }
-
-  // TODO : do this properly - should be based on position defined.
+  // TODO : do based on position defined.
   return constraints;
 }
 
@@ -249,7 +269,7 @@ function getConstraints(items: string[][], prefix: string[]): [string, string][]
  */
 function partialSolve(items: ICommandMenuItem[], prefix: string[]): CommandMenuItem[] {
   var menuItems: any[] = [];
-  var levelItems: string[][] = getItemsAtLevel(items, prefix);
+  var levelItems: LocationArray[] = getItemsAtLevel(items, prefix);
 
   // TODO : don't need to sort at every level, can just sort once at the top,
   // or require the items to be sorted before calling partialSolve.
@@ -283,7 +303,7 @@ function partialSolve(items: ICommandMenuItem[], prefix: string[]): CommandMenuI
         endIdx++;
       }
       var subItems = levelItems.slice(startIdx, endIdx).map((val) => {
-        return (<any>val).menuItem;
+        return val.menuItem;
       });
 
       var submenu = partialSolve(subItems, currentVal.slice(0,preLen+1));
