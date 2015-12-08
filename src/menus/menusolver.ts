@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  ICommandMenuItem, CommandMenuItem
+  ICommandMenuItem, CommandMenuItem, IConstraints
 } from './menuiteminterface';
 
 import {
@@ -224,7 +224,7 @@ function getConstraintsAtLevel(item: LocationArray, level: number): [string, str
   let menuItem: ICommandMenuItem = item.menuItem;
   let levelText = menuItem.location[level];
   if (menuItem.constraints === undefined) { return constraints; }
-  let cons: any = menuItem.constraints[levelText];
+  let cons: IConstraints = menuItem.constraints[levelText];
   if (cons) {
     var formatted = formatConstraints(cons, levelText);
     for (let c = 0; c < formatted.length; ++c) {
