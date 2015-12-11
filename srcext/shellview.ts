@@ -36,7 +36,7 @@ import {
 
 import {
   IMainViewOptions, IShellView, ISideViewOptions
-} from '..';
+} from '../lib/index';
 
 import {
   SideBar
@@ -74,7 +74,6 @@ class ShellView extends BoxPanel implements IShellView {
     super();
 
     // TODO fix many of these hard coded values
-
     this.addClass(SHELL_VIEW_CLASS);
     this.direction = Direction.TopToBottom;
     this.spacing = 0;
@@ -131,6 +130,18 @@ class ShellView extends BoxPanel implements IShellView {
 
     this.children.add(this._menuPanel);
     this.children.add(this._boxPanel);
+
+    // TOOD fix ids
+    this.id = 'p-shell-view';
+    this._leftStackedPanel.id = 'p-left-stack';
+    this._rightStackedPanel.id = 'p-right-stack';
+    this._dockPanel.id = 'p-main-dock-panel';
+    this._splitPanel.id = 'p-main-split-panel';
+    this._leftSideBar.addClass('p-mod-left');
+    this._rightSideBar.addClass('p-mod-right');
+
+    Widget.attach(this, document.body);
+    window.addEventListener('resize', () => { this.update(); });
   }
 
   /**
