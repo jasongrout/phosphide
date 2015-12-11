@@ -7,9 +7,5 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
-export * from './cssreceiver';
-export * from './dockpanelreceiver';
-export * from './mainpanel';
-export * from './menubarreceiver';
-export * from './sidebar';
-export * from './sidebarreceiver';
+export * from './extensions';
+export * from './ishellview';

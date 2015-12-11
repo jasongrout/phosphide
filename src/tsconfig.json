@@ -3,14 +3,17 @@
     "declaration": true,
     "noImplicitAny": true,
     "noEmitOnError": true,
+    "sourceMap": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
-    "outDir": "../lib/"
+    "outDir": "../lib"
   },
   "files": [
-    "../typings/es6-collections/es6-collections.d.ts",
     "../typings/es6-promise/es6-promise.d.ts",
-    "registry.ts"
+    "../typings/systemjs/systemjs.d.ts",
+    "extensions.ts",
+    "index.ts",
+    "ishellview.ts"
   ]
 }
