@@ -7,15 +7,15 @@
   "dependencies": {
     "phosphor-arrays": "^1.0.6",
     "phosphor-boxpanel": "^1.0.0-beta",
-    "phosphor-command": "^0.3.0",
+    "phosphor-command": "^0.5.0",
+    "phosphor-di": "0.0.2",
     "phosphor-disposable": "^1.0.5",
     "phosphor-dockpanel": "^0.9.3",
     "phosphor-domutil": "^1.2.0",
-    "phosphor-menus": "^1.0.0-beta",
+    "phosphor-menus": "^1.0.0-beta.1",
     "phosphor-messaging": "^1.0.5",
     "phosphor-nodewrapper": "^1.0.4",
     "phosphor-observablelist": "^1.0.0-beta",
-    "phosphor-plugins": "^0.4.0",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
     "phosphor-splitpanel": "^1.0.0-beta",
@@ -32,10 +32,11 @@
     "typescript": "^1.6.2"
   },
   "scripts": {
-    "clean": "rimraf lib && rimraf test/build && rimraf test/coverage",
+    "clean": "rimraf lib && rimraf ext && rimraf test/build && rimraf test/coverage",
     "build:example": "rimraf example/node_modules/phosphide && cd example && npm install && npm run build",
     "build:src": "tsc --project src",
-    "build": "npm run build:src",
+    "build:ext": "tsc --project srcext",
+    "build": "npm run build:src && npm run build:ext",
     "docs": "rimraf docs/api && typedoc --options scripts/tdoptions.json",
     "postinstall": "npm dedupe",
     "prepublish": "npm run build"
@@ -48,7 +49,9 @@
     "lib/*.css",
     "lib/*.d.ts",
     "lib/*.js",
-    "phosphor-plugin.json"
+    "ext/*.css",
+    "ext/*.d.ts",
+    "ext/*.js"
   ],
   "keywords": [
     "application",
