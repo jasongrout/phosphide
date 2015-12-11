@@ -8,12 +8,13 @@
 'use strict';
 
 
-System.import('phosphor-plugins').then(lib => {
-  lib.registerPlugin('phosphide');
-  lib.registerPlugin('blue');
-  lib.registerPlugin('green');
-  lib.registerPlugin('red');
-  lib.registerPlugin('yellow');
-  lib.registerPlugin('editor');
-  lib.registerPlugin('theme');
+require('phosphide').loadExtensions([
+  'phosphide/ext/shellview',
+  'blue/index.js',
+  'editor/index.js',
+  'green/index.js',
+  'red/index.js',
+  'yellow/index.js'
+]).then(function() {
+  console.log('loading finished');
 });

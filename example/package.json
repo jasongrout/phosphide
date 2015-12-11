@@ -4,8 +4,8 @@
   "dependencies": {
     "codemirror": "^5.9.0",
     "phosphide": "file:..",
+    "phosphor-di": "0.0.2",
     "phosphor-messaging": "^1.0.5",
-    "phosphor-plugins": "^0.4.0",
     "phosphor-widget": "^1.0.0-beta"
   },
   "devDependencies": {

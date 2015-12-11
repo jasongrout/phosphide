@@ -10,12 +10,15 @@
 import CodeMirror = require('codemirror');
 
 import {
-  Message
-} from 'phosphor-messaging';
+  IShellView
+} from 'phosphide';
+
+import * as di
+  from 'phosphor-di';
 
 import {
-  IContribution
-} from 'phosphor-plugins';
+  Message
+} from 'phosphor-messaging';
 
 import {
   ResizeMessage, Widget
@@ -23,6 +26,42 @@ import {
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/javascript/javascript.js';
+
+
+export
+function resolve(): Promise<void> {
+  return di.resolve(Plugin).then(plugin => { plugin.run(); });
+}
+
+
+class Plugin {
+
+  static requires = [IShellView];
+
+  constructor(shell: IShellView) {
+    this._shell = shell;
+  }
+
+  run(): void {
+    for (let i = 0; i < 5; ++i) {
+      let editor = createEditor(i);
+      this._shell.addMainView(editor);
+    }
+  }
+
+  private _shell: IShellView;
+}
+
+
+function createEditor(n: number): CodeMirrorWidget {
+  let widget = new CodeMirrorWidget({
+    mode: 'text/typescript',
+    lineNumbers: true,
+    tabSize: 2,
+  });
+  widget.title.text = `Untitled - ${n}`;
+  return widget;
+}
 
 
 class CodeMirrorWidget extends Widget {
@@ -50,35 +89,4 @@ class CodeMirrorWidget extends Widget {
   }
 
   private _editor: CodeMirror.Editor;
-}
-
-
-let contribProto: IContribution = {
-  item: null,
-  isDisposed: false,
-  dispose: function() {
-    this.isDisposed = true;
-    this.item = null;
-  },
-};
-
-
-let count = 0;
-
-function createEditor(): CodeMirrorWidget {
-  let widget = new CodeMirrorWidget({
-    mode: 'text/typescript',
-    lineNumbers: true,
-    tabSize: 2,
-  });
-  widget.title.text = `Untitled - ${count++}`;
-  return widget;
-}
-
-
-export
-function createContent(): IContribution {
-  let contrib = Object.create(contribProto);
-  contrib.item = createEditor();
-  return contrib;
 }

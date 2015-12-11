@@ -1,9 +1,0 @@
-{
-  "extensions": [
-    {
-      "id": "theme:css",
-      "point": "phosphide:ui:css",
-      "config": { "path": "index.css" }
-    }
-  ]
-}

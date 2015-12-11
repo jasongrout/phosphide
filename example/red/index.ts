@@ -8,30 +8,37 @@
 'use strict';
 
 import {
-  IContribution
-} from 'phosphor-plugins';
+  IShellView
+} from 'phosphide';
+
+import * as di
+  from 'phosphor-di';
 
 import {
   Widget
 } from 'phosphor-widget';
 
 
-let contribProto: IContribution = {
-  item: null,
-  isDisposed: false,
-  dispose: function() {
-    this.isDisposed = true;
-    this.item = null;
-  },
-};
-
-
 export
-function createContent(): IContribution {
-  let contrib = Object.create(contribProto);
-  let widget = new Widget();
-  widget.addClass('red-content');
-  widget.title.text = 'Red';
-  contrib.item = widget;
-  return contrib;
+function resolve(): Promise<void> {
+  return di.resolve(Plugin).then(plugin => { plugin.run(); });
+}
+
+
+class Plugin {
+
+  static requires = [IShellView];
+
+  constructor(shell: IShellView) {
+    this._shell = shell;
+  }
+
+  run(): void {
+    let view = new Widget();
+    view.addClass('red-content');
+    view.title.text = 'Red';
+    this._shell.addRightView(view);
+  }
+
+  private _shell: IShellView;
 }
