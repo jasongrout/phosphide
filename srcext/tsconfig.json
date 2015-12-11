@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "sourceMap": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES5",
+    "outDir": "../ext"
+  },
+  "files": [
+    "../typings/es6-promise/es6-promise.d.ts",
+    "shellview.ts",
+    "sidebar.ts"
+  ]
+}
