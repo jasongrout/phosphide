@@ -13,6 +13,7 @@
  */
 export
 function loadExtensions(paths: string[]): Promise<void> {
+  // TODO dont re-init already loaded extensions
   let imports = paths.map(path => System.import(path));
   return Promise.all(imports).then(bootstrap);
 }
