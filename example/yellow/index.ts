@@ -11,8 +11,9 @@ import {
   IShellView
 } from 'phosphide';
 
-import * as di
-  from 'phosphor-di';
+import {
+  Container
+} from 'phosphor-di';
 
 import {
   Widget
@@ -20,14 +21,18 @@ import {
 
 
 export
-function resolve(): Promise<void> {
-  return di.resolve(Plugin).then(plugin => { plugin.run(); });
+function resolve(container: Container): Promise<void> {
+  return container.resolve(YellowHandler).then(handler => { handler.run(); });
 }
 
 
-class Plugin {
+class YellowHandler {
 
   static requires = [IShellView];
+
+  static create(shell: IShellView): YellowHandler {
+    return new YellowHandler(shell);
+  }
 
   constructor(shell: IShellView) {
     this._shell = shell;

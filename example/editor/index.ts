@@ -13,8 +13,9 @@ import {
   IShellView
 } from 'phosphide';
 
-import * as di
-  from 'phosphor-di';
+import {
+  Container
+} from 'phosphor-di';
 
 import {
   Message
@@ -29,14 +30,18 @@ import 'codemirror/mode/javascript/javascript.js';
 
 
 export
-function resolve(): Promise<void> {
-  return di.resolve(Plugin).then(plugin => { plugin.run(); });
+function resolve(container: Container): Promise<void> {
+  return container.resolve(EditorHandler).then(handler => { handler.run(); });
 }
 
 
-class Plugin {
+class EditorHandler {
 
   static requires = [IShellView];
+
+  static create(shell: IShellView): EditorHandler {
+    return new EditorHandler(shell);
+  }
 
   constructor(shell: IShellView) {
     this._shell = shell;
@@ -59,7 +64,7 @@ function createEditor(n: number): CodeMirrorWidget {
     lineNumbers: true,
     tabSize: 2,
   });
-  widget.title.text = `Untitled - ${n}`;
+  widget.title.text = `Untitled - ${n}.ts`;
   return widget;
 }
 

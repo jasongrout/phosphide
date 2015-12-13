@@ -7,8 +7,9 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
-import * as di
-  from 'phosphor-di';
+import {
+  Token
+} from 'phosphor-di';
 
 import {
   Widget
@@ -19,7 +20,7 @@ import {
  *
  */
 export
-interface ISideViewOptions {
+interface IViewOptions {
   /**
    *
    */
@@ -52,17 +53,17 @@ interface IShellView extends Widget {
   /**
    *
    */
-  addTopView(view: Widget, options?: ISideViewOptions): void;
+  addTopView(view: Widget, options?: IViewOptions): void;
 
   /**
    *
    */
-  addLeftView(view: Widget, options?: ISideViewOptions): void;
+  addLeftView(view: Widget, options?: IViewOptions): void;
 
   /**
    *
    */
-  addRightView(view: Widget, options?: ISideViewOptions): void;
+  addRightView(view: Widget, options?: IViewOptions): void;
 
   /**
    *
@@ -75,4 +76,4 @@ interface IShellView extends Widget {
  *
  */
 export
-const IShellView = new di.Token<IShellView>('phosphide.IShellView');
+const IShellView = new Token<IShellView>('phosphide.IShellView');

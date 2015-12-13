@@ -11,8 +11,9 @@ import {
   BoxPanel, Direction
 } from 'phosphor-boxpanel';
 
-import * as di
-  from 'phosphor-di';
+import {
+  Container, Token
+} from 'phosphor-di';
 
 import {
   DockPanel
@@ -35,8 +36,8 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IMainViewOptions, IShellView, ISideViewOptions
-} from '../lib/index';
+  IMainViewOptions, IShellView, IViewOptions
+} from './index';
 
 import {
   SideBar
@@ -53,8 +54,8 @@ const SHELL_VIEW_CLASS = 'p-ShellView';
  *
  */
 export
-function register(): void {
-  di.register(IShellView, ShellView);
+function register(container: Container): void {
+  container.register(IShellView, ShellView);
 }
 
 
@@ -65,7 +66,17 @@ class ShellView extends BoxPanel implements IShellView {
   /**
    *
    */
-  static requires: di.Token<any>[] = [];
+  static requires: Token<any>[] = [];
+
+  /**
+   *
+   */
+  static create(): IShellView {
+    let view = new ShellView();
+    Widget.attach(view, document.body);
+    window.addEventListener('resize', () => { view.update(); });
+    return view;
+  }
 
   /**
    *
@@ -74,6 +85,7 @@ class ShellView extends BoxPanel implements IShellView {
     super();
 
     // TODO fix many of these hard coded values
+
     this.addClass(SHELL_VIEW_CLASS);
     this.direction = Direction.TopToBottom;
     this.spacing = 0;
@@ -139,9 +151,6 @@ class ShellView extends BoxPanel implements IShellView {
     this._splitPanel.id = 'p-main-split-panel';
     this._leftSideBar.addClass('p-mod-left');
     this._rightSideBar.addClass('p-mod-right');
-
-    Widget.attach(this, document.body);
-    window.addEventListener('resize', () => { this.update(); });
   }
 
   /**
@@ -162,7 +171,7 @@ class ShellView extends BoxPanel implements IShellView {
   /**
    *
    */
-  addTopView(view: Widget, options?: ISideViewOptions): void {
+  addTopView(view: Widget, options?: IViewOptions): void {
     // TODO support options
     // TODO support this panel
   }
@@ -170,7 +179,7 @@ class ShellView extends BoxPanel implements IShellView {
   /**
    *
    */
-  addLeftView(view: Widget, options?: ISideViewOptions): void {
+  addLeftView(view: Widget, options?: IViewOptions): void {
     // TODO support options
     this._leftStackedPanel.children.add(view);
   }
@@ -178,7 +187,7 @@ class ShellView extends BoxPanel implements IShellView {
   /**
    *
    */
-  addRightView(view: Widget, options?: ISideViewOptions): void {
+  addRightView(view: Widget, options?: IViewOptions): void {
     // TODO support options
     this._rightStackedPanel.children.add(view);
   }

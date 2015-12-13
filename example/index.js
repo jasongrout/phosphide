@@ -7,14 +7,17 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
+var phosphide = require('phosphide');
+var di = require('phosphor-di');
 
-require('phosphide').loadExtensions([
-  'phosphide/ext/shellview',
-  'blue/index.js',
-  'editor/index.js',
-  'green/index.js',
-  'red/index.js',
-  'yellow/index.js'
+
+phosphide.loadPlugins(new di.Container(), [
+  require('phosphide/lib/shellview/plugin'),
+  require('red/index'),
+  require('blue/index'),
+  require('green/index'),
+  require('yellow/index'),
+  require('editor/index')
 ]).then(function() {
   console.log('loading finished');
 });

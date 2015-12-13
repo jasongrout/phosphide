@@ -7,13 +7,15 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES5",
+    "rootDir": ".",
     "outDir": "../lib"
   },
   "files": [
+    "../typings/es6-collections/es6-collections.d.ts",
     "../typings/es6-promise/es6-promise.d.ts",
-    "../typings/systemjs/systemjs.d.ts",
-    "extensions.ts",
     "index.ts",
-    "ishellview.ts"
+    "shellview/index.ts",
+    "shellview/plugin.ts",
+    "shellview/sidebar.ts"
   ]
 }

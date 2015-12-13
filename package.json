@@ -8,7 +8,7 @@
     "phosphor-arrays": "^1.0.6",
     "phosphor-boxpanel": "^1.0.0-beta",
     "phosphor-command": "^0.5.0",
-    "phosphor-di": "0.0.2",
+    "phosphor-di": "^0.9.0",
     "phosphor-disposable": "^1.0.5",
     "phosphor-dockpanel": "^0.9.3",
     "phosphor-domutil": "^1.2.0",
@@ -32,11 +32,10 @@
     "typescript": "^1.6.2"
   },
   "scripts": {
-    "clean": "rimraf lib && rimraf ext && rimraf test/build && rimraf test/coverage",
+    "clean": "rimraf lib && rimraf test/build && rimraf test/coverage",
     "build:example": "rimraf example/node_modules/phosphide && cd example && npm install && npm run build",
     "build:src": "tsc --project src",
-    "build:ext": "tsc --project srcext",
-    "build": "npm run build:src && npm run build:ext",
+    "build": "npm run build:src",
     "docs": "rimraf docs/api && typedoc --options scripts/tdoptions.json",
     "postinstall": "npm dedupe",
     "prepublish": "npm run build"
@@ -49,14 +48,15 @@
     "lib/*.css",
     "lib/*.d.ts",
     "lib/*.js",
-    "ext/*.css",
-    "ext/*.d.ts",
-    "ext/*.js"
+    "lib/**/*.css",
+    "lib/**/*.d.ts",
+    "lib/**/*.js"
   ],
   "keywords": [
     "application",
     "ide",
-    "plugin"
+    "plugin",
+    "plugins"
   ],
   "author": "S. Chris Colbert <sccolbert@gmail.com>",
   "license": "BSD-3-Clause",
