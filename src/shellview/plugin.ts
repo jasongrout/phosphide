@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  BoxPanel, Direction
+  BoxLayout, BoxPanel
 } from 'phosphor-boxpanel';
 
 import {
@@ -24,7 +24,7 @@ import {
 } from 'phosphor-properties';
 
 import {
-  Orientation, SplitPanel
+  SplitPanel
 } from 'phosphor-splitpanel';
 
 import {
@@ -32,7 +32,7 @@ import {
 } from 'phosphor-stackedpanel';
 
 import {
-  IChildWidgetList, Panel, Widget
+  Panel, Title, Widget
 } from 'phosphor-widget';
 
 import {
@@ -62,7 +62,7 @@ function register(container: Container): void {
 /**
  *
  */
-class ShellView extends BoxPanel implements IShellView {
+class ShellView extends Widget implements IShellView {
   /**
    *
    */
@@ -73,7 +73,7 @@ class ShellView extends BoxPanel implements IShellView {
    */
   static create(): IShellView {
     let view = new ShellView();
-    Widget.attach(view, document.body);
+    view.attach(document.body);
     window.addEventListener('resize', () => { view.update(); });
     return view;
   }
@@ -83,74 +83,77 @@ class ShellView extends BoxPanel implements IShellView {
    */
   constructor() {
     super();
+    this.addClass(SHELL_VIEW_CLASS);
 
     // TODO fix many of these hard coded values
-
-    this.addClass(SHELL_VIEW_CLASS);
-    this.direction = Direction.TopToBottom;
-    this.spacing = 0;
 
     this._menuPanel = new Panel();
     this._boxPanel = new BoxPanel();
     this._dockPanel = new Widget(); //new DockPanel();
     this._splitPanel = new SplitPanel();
-    this._leftSideBar = new SideBar<Widget>();
-    this._rightSideBar = new SideBar<Widget>();
-    this._leftStackedPanel = new StackedPanel();
-    this._rightStackedPanel = new StackedPanel();
+    let leftSideBar = new SideBar();
+    let rightSideBar = new SideBar();
+    let leftStackedPanel = new StackedPanel();
+    let rightStackedPanel = new StackedPanel();
+    this._leftHandler = new SideBarHandler(leftSideBar, leftStackedPanel);
+    this._rightHandler = new SideBarHandler(rightSideBar, rightStackedPanel);
 
-    this._leftSideBar.hidden = true;
-    this._rightSideBar.hidden = true;
-    this._leftStackedPanel.hidden = true;
-    this._rightStackedPanel.hidden = true;
+    //leftSideBar.hide();
+    //rightSideBar.hide();
+    leftStackedPanel.hide();
+    rightStackedPanel.hide();
 
-    this._boxPanel.direction = Direction.LeftToRight;
+    this._boxPanel.direction = BoxPanel.LeftToRight;
     this._boxPanel.spacing = 0;
 
     this._splitPanel = new SplitPanel();
-    this._splitPanel.orientation = Orientation.Horizontal;
+    this._splitPanel.orientation = SplitPanel.Horizontal;
     this._splitPanel.spacing = 1;
 
     //this._dockPanel.spacing = 8;
 
-    BoxPanel.setStretch(this._menuPanel, 0);
-    BoxPanel.setStretch(this._boxPanel, 1);
+    // this._leftSideBar.items = this._leftStackedPanel.children;
+    // this._leftSideBar.currentChanged.connect(this._onLeftCurrentChanged, this);
 
-    BoxPanel.setStretch(this._leftSideBar, 0);
-    BoxPanel.setStretch(this._splitPanel, 1);
-    BoxPanel.setStretch(this._rightSideBar, 0);
+    // this._rightSideBar.items = this._rightStackedPanel.children;
+    // this._rightSideBar.currentChanged.connect(this._onRightCurrentChanged, this);
 
-    SplitPanel.setStretch(this._leftStackedPanel, 0);
+    SplitPanel.setStretch(leftStackedPanel, 0);
     SplitPanel.setStretch(this._dockPanel, 1);
-    SplitPanel.setStretch(this._rightStackedPanel, 0);
+    SplitPanel.setStretch(rightStackedPanel, 0);
 
-    this._leftSideBar.items = this._leftStackedPanel.children;
-    this._leftSideBar.currentItemChanged.connect(this._onLeftCurrentChanged, this);
-    this._leftStackedPanel.children.changed.connect(this._onLeftChildrenChanged, this);
+    this._splitPanel.addChild(leftStackedPanel);
+    this._splitPanel.addChild(this._dockPanel);
+    this._splitPanel.addChild(rightStackedPanel);
 
-    this._rightSideBar.items = this._rightStackedPanel.children;
-    this._rightSideBar.currentItemChanged.connect(this._onRightCurrentChanged, this);
-    this._rightStackedPanel.children.changed.connect(this._onRightChildrenChanged, this);
+    BoxPanel.setStretch(leftSideBar, 0);
+    BoxPanel.setStretch(this._splitPanel, 1);
+    BoxPanel.setStretch(rightSideBar, 0);
 
-    this._splitPanel.children.add(this._leftStackedPanel);
-    this._splitPanel.children.add(this._dockPanel);
-    this._splitPanel.children.add(this._rightStackedPanel);
-
-    this._boxPanel.children.add(this._leftSideBar);
-    this._boxPanel.children.add(this._splitPanel);
-    this._boxPanel.children.add(this._rightSideBar);
-
-    this.children.add(this._menuPanel);
-    this.children.add(this._boxPanel);
+    this._boxPanel.addChild(leftSideBar);
+    this._boxPanel.addChild(this._splitPanel);
+    this._boxPanel.addChild(rightSideBar);
 
     // TOOD fix ids
     this.id = 'p-shell-view';
-    this._leftStackedPanel.id = 'p-left-stack';
-    this._rightStackedPanel.id = 'p-right-stack';
+    leftStackedPanel.id = 'p-left-stack';
+    rightStackedPanel.id = 'p-right-stack';
     this._dockPanel.id = 'p-main-dock-panel';
     this._splitPanel.id = 'p-main-split-panel';
-    this._leftSideBar.addClass('p-mod-left');
-    this._rightSideBar.addClass('p-mod-right');
+    leftSideBar.addClass('p-mod-left');
+    rightSideBar.addClass('p-mod-right');
+
+    let layout = new BoxLayout();
+    layout.direction = BoxLayout.TopToBottom;
+    layout.spacing = 0;
+
+    BoxLayout.setStretch(this._menuPanel, 0);
+    BoxLayout.setStretch(this._boxPanel, 1);
+
+    layout.addChild(this._menuPanel);
+    layout.addChild(this._boxPanel);
+
+    this.layout = layout;
   }
 
   /**
@@ -161,10 +164,8 @@ class ShellView extends BoxPanel implements IShellView {
     this._boxPanel = null;
     this._dockPanel = null;
     this._splitPanel = null;
-    this._leftSideBar = null;
-    this._rightSideBar = null;
-    this._leftStackedPanel = null;
-    this._rightStackedPanel = null;
+    this._leftHandler = null;
+    this._rightHandler = null;
     super.dispose();
   }
 
@@ -180,16 +181,14 @@ class ShellView extends BoxPanel implements IShellView {
    *
    */
   addLeftView(view: Widget, options?: IViewOptions): void {
-    // TODO support options
-    this._leftStackedPanel.children.add(view);
+    this._leftHandler.add(view, options);
   }
 
   /**
    *
    */
   addRightView(view: Widget, options?: IViewOptions): void {
-    // TODO support options
-    this._rightStackedPanel.children.add(view);
+    this._rightHandler.add(view, options);
   }
 
   /**
@@ -200,53 +199,57 @@ class ShellView extends BoxPanel implements IShellView {
     // this._dockPanel.insertTabAfter(view);
   }
 
-  /**
-   *
-   */
-  private _onLeftCurrentChanged(sender: SideBar<Widget>, args: IChangedArgs<Widget>): void {
-    this._leftStackedPanel.currentWidget = args.newValue;
-    this._leftStackedPanel.hidden = !args.newValue;
-  }
-
-  /**
-   *
-   */
-  private _onLeftChildrenChanged(sender: IChildWidgetList): void {
-    if (sender.length === 0) {
-      this._leftSideBar.hidden = true;
-      this._leftStackedPanel.hidden = true;
-    } else {
-      this._leftSideBar.hidden = false;
-    }
-  }
-
-  /**
-   *
-   */
-  private _onRightCurrentChanged(sender: SideBar<Widget>, args: IChangedArgs<Widget>): void {
-    this._rightStackedPanel.currentWidget = args.newValue;
-    this._rightStackedPanel.hidden = !args.newValue;
-  }
-
-  /**
-   *
-   */
-  private _onRightChildrenChanged(sender: IChildWidgetList): void {
-    if (sender.length === 0) {
-      this._rightSideBar.hidden = true;
-      this._rightStackedPanel.hidden = true;
-    } else {
-      this._rightSideBar.hidden = false;
-    }
-  }
 
   private _menuPanel: Panel;
   private _boxPanel: BoxPanel;
   //private _dockPanel: DockPanel;
   private _dockPanel: Widget;
   private _splitPanel: SplitPanel;
-  private _leftSideBar: SideBar<Widget>;
-  private _rightSideBar: SideBar<Widget>;
-  private _leftStackedPanel: StackedPanel;
-  private _rightStackedPanel: StackedPanel;
+  private _leftHandler: SideBarHandler;
+  private _rightHandler: SideBarHandler;
+}
+
+
+class SideBarHandler {
+
+  constructor(sideBar: SideBar, stackedPanel: StackedPanel) {
+    this._sideBar = sideBar;
+    this._stackedPanel = stackedPanel;
+    sideBar.currentChanged.connect(this._onCurrentChanged, this);
+  }
+
+  get sideBar(): SideBar {
+    return this._sideBar;
+  }
+
+  get stackedPanel(): StackedPanel {
+    return this._stackedPanel;
+  }
+
+  add(view: Widget, options?: IViewOptions): void {
+    this._stackedPanel.addChild(view);
+    this._sideBar.addTitle(view.title);
+  }
+
+  private _findWidget(title: Title): Widget {
+    let stack = this._stackedPanel;
+    for (let i = 0, n = stack.childCount(); i < n; ++i) {
+      let child = stack.childAt(i);
+      if (child.title === title) return child;
+    }
+    return null;
+  }
+
+  private _onCurrentChanged(sender: SideBar, args: IChangedArgs<Title>): void {
+    let widget = args.newValue ? this._findWidget(args.newValue) : null;
+    this._stackedPanel.currentWidget = widget;
+    if (widget) {
+      this._stackedPanel.show();
+    } else {
+      this._stackedPanel.hide();
+    }
+  }
+
+  private _sideBar: SideBar;
+  private _stackedPanel: StackedPanel;
 }
