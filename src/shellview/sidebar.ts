@@ -39,6 +39,8 @@ import {
 } from 'phosphor-widget';
 
 
+// TODO - need better solution for storing these class names
+
 /**
  * The class name added to SideBar instances.
  */
@@ -71,7 +73,7 @@ const CURRENT_CLASS = 'p-mod-current';
 
 
 /**
- * A widget which displays titles a row of exclusive buttons.
+ * A widget which displays titles as a row of exclusive buttons.
  */
 export
 class SideBar extends Widget {
@@ -131,6 +133,8 @@ class SideBar extends Widget {
    * This is the node which holds the side bar button nodes. Modifying
    * the content of this node indiscriminately can lead to undesired
    * behavior.
+   *
+   * This is a read-only property.
    */
   get contentNode(): HTMLElement {
     return this.node.getElementsByClassName(CONTENT_CLASS)[0] as HTMLElement;
@@ -220,13 +224,13 @@ class SideBar extends Widget {
    * If the title is not in the side bar, this is a no-op.
    */
   removeTitle(title: Title): void {
+    if (this.currentTitle === title) {
+      this.currentTitle = null;
+    }
     let titles = SideBarPrivate.titlesProperty.get(this);
     let i = arrays.remove(titles, title);
     if (i === -1) {
       return;
-    }
-    if (this.currentTitle === title) {
-      this.currentTitle = null;
     }
     let buttons = SideBarPrivate.buttonsProperty.get(this);
     let btn = arrays.removeAt(buttons, i);
@@ -284,7 +288,7 @@ class SideBar extends Widget {
     event.preventDefault();
     event.stopPropagation();
 
-    // Update or toggle the current item.
+    // Update the current title.
     let btn = buttons[i];
     if (btn.title !== this.currentTitle) {
       this.currentTitle = btn.title;
@@ -316,7 +320,7 @@ class SideBarButton extends NodeWrapper implements IDisposable {
   /**
    * Construct a new side bar button.
    *
-   * @param title - The title to associate with the button.
+   * @param title - The title object for the button.
    */
   constructor(title: Title) {
     super();
@@ -324,8 +328,8 @@ class SideBarButton extends NodeWrapper implements IDisposable {
     this._title = title;
 
     this.textNode.textContent = title.text;
-    if (title.icon) SideBarPrivate.exAddClass(this.iconNode, title.icon);
-    if (title.className) SideBarPrivate.exAddClass(this.node, title.className);
+    if (title.icon) SideBarPrivate.addClasses(this.iconNode, title.icon);
+    if (title.className) SideBarPrivate.addClasses(this.node, title.className);
 
     title.changed.connect(this._onTitleChanged, this);
   }
@@ -366,7 +370,7 @@ class SideBarButton extends NodeWrapper implements IDisposable {
   }
 
   /**
-   * Get the title associated with the button.
+   * Get the title object for the button.
    *
    * #### Notes
    * This is a read-only property.
@@ -404,8 +408,8 @@ class SideBarButton extends NodeWrapper implements IDisposable {
    */
   private _onTitleIconChanged(args: IChangedArgs<string>): void {
     let node = this.iconNode;
-    if (args.oldValue) SideBarPrivate.exRemClass(node, args.oldValue);
-    if (args.newValue) SideBarPrivate.exAddClass(node, args.newValue);
+    if (args.oldValue) SideBarPrivate.remClasses(node, args.oldValue);
+    if (args.newValue) SideBarPrivate.addClasses(node, args.newValue);
   }
 
   /**
@@ -413,8 +417,8 @@ class SideBarButton extends NodeWrapper implements IDisposable {
    */
   private _onTitleClassNameChanged(args: IChangedArgs<string>): void {
     let node = this.node;
-    if (args.oldValue) SideBarPrivate.exRemClass(node, args.oldValue);
-    if (args.newValue) SideBarPrivate.exAddClass(node, args.newValue);
+    if (args.oldValue) SideBarPrivate.remClasses(node, args.oldValue);
+    if (args.newValue) SideBarPrivate.addClasses(node, args.newValue);
   }
 
   private _title: Title;
@@ -432,7 +436,7 @@ namespace SideBarPrivate {
   const currentChangedSignal = new Signal<SideBar, IChangedArgs<Title>>();
 
   /**
-   * The property descriptor for the currently selected side bar title.
+   * The property descriptor for the selected side bar title.
    */
   export
   const currentTitleProperty = new Property<SideBar, Title>({
@@ -444,7 +448,7 @@ namespace SideBarPrivate {
   });
 
   /**
-   * The property descriptor for the side bar titles.
+   * The property descriptor for the side bar titles array.
    */
   export
   const titlesProperty = new Property<SideBar, Title[]>({
@@ -453,7 +457,7 @@ namespace SideBarPrivate {
   });
 
   /**
-   * The property descriptor for the side bar buttons.
+   * The property descriptor for the side bar buttons array.
    */
   export
   const buttonsProperty = new Property<SideBar, SideBarButton[]>({
@@ -462,10 +466,10 @@ namespace SideBarPrivate {
   });
 
   /**
-   * Add a whitespace separated class name to the given node.
+   * Add whitespace separated class names to the given node.
    */
   export
-  function exAddClass(node: HTMLElement, name: string): void {
+  function addClasses(node: HTMLElement, name: string): void {
     let list = node.classList;
     let parts = name.split(/\s+/);
     for (let i = 0, n = parts.length; i < n; ++i) {
@@ -474,10 +478,10 @@ namespace SideBarPrivate {
   }
 
   /**
-   * Remove a whitespace separated class name to the given node.
+   * Remove whitespace separated class names from the given node.
    */
   export
-  function exRemClass(node: HTMLElement, name: string): void {
+  function remClasses(node: HTMLElement, name: string): void {
     let list = node.classList;
     let parts = name.split(/\s+/);
     for (let i = 0, n = parts.length; i < n; ++i) {
