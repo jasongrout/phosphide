@@ -17,38 +17,26 @@ import {
 
 
 /**
- * The options object for adding side views to the shell.
+ * The options for adding widgets to the side areas of the shell.
  */
 export
-interface IViewOptions {
+interface ISideAreaOptions {
   /**
-   * The sort order rank for the view.
-   *
-   * The default rank is `100`.
+   * The rank value for sorting the widget amongst its siblings.
    */
   rank?: number;
 }
 
 
 /**
- *
+ * The options for adding widgets to the main area of the shell.
  */
 export
-interface IMainViewOptions {
-  /**
-   *
-   */
-  mode?: string;
-
-  /**
-   *
-   */
-  ref?: string;
-}
+interface IMainAreaOptions { }
 
 
 /**
- * An which provides the main application layout.
+ * An object which provides the main application layout.
  *
  * #### Notes
  * A shell view is the top-level widget in a Phosphide application. It
@@ -57,7 +45,7 @@ interface IMainViewOptions {
  *
  */
 export
-interface IShellView extends Widget {
+interface IShell extends Widget {
   /**
    * Add a view to the top shell area.
    *
@@ -70,7 +58,7 @@ interface IShellView extends Widget {
    *
    * The view can be removed by setting its parent to `null`.
    */
-  addTopView(view: Widget, options?: IViewOptions): void;
+  addToTopArea(widget: Widget, options?: ISideAreaOptions): void;
 
   /**
    * Add a view to the left shell area.
@@ -84,7 +72,7 @@ interface IShellView extends Widget {
    *
    * The view can be removed by setting its parent to `null`.
    */
-  addLeftView(view: Widget, options?: IViewOptions): void;
+  addToLeftArea(widget: Widget, options?: ISideAreaOptions): void;
 
   /**
    * Add a view to the right shell area.
@@ -98,17 +86,17 @@ interface IShellView extends Widget {
    *
    * The view can be removed by setting its parent to `null`.
    */
-  addRightView(view: Widget, options?: IViewOptions): void;
+  addToRightArea(widget: Widget, options?: ISideAreaOptions): void;
 
   /**
    *
    */
-  addMainView(view: Widget, options?: IMainViewOptions): void;
+  addToMainArea(widget: Widget, options?: IMainAreaOptions): void;
 }
 
 
 /**
- * The dependency token for the `IShellView` interface.
+ * The dependency token for the `IShell` interface.
  */
 export
-const IShellView = new Token<IShellView>('phosphide.IShellView');
+const IShell = new Token<IShell>('phosphide.IShell');

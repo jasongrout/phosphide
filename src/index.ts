@@ -16,7 +16,7 @@ import {
 } from 'phosphor-properties';
 
 
-export * from './shellview/index';
+export * from './shell/index';
 
 
 /**
@@ -84,7 +84,7 @@ interface IPlugin {
 export
 function loadPlugins(container: Container, plugins: IPlugin[]): Promise<void> {
   // Lookup the plugin set for the container.
-  let pluginSet = PhosphidePrivate.pluginSetProperty.get(container);
+  let pluginSet = PluginsPrivate.pluginSetProperty.get(container);
 
   // Filter for the new plugins.
   let newPlugins: IPlugin[] = [];
@@ -117,9 +117,9 @@ function loadPlugins(container: Container, plugins: IPlugin[]): Promise<void> {
 
 
 /**
- * The namespace for private phosphide data.
+ * The namespace for private plugin data.
  */
-namespace PhosphidePrivate {
+namespace PluginsPrivate {
   /**
    * The property descriptor for a container's plugin set.
    */
