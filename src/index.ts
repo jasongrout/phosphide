@@ -83,9 +83,11 @@ interface IPlugin {
  */
 export
 function loadPlugins(container: Container, plugins: IPlugin[]): Promise<void> {
+  // Lookup the plugin set for the container.
+  let pluginSet = PhosphidePrivate.pluginSetProperty.get(container);
+
   // Filter for the new plugins.
   let newPlugins: IPlugin[] = [];
-  let pluginSet = getPluginSet(container);
   for (let plugin of plugins) {
     if (plugin && !pluginSet.has(plugin)) {
       pluginSet.add(plugin);
@@ -115,17 +117,15 @@ function loadPlugins(container: Container, plugins: IPlugin[]): Promise<void> {
 
 
 /**
- * An attached property which holds the plugin set for a container.
+ * The namespace for private phosphide data.
  */
-const pluginSetProperty = new Property<Container, Set<IPlugin>>({
-  name: 'pluginSet',
-  create: () => new Set<IPlugin>(),
-});
-
-
-/**
- * Get the plugin set for the specified container.
- */
-function getPluginSet(container: Container): Set<IPlugin> {
-  return pluginSetProperty.get(container);
+namespace PhosphidePrivate {
+  /**
+   * The property descriptor for a container's plugin set.
+   */
+  export
+  const pluginSetProperty = new Property<Container, Set<IPlugin>>({
+    name: 'pluginSet',
+    create: () => new Set<IPlugin>(),
+  });
 }
