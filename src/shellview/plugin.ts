@@ -15,9 +15,9 @@ import {
   Container, Token
 } from 'phosphor-di';
 
-import {
-  DockPanel
-} from 'phosphor-dockpanel';
+// import {
+//   DockPanel
+// } from 'phosphor-dockpanel';
 
 import {
   IChangedArgs
@@ -92,7 +92,7 @@ class ShellView extends BoxPanel implements IShellView {
 
     this._menuPanel = new Panel();
     this._boxPanel = new BoxPanel();
-    this._dockPanel = new DockPanel();
+    this._dockPanel = new Widget(); //new DockPanel();
     this._splitPanel = new SplitPanel();
     this._leftSideBar = new SideBar<Widget>();
     this._rightSideBar = new SideBar<Widget>();
@@ -111,7 +111,7 @@ class ShellView extends BoxPanel implements IShellView {
     this._splitPanel.orientation = Orientation.Horizontal;
     this._splitPanel.spacing = 1;
 
-    this._dockPanel.spacing = 8;
+    //this._dockPanel.spacing = 8;
 
     BoxPanel.setStretch(this._menuPanel, 0);
     BoxPanel.setStretch(this._boxPanel, 1);
@@ -197,7 +197,7 @@ class ShellView extends BoxPanel implements IShellView {
    */
   addMainView(view: Widget, options?: IMainViewOptions): void {
     // TODO support options
-    this._dockPanel.insertTabAfter(view);
+    // this._dockPanel.insertTabAfter(view);
   }
 
   /**
@@ -242,7 +242,8 @@ class ShellView extends BoxPanel implements IShellView {
 
   private _menuPanel: Panel;
   private _boxPanel: BoxPanel;
-  private _dockPanel: DockPanel;
+  //private _dockPanel: DockPanel;
+  private _dockPanel: Widget;
   private _splitPanel: SplitPanel;
   private _leftSideBar: SideBar<Widget>;
   private _rightSideBar: SideBar<Widget>;
