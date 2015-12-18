@@ -27,10 +27,6 @@ import {
 } from 'phosphor-nodewrapper';
 
 import {
-  IListChangedArgs, IObservableList, ListChangeType
-} from 'phosphor-observablelist';
-
-import {
   IChangedArgs, Property
 } from 'phosphor-properties';
 
@@ -75,25 +71,10 @@ const CURRENT_CLASS = 'p-mod-current';
 
 
 /**
- * An object which can be added to a side bar.
+ * A widget which displays titles a row of exclusive buttons.
  */
 export
-interface ISideBarItem {
-  /**
-   * The title object which provides data for the item's button.
-   *
-   * #### Notes
-   * This should be a read-only property.
-   */
-  title: Title;
-}
-
-
-/**
- * A widget which displays its items as a list of exclusive buttons.
- */
-export
-class SideBar<T extends ISideBarItem> extends Widget {
+class SideBar extends Widget {
   /**
    * Create the DOM node for a side bar.
    */
@@ -104,31 +85,6 @@ class SideBar<T extends ISideBarItem> extends Widget {
     node.appendChild(content);
     return node;
   }
-
-  /**
-   * The property descriptor for the currently selected side bar item.
-   *
-   * **See also:** [[currentItem]]
-   */
-  static currentItemProperty = new Property<SideBar<ISideBarItem>, ISideBarItem>({
-    name: 'currentItem',
-    value: null,
-    coerce: (owner, value) => owner._coerceCurrentItem(value),
-    changed: (owner, old, value) => { owner._onCurrentItemChanged(old, value); },
-    notify: new Signal<SideBar<ISideBarItem>, IChangedArgs<ISideBarItem>>(),
-  });
-
-  /**
-   * The property descriptor for the observable list of side bar items.
-   *
-   * **See also:** [[items]]
-   */
-  static itemsProperty = new Property<SideBar<ISideBarItem>, IObservableList<ISideBarItem>>({
-    name: 'items',
-    value: null,
-    coerce: (owner, value) => value || null,
-    changed: (owner, old, value) => { owner._onItemsChanged(old, value); },
-  });
 
   /**
    * Construct a new side bar.
@@ -142,59 +98,30 @@ class SideBar<T extends ISideBarItem> extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    this._buttons.forEach(btn => { btn.dispose(); });
-    this._buttons.length = 0;
+    let buttons = SideBarPrivate.buttonsProperty.get(this);
+    buttons.forEach(button => { button.dispose(); });
     super.dispose();
   }
 
   /**
-   * Get the currently selected side bar item.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[currentItemProperty]].
+   * A signal emitted when the current side bar title is changed.
    */
-  get currentItem(): T {
-    return SideBar.currentItemProperty.get(this) as T;
+  get currentChanged(): ISignal<SideBar, IChangedArgs<Title>> {
+    return SideBarPrivate.currentChangedSignal.bind(this);
   }
 
   /**
-   * Set the currently selected side bar item.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[currentItemProperty]].
+   * Get the currently selected side bar title.
    */
-  set currentItem(value: T) {
-    SideBar.currentItemProperty.set(this, value);
+  get currentTitle(): Title {
+    return SideBarPrivate.currentTitleProperty.get(this);
   }
 
   /**
-   * A signal emitted when the current side bar item is changed.
-   *
-   * #### Notes
-   * This is the notify signal for the [[currentItemProperty]].
+   * Set the currently selected side bar title.
    */
-  get currentItemChanged(): ISignal<SideBar<T>, IChangedArgs<T>> {
-    return SideBar.currentItemProperty.notify.bind(this);
-  }
-
-  /**
-   * Get the list of side bar items for the side bar.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[itemsProperty]].
-   */
-  get items(): IObservableList<T> {
-    return SideBar.itemsProperty.get(this) as IObservableList<T>;
-  }
-
-  /**
-   * Set the list side bar items for the side bar.
-   *
-   * #### Notes
-   * This is a pure delegate to the [[itemsProperty]].
-   */
-  set items(value: IObservableList<T>) {
-    SideBar.itemsProperty.set(this, value);
+  set currentTitle(value: Title) {
+    SideBarPrivate.currentTitleProperty.set(this, value);
   }
 
   /**
@@ -207,6 +134,104 @@ class SideBar<T extends ISideBarItem> extends Widget {
    */
   get contentNode(): HTMLElement {
     return this.node.getElementsByClassName(CONTENT_CLASS)[0] as HTMLElement;
+  }
+
+  /**
+   * Get the number of title objects in the side bar.
+   *
+   * @returns The number of title objects in the side bar.
+   */
+  titleCount(): number {
+    return SideBarPrivate.titlesProperty.get(this).length;
+  }
+
+  /**
+   * Get the title object at the specified index.
+   *
+   * @param index - The index of the title object of interest.
+   *
+   * @returns The title at the specified index, or `undefined`.
+   */
+  titleAt(index: number): Title {
+    return SideBarPrivate.titlesProperty.get(this)[index];
+  }
+
+  /**
+   * Get the index of the specified title object.
+   *
+   * @param title - The title object of interest.
+   *
+   * @returns The index of the specified title, or `-1`.
+   */
+  titleIndex(title: Title): number {
+    return SideBarPrivate.titlesProperty.get(this).indexOf(title);
+  }
+
+  /**
+   * Add a title object to the end of the side bar.
+   *
+   * @param title - The title object to add to the side bar.
+   *
+   * #### Notes
+   * If the title is already added to the side bar, it will be moved.
+   */
+  addTitle(title: Title): void {
+    this.insertTitle(this.titleCount(), title);
+  }
+
+  /**
+   * Insert a title object at the specified index.
+   *
+   * @param index - The index at which to insert the title.
+   *
+   * @param title - The title object to insert into to the panel.
+   *
+   * #### Notes
+   * If the title is already added to the side bar, it will be moved.
+   */
+  insertTitle(index: number, title: Title): void {
+    let titles = SideBarPrivate.titlesProperty.get(this);
+    let buttons = SideBarPrivate.buttonsProperty.get(this);
+    let i = titles.indexOf(title);
+    let j = Math.max(0, Math.min(index | 0, titles.length));
+    if (i !== -1) {
+      if (i < j) j--;
+      if (i === j) return;
+      arrays.move(titles, i, j);
+      arrays.move(buttons, i, j);
+      let btn = buttons[j];
+      let ref = buttons[j + 1];
+      this.contentNode.insertBefore(btn.node, ref && ref.node);
+    } else {
+      let btn = new SideBarButton(title);
+      arrays.insert(titles, j, title);
+      arrays.insert(buttons, j, btn);
+      let ref = buttons[j + 1];
+      this.contentNode.insertBefore(btn.node, ref && ref.node);
+    }
+  }
+
+  /**
+   * Remove a title object from the side bar.
+   *
+   * @param title - The title object to remove from the side bar.
+   *
+   * #### Notes
+   * If the title is not in the side bar, this is a no-op.
+   */
+  removeTitle(title: Title): void {
+    let titles = SideBarPrivate.titlesProperty.get(this);
+    let i = arrays.remove(titles, title);
+    if (i === -1) {
+      return;
+    }
+    if (this.currentTitle === title) {
+      this.currentTitle = null;
+    }
+    let buttons = SideBarPrivate.buttonsProperty.get(this);
+    let btn = arrays.removeAt(buttons, i);
+    this.contentNode.removeChild(btn.node);
+    btn.dispose();
   }
 
   /**
@@ -249,8 +274,9 @@ class SideBar<T extends ISideBarItem> extends Widget {
     }
 
     // Do nothing if the press is not on a button.
-    let index = hitTestButtons(this._buttons, event.clientX, event.clientY);
-    if (index < 0) {
+    let buttons = SideBarPrivate.buttonsProperty.get(this);
+    let i = SideBarPrivate.findButton(buttons, event.clientX, event.clientY);
+    if (i < 0) {
       return;
     }
 
@@ -259,206 +285,20 @@ class SideBar<T extends ISideBarItem> extends Widget {
     event.stopPropagation();
 
     // Update or toggle the current item.
-    let btn = this._buttons[index];
-    if (btn.item !== this.currentItem) {
-      this.currentItem = btn.item;
+    let btn = buttons[i];
+    if (btn.title !== this.currentTitle) {
+      this.currentTitle = btn.title;
     } else {
-      this.currentItem = null;
+      this.currentTitle = null;
     }
   }
-
-  /**
-   * The coerce handler for the [[currentItemProperty]].
-   */
-  private _coerceCurrentItem(item: T): T {
-    let list = this.items;
-    return (item && list && list.contains(item)) ? item : null;
-  }
-
-  /**
-   * The change handler for the [[currentItemProperty]].
-   */
-  private _onCurrentItemChanged(oldItem: T, newItem: T): void {
-    let oldBtn = arrays.find(this._buttons, btn => btn.item === oldItem);
-    let newBtn = arrays.find(this._buttons, btn => btn.item === newItem);
-    if (oldBtn) oldBtn.removeClass(CURRENT_CLASS);
-    if (newBtn) newBtn.addClass(CURRENT_CLASS);
-  }
-
-  /**
-   * The change handler for the [[itemsProperty]].
-   */
-  private _onItemsChanged(oldList: IObservableList<T>, newList: IObservableList<T>): void {
-    // Disconnect the old list and dispose the old buttons.
-    if (oldList) {
-      oldList.changed.disconnect(this._onItemsListChanged, this);
-      let content = this.contentNode;
-      while (this._buttons.length) {
-        let btn = this._buttons.pop();
-        content.removeChild(btn.node);
-        btn.dispose();
-      }
-    }
-
-    // Create the new buttons and connect the new list.
-    if (newList) {
-      let content = this.contentNode;
-      for (let i = 0, n = newList.length; i < n; ++i) {
-        let btn = new SideBarButton(newList.get(i));
-        content.appendChild(btn.node);
-        this._buttons.push(btn);
-      }
-      newList.changed.connect(this._onItemsListChanged, this);
-    }
-
-    // Reset the current item to null.
-    this.currentItem = null;
-  }
-
-  /**
-   * The change handler for the items list `changed` signal.
-   */
-  private _onItemsListChanged(sender: IObservableList<T>, args: IListChangedArgs<T>): void {
-    switch (args.type) {
-    case ListChangeType.Add:
-      this._onItemsListAdd(args);
-      break;
-    case ListChangeType.Move:
-      this._onItemsListMove(args);
-      break;
-    case ListChangeType.Remove:
-      this._onItemsListRemove(args);
-      break;
-    case ListChangeType.Replace:
-      this._onItemsListReplace(args);
-      break;
-    case ListChangeType.Set:
-      this._onItemsListSet(args);
-      break;
-    }
-  }
-
-  /**
-   * The handler invoked on a items list change of type `Add`.
-   */
-  private _onItemsListAdd(args: IListChangedArgs<T>): void {
-    // Create the button for the new side bar item.
-    let btn = new SideBarButton(args.newValue as T);
-
-    // Add the button to the same location in the internal array.
-    arrays.insert(this._buttons, args.newIndex, btn);
-
-    // Lookup the next sibling reference.
-    let ref = this._buttons[args.newIndex + 1];
-
-    // Add the button node to the DOM before its next sibling.
-    this.contentNode.insertBefore(btn.node, ref && ref.node);
-  }
-
-  /**
-   * The handler invoked on a items list change of type `Move`.
-   */
-  private _onItemsListMove(args: IListChangedArgs<T>): void {
-    // Move the button in the internal array.
-    arrays.move(this._buttons, args.oldIndex, args.newIndex);
-
-    // Lookup the target button.
-    let btn = this._buttons[args.newIndex];
-
-    // Lookup the next sibling reference.
-    let ref = this._buttons[args.newIndex + 1];
-
-    // Move the button in the DOM before its next sibling.
-    this.contentNode.insertBefore(btn.node, ref && ref.node);
-  }
-
-  /**
-   * The handler invoked on an items list change of type `Remove`.
-   */
-  private _onItemsListRemove(args: IListChangedArgs<T>): void {
-    // Remove the button from the internal array.
-    let btn = arrays.removeAt(this._buttons, args.oldIndex);
-
-    // Remove the button node from the DOM.
-    this.contentNode.removeChild(btn.node);
-
-    // Clear the current item if it was removed.
-    if (this.currentItem === btn.item) {
-      this.currentItem = null;
-    }
-
-    // Dispose of the old button.
-    btn.dispose();
-  }
-
-  /**
-   * The handler invoked on a items list change of type `Replace`.
-   */
-  private _onItemsListReplace(args: IListChangedArgs<T>): void {
-    // Create the new buttons for the new side bar items.
-    let newItems = args.newValue as T[];
-    let newBtns = newItems.map(item => new SideBarButton(item));
-
-    // Replace the buttons in the internal array.
-    let oldItems = args.oldValue as T[];
-    let oldBtns = this._buttons.splice(args.newIndex, oldItems.length, ...newBtns);
-
-    // Remove the old buttons from the DOM.
-    let content = this.contentNode;
-    oldBtns.forEach(btn => { content.removeChild(btn.node); });
-
-    // Lookup the next sibiling reference.
-    let ref = this._buttons[args.newIndex + newBtns.length];
-    let refNode = ref && ref.node;
-
-    // Add the new buttons to the DOM before the next sibling.
-    newBtns.forEach(btn => { content.insertBefore(btn.node, refNode); });
-
-    // Clear the current item if it was removed.
-    if (oldItems.indexOf(this.currentItem) !== -1) {
-      this.currentItem = null;
-    }
-
-    // Dispose of the old buttons.
-    oldBtns.forEach(btn => { btn.dispose(); });
-  }
-
-  /**
-   * The handler invoked on a items list change of type `Set`.
-   */
-  private _onItemsListSet(args: IListChangedArgs<T>): void {
-    // If the item was not actually changed, there is nothing to do.
-    if (args.oldValue === args.newValue) {
-      return;
-    }
-
-    // Create the button for the new side bar item.
-    let newBtn = new SideBarButton(args.newValue as T);
-
-    // Swap the new button in the internal array.
-    let oldBtn = this._buttons[args.newIndex];
-    this._buttons[args.newIndex] = newBtn;
-
-    // Swap the new button node in the DOM.
-    this.contentNode.replaceChild(newBtn.node, oldBtn.node);
-
-    // Clear the current item if it was removed.
-    if (this.currentItem === oldBtn.item) {
-      this.currentItem = null;
-    }
-
-    // Dispose of the old button.
-    oldBtn.dispose();
-  }
-
-  private _buttons: SideBarButton<T>[] = [];
 }
 
 
 /**
  * An object which manages a button node for a side bar.
  */
-class SideBarButton<T extends ISideBarItem> extends NodeWrapper implements IDisposable {
+class SideBarButton extends NodeWrapper implements IDisposable {
   /**
    * Create the DOM node for a side bar button.
    */
@@ -476,17 +316,16 @@ class SideBarButton<T extends ISideBarItem> extends NodeWrapper implements IDisp
   /**
    * Construct a new side bar button.
    *
-   * @param item - The side bar item to associate with the button.
+   * @param title - The title to associate with the button.
    */
-  constructor(item: T) {
+  constructor(title: Title) {
     super();
     this.addClass(BUTTON_CLASS);
-    this._item = item;
+    this._title = title;
 
-    let title = item.title;
     this.textNode.textContent = title.text;
-    if (title.icon) exAddClass(this.iconNode, title.icon);
-    if (title.className) exAddClass(this.node, title.className);
+    if (title.icon) SideBarPrivate.exAddClass(this.iconNode, title.icon);
+    if (title.className) SideBarPrivate.exAddClass(this.node, title.className);
 
     title.changed.connect(this._onTitleChanged, this);
   }
@@ -495,7 +334,7 @@ class SideBarButton<T extends ISideBarItem> extends NodeWrapper implements IDisp
    * Dispose of the resources held by the button.
    */
   dispose(): void {
-    this._item = null;
+    this._title = null;
     clearSignalData(this);
   }
 
@@ -503,7 +342,7 @@ class SideBarButton<T extends ISideBarItem> extends NodeWrapper implements IDisp
    * Test whether the button is disposed.
    */
   get isDisposed(): boolean {
-    return this._item === null;
+    return this._title === null;
   }
 
   /**
@@ -527,13 +366,13 @@ class SideBarButton<T extends ISideBarItem> extends NodeWrapper implements IDisp
   }
 
   /**
-   * Get the side bar item associated with the button.
+   * Get the title associated with the button.
    *
    * #### Notes
    * This is a read-only property.
    */
-  get item(): T {
-    return this._item;
+  get title(): Title {
+    return this._title;
   }
 
   /**
@@ -565,8 +404,8 @@ class SideBarButton<T extends ISideBarItem> extends NodeWrapper implements IDisp
    */
   private _onTitleIconChanged(args: IChangedArgs<string>): void {
     let node = this.iconNode;
-    if (args.oldValue) exRemClass(node, args.oldValue);
-    if (args.newValue) exAddClass(node, args.newValue);
+    if (args.oldValue) SideBarPrivate.exRemClass(node, args.oldValue);
+    if (args.newValue) SideBarPrivate.exAddClass(node, args.newValue);
   }
 
   /**
@@ -574,48 +413,106 @@ class SideBarButton<T extends ISideBarItem> extends NodeWrapper implements IDisp
    */
   private _onTitleClassNameChanged(args: IChangedArgs<string>): void {
     let node = this.node;
-    if (args.oldValue) exRemClass(node, args.oldValue);
-    if (args.newValue) exAddClass(node, args.newValue);
+    if (args.oldValue) SideBarPrivate.exRemClass(node, args.oldValue);
+    if (args.newValue) SideBarPrivate.exAddClass(node, args.newValue);
   }
 
-  private _item: T;
-}
-
-
-// TODO - move `exAddClass` and `exRemClass` to `phosphor-domutil`?
-
-/**
- * Add a whitespace separated class name to the given node.
- */
-function exAddClass(node: HTMLElement, name: string): void {
-  let list = node.classList;
-  let parts = name.split(/\s+/);
-  for (let i = 0, n = parts.length; i < n; ++i) {
-    if (parts[i]) list.add(parts[i]);
-  }
+  private _title: Title;
 }
 
 
 /**
- * Remove a whitespace separated class name to the given node.
+ * The namespace for the `SideBar` class private data.
  */
-function exRemClass(node: HTMLElement, name: string): void {
-  let list = node.classList;
-  let parts = name.split(/\s+/);
-  for (let i = 0, n = parts.length; i < n; ++i) {
-    if (parts[i]) list.remove(parts[i]);
-  }
-}
+namespace SideBarPrivate {
+  /**
+   * A signal emitted when the current title is changed.
+   */
+  export
+  const currentChangedSignal = new Signal<SideBar, IChangedArgs<Title>>();
 
+  /**
+   * The property descriptor for the currently selected side bar title.
+   */
+  export
+  const currentTitleProperty = new Property<SideBar, Title>({
+    name: 'currentTitle',
+    value: null,
+    coerce: coerceCurrentTitle,
+    changed: onCurrentTitleChanged,
+    notify: currentChangedSignal,
+  });
 
-/**
- * Perform a client position hit test on an array of side bar buttons.
- *
- * Returns the index of the first matching button, or `-1`.
- */
-function hitTestButtons(buttons: SideBarButton<ISideBarItem>[], clientX: number, clientY: number): number {
-  for (let i = 0, n = buttons.length; i < n; ++i) {
-    if (hitTest(buttons[i].node, clientX, clientY)) return i;
+  /**
+   * The property descriptor for the side bar titles.
+   */
+  export
+  const titlesProperty = new Property<SideBar, Title[]>({
+    name: 'titles',
+    create: () => [],
+  });
+
+  /**
+   * The property descriptor for the side bar buttons.
+   */
+  export
+  const buttonsProperty = new Property<SideBar, SideBarButton[]>({
+    name: 'buttons',
+    create: () => [],
+  });
+
+  /**
+   * Add a whitespace separated class name to the given node.
+   */
+  export
+  function exAddClass(node: HTMLElement, name: string): void {
+    let list = node.classList;
+    let parts = name.split(/\s+/);
+    for (let i = 0, n = parts.length; i < n; ++i) {
+      if (parts[i]) list.add(parts[i]);
+    }
   }
-  return -1;
+
+  /**
+   * Remove a whitespace separated class name to the given node.
+   */
+  export
+  function exRemClass(node: HTMLElement, name: string): void {
+    let list = node.classList;
+    let parts = name.split(/\s+/);
+    for (let i = 0, n = parts.length; i < n; ++i) {
+      if (parts[i]) list.remove(parts[i]);
+    }
+  }
+
+  /**
+   * Perform a client position hit test on an array of buttons.
+   *
+   * Returns the index of the first matching button, or `-1`.
+   */
+  export
+  function findButton(buttons: SideBarButton[], clientX: number, clientY: number): number {
+    for (let i = 0, n = buttons.length; i < n; ++i) {
+      if (hitTest(buttons[i].node, clientX, clientY)) return i;
+    }
+    return -1;
+  }
+
+  /**
+   * The coerce handler for the `currentTitle` property.
+   */
+  function coerceCurrentTitle(owner: SideBar, value: Title): Title {
+    return owner.titleIndex(value) !== -1 ? value : null;
+  }
+
+  /**
+   * The change handler for the `currentTitle` property.
+   */
+  function onCurrentTitleChanged(owner: SideBar, old: Title, val: Title): void {
+    let buttons = buttonsProperty.get(owner);
+    let oldBtn = arrays.find(buttons, btn => btn.title === old);
+    let newBtn = arrays.find(buttons, btn => btn.title === val);
+    if (oldBtn) oldBtn.removeClass(CURRENT_CLASS);
+    if (newBtn) newBtn.addClass(CURRENT_CLASS);
+  }
 }
