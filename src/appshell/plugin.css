@@ -13,3 +13,17 @@
 .p-AppShell > .p-Widget {
   position: absolute;
 }
+
+
+.p-SideBar-content {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  list-style-type: none;
+}
+
+
+.p-SideBarButton {
+  box-sizing: border-box;
+}

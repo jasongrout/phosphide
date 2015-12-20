@@ -23,13 +23,11 @@ body {
 
 
 .p-SideBar {
-  position: relative;
   min-width: 36px;
   max-width: 36px;
   font-size: 13px;
   font-family: Helvetica, Arial;
   background: #F7F7F7;
-  z-index: 0;
 }
 
 
@@ -49,14 +47,8 @@ body {
 
 
 .p-SideBar-content {
-  padding: 0;
-  margin: 0;
   height: 35px;
-  display: flex;
-  align-items: stretch;
-  list-style-type: none;
   transform-origin: 0 0 0;
-  z-index: 1;
 }
 
 
@@ -75,7 +67,6 @@ body {
 .p-SideBarButton {
   padding: 0 18px;
   line-height: 35px;
-  box-sizing: border-box;
 }
 
 
@@ -90,12 +81,12 @@ body {
 }
 
 
-.p-SideBar.p-mod-left > .p-SideBar-content > .p-SideBarButton {
+.p-SideBar.p-mod-left .p-SideBarButton {
   border-left: 1px solid #C0C0C0;
 }
 
 
-.p-SideBar.p-mod-right > .p-SideBar-content > .p-SideBarButton {
+.p-SideBar.p-mod-right .p-SideBarButton {
   border-right: 1px solid #C0C0C0;
 }
 
