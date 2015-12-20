@@ -11,10 +11,6 @@ import * as arrays
   from 'phosphor-arrays';
 
 import {
-  IDisposable
-} from 'phosphor-disposable';
-
-import {
   hitTest
 } from 'phosphor-domutil';
 
@@ -23,15 +19,11 @@ import {
 } from 'phosphor-messaging';
 
 import {
-  NodeWrapper
-} from 'phosphor-nodewrapper';
-
-import {
   IChangedArgs, Property
 } from 'phosphor-properties';
 
 import {
-  ISignal, Signal, clearSignalData
+  ISignal, Signal
 } from 'phosphor-signaling';
 
 import {
@@ -100,8 +92,7 @@ class SideBar extends Widget {
    * Dispose of the resources held by the widget.
    */
   dispose(): void {
-    let buttons = SideBarPrivate.buttonsProperty.get(this);
-    buttons.forEach(button => { button.dispose(); });
+    this._titles.length = 0;
     super.dispose();
   }
 
@@ -127,12 +118,10 @@ class SideBar extends Widget {
   }
 
   /**
-   * Get the side bar content node.
+   * Get the content node which holds the side bar buttons.
    *
    * #### Notes
-   * This is the node which holds the side bar button nodes. Modifying
-   * the content of this node indiscriminately can lead to undesired
-   * behavior.
+   * Modifying this node can lead to undefined behavior.
    *
    * This is a read-only property.
    */
@@ -146,7 +135,7 @@ class SideBar extends Widget {
    * @returns The number of title objects in the side bar.
    */
   titleCount(): number {
-    return SideBarPrivate.titlesProperty.get(this).length;
+    return this._titles.length;
   }
 
   /**
@@ -157,7 +146,7 @@ class SideBar extends Widget {
    * @returns The title at the specified index, or `undefined`.
    */
   titleAt(index: number): Title {
-    return SideBarPrivate.titlesProperty.get(this)[index];
+    return this._titles[index];
   }
 
   /**
@@ -168,7 +157,7 @@ class SideBar extends Widget {
    * @returns The index of the specified title, or `-1`.
    */
   titleIndex(title: Title): number {
-    return SideBarPrivate.titlesProperty.get(this).indexOf(title);
+    return this._titles.indexOf(title);
   }
 
   /**
@@ -194,25 +183,17 @@ class SideBar extends Widget {
    * If the title is already added to the side bar, it will be moved.
    */
   insertTitle(index: number, title: Title): void {
-    let titles = SideBarPrivate.titlesProperty.get(this);
-    let buttons = SideBarPrivate.buttonsProperty.get(this);
-    let i = titles.indexOf(title);
-    let j = Math.max(0, Math.min(index | 0, titles.length));
+    let n = this.titleCount();
+    let i = this.titleIndex(title);
+    let j = Math.max(0, Math.min(index | 0, n));
     if (i !== -1) {
-      if (i < j) j--;
+      if (j === n) j--;
       if (i === j) return;
-      arrays.move(titles, i, j);
-      arrays.move(buttons, i, j);
-      let btn = buttons[j];
-      let ref = buttons[j + 1];
-      this.contentNode.insertBefore(btn.node, ref && ref.node);
+      arrays.move(this._titles, i, j);
     } else {
-      let btn = new SideBarButton(title);
-      arrays.insert(titles, j, title);
-      arrays.insert(buttons, j, btn);
-      let ref = buttons[j + 1];
-      this.contentNode.insertBefore(btn.node, ref && ref.node);
+      arrays.insert(this._titles, j, title);
     }
+    this.update();
   }
 
   /**
@@ -227,15 +208,11 @@ class SideBar extends Widget {
     if (this.currentTitle === title) {
       this.currentTitle = null;
     }
-    let titles = SideBarPrivate.titlesProperty.get(this);
-    let i = arrays.remove(titles, title);
+    let i = arrays.remove(this._titles, title);
     if (i === -1) {
       return;
     }
-    let buttons = SideBarPrivate.buttonsProperty.get(this);
-    let btn = arrays.removeAt(buttons, i);
-    this.contentNode.removeChild(btn.node);
-    btn.dispose();
+    this.update();
   }
 
   /**
@@ -269,6 +246,34 @@ class SideBar extends Widget {
   }
 
   /**
+   * A message handler invoked on an `'update-request'` message.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    // Fetch common variables.
+    let titles = this._titles;
+    let content = this.contentNode;
+    let children = content.children;
+
+    // Remove any excess button nodes.
+    while (children.length > titles.length) {
+      content.removeChild(content.lastChild);
+    }
+
+    // Add any missing button nodes.
+    while (children.length < titles.length) {
+      content.appendChild(SideBarPrivate.createButtonNode());
+    }
+
+    // Update the button nodes to match the titles.
+    let current = this.currentTitle;
+    for (let i = 0, n = titles.length; i < n; ++i) {
+      let node = children[i] as HTMLElement;
+      SideBarPrivate.updateButtonNode(node, titles[i]);
+      if (titles[i] === current) node.classList.add(CURRENT_CLASS);
+    }
+  }
+
+  /**
    * Handle the `'mousedown'` event for the side bar.
    */
   private _evtMouseDown(event: MouseEvent): void {
@@ -278,8 +283,7 @@ class SideBar extends Widget {
     }
 
     // Do nothing if the press is not on a button.
-    let buttons = SideBarPrivate.buttonsProperty.get(this);
-    let i = SideBarPrivate.findButton(buttons, event.clientX, event.clientY);
+    let i = SideBarPrivate.hitTestButtons(this, event.clientX, event.clientY);
     if (i < 0) {
       return;
     }
@@ -289,139 +293,15 @@ class SideBar extends Widget {
     event.stopPropagation();
 
     // Update the current title.
-    let btn = buttons[i];
-    if (btn.title !== this.currentTitle) {
-      this.currentTitle = btn.title;
+    let title = this._titles[i];
+    if (title !== this.currentTitle) {
+      this.currentTitle = title;
     } else {
       this.currentTitle = null;
     }
   }
-}
 
-
-/**
- * An object which manages a button node for a side bar.
- */
-class SideBarButton extends NodeWrapper implements IDisposable {
-  /**
-   * Create the DOM node for a side bar button.
-   */
-  static createNode(): HTMLElement {
-    let node = document.createElement('li');
-    let icon = document.createElement('span');
-    let text = document.createElement('span');
-    icon.className = ICON_CLASS;
-    text.className = TEXT_CLASS;
-    node.appendChild(icon);
-    node.appendChild(text);
-    return node;
-  }
-
-  /**
-   * Construct a new side bar button.
-   *
-   * @param title - The title object for the button.
-   */
-  constructor(title: Title) {
-    super();
-    this.addClass(BUTTON_CLASS);
-    this._title = title;
-
-    this.textNode.textContent = title.text;
-    if (title.icon) SideBarPrivate.addClasses(this.iconNode, title.icon);
-    if (title.className) SideBarPrivate.addClasses(this.node, title.className);
-
-    title.changed.connect(this._onTitleChanged, this);
-  }
-
-  /**
-   * Dispose of the resources held by the button.
-   */
-  dispose(): void {
-    this._title = null;
-    clearSignalData(this);
-  }
-
-  /**
-   * Test whether the button is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._title === null;
-  }
-
-  /**
-   * Get the icon node for the button.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get iconNode(): HTMLElement {
-    return this.node.childNodes[0] as HTMLElement;
-  }
-
-  /**
-   * Get the text node for the button.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get textNode(): HTMLElement {
-    return this.node.childNodes[1] as HTMLElement;
-  }
-
-  /**
-   * Get the title object for the button.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  get title(): Title {
-    return this._title;
-  }
-
-  /**
-   * The handler for the title `changed` signal.
-   */
-  private _onTitleChanged(sender: Title, args: IChangedArgs<any>): void {
-    switch (args.name) {
-    case 'text':
-      this._onTitleTextChanged(args as IChangedArgs<string>);
-      break;
-    case 'icon':
-      this._onTitleIconChanged(args as IChangedArgs<string>);
-      break;
-    case 'className':
-      this._onTitleClassNameChanged(args as IChangedArgs<string>);
-      break;
-    }
-  }
-
-  /**
-   * A method invoked when the title text changes.
-   */
-  private _onTitleTextChanged(args: IChangedArgs<string>): void {
-    this.textNode.textContent = args.newValue;
-  }
-
-  /**
-   * A method invoked when the title icon changes.
-   */
-  private _onTitleIconChanged(args: IChangedArgs<string>): void {
-    let node = this.iconNode;
-    if (args.oldValue) SideBarPrivate.remClasses(node, args.oldValue);
-    if (args.newValue) SideBarPrivate.addClasses(node, args.newValue);
-  }
-
-  /**
-   * A method invoked when the title class name changes.
-   */
-  private _onTitleClassNameChanged(args: IChangedArgs<string>): void {
-    let node = this.node;
-    if (args.oldValue) SideBarPrivate.remClasses(node, args.oldValue);
-    if (args.newValue) SideBarPrivate.addClasses(node, args.newValue);
-  }
-
-  private _title: Title;
+  private _titles: Title[] = [];
 }
 
 
@@ -436,7 +316,7 @@ namespace SideBarPrivate {
   const currentChangedSignal = new Signal<SideBar, IChangedArgs<Title>>();
 
   /**
-   * The property descriptor for the selected side bar title.
+   * The property descriptor for the current side bar title.
    */
   export
   const currentTitleProperty = new Property<SideBar, Title>({
@@ -448,56 +328,47 @@ namespace SideBarPrivate {
   });
 
   /**
-   * The property descriptor for the side bar titles array.
+   * Create an uninitialized DOM node for a side bar button.
    */
   export
-  const titlesProperty = new Property<SideBar, Title[]>({
-    name: 'titles',
-    create: () => [],
-  });
-
-  /**
-   * The property descriptor for the side bar buttons array.
-   */
-  export
-  const buttonsProperty = new Property<SideBar, SideBarButton[]>({
-    name: 'buttons',
-    create: () => [],
-  });
-
-  /**
-   * Add whitespace separated class names to the given node.
-   */
-  export
-  function addClasses(node: HTMLElement, name: string): void {
-    let list = node.classList;
-    let parts = name.split(/\s+/);
-    for (let i = 0, n = parts.length; i < n; ++i) {
-      if (parts[i]) list.add(parts[i]);
-    }
+  function createButtonNode(): HTMLElement {
+    let node = document.createElement('li');
+    let icon = document.createElement('span');
+    let text = document.createElement('span');
+    text.className = TEXT_CLASS;
+    node.appendChild(icon);
+    node.appendChild(text);
+    return node;
   }
 
   /**
-   * Remove whitespace separated class names from the given node.
+   * Update a button node to reflect the state of a title.
    */
   export
-  function remClasses(node: HTMLElement, name: string): void {
-    let list = node.classList;
-    let parts = name.split(/\s+/);
-    for (let i = 0, n = parts.length; i < n; ++i) {
-      if (parts[i]) list.remove(parts[i]);
+  function updateButtonNode(node: HTMLElement, title: Title): void {
+    let icon = node.firstChild as HTMLElement;
+    let text = node.lastChild as HTMLElement;
+    if (title.className) {
+      node.className = BUTTON_CLASS + ' ' + title.className;
+    } else {
+      node.className = BUTTON_CLASS;
     }
+    if (title.icon) {
+      icon.className = ICON_CLASS + ' ' + title.icon;
+    } else {
+      icon.className = ICON_CLASS;
+    }
+    text.textContent = title.text;
   }
 
   /**
-   * Perform a client position hit test on an array of buttons.
-   *
-   * Returns the index of the first matching button, or `-1`.
+   * Get the index of the button node at a client position, or `-1`.
    */
   export
-  function findButton(buttons: SideBarButton[], clientX: number, clientY: number): number {
-    for (let i = 0, n = buttons.length; i < n; ++i) {
-      if (hitTest(buttons[i].node, clientX, clientY)) return i;
+  function hitTestButtons(owner: SideBar, x: number, y: number): number {
+    let nodes = owner.contentNode.children;
+    for (let i = 0, n = nodes.length; i < n; ++i) {
+      if (hitTest(nodes[i] as HTMLElement, x, y)) return i;
     }
     return -1;
   }
@@ -513,10 +384,12 @@ namespace SideBarPrivate {
    * The change handler for the `currentTitle` property.
    */
   function onCurrentTitleChanged(owner: SideBar, old: Title, val: Title): void {
-    let buttons = buttonsProperty.get(owner);
-    let oldBtn = arrays.find(buttons, btn => btn.title === old);
-    let newBtn = arrays.find(buttons, btn => btn.title === val);
-    if (oldBtn) oldBtn.removeClass(CURRENT_CLASS);
-    if (newBtn) newBtn.addClass(CURRENT_CLASS);
+    let children = owner.contentNode.children;
+    let oldIndex = owner.titleIndex(old);
+    let newIndex = owner.titleIndex(val);
+    let oldNode = children[oldIndex];
+    let newNode = children[newIndex];
+    if (oldNode) oldNode.classList.remove(CURRENT_CLASS);
+    if (newNode) newNode.classList.add(CURRENT_CLASS);
   }
 }
