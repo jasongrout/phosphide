@@ -46,6 +46,8 @@ import {
   SideBar
 } from './sidebar';
 
+import './plugin.css';
+
 
 // TODO - need better solution for storing these class names
 
