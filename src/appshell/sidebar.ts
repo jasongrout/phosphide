@@ -177,7 +177,7 @@ class SideBar extends Widget {
    *
    * @param index - The index at which to insert the title.
    *
-   * @param title - The title object to insert into to the panel.
+   * @param title - The title object to insert into to the side bar.
    *
    * #### Notes
    * If the title is already added to the side bar, it will be moved.
