@@ -44,19 +44,19 @@ const SIDE_BAR_CLASS = 'p-SideBar';
 const CONTENT_CLASS = 'p-SideBar-content';
 
 /**
- * The class name added to SideBarButton instances.
+ * The class name added to side bar button nodes.
  */
-const BUTTON_CLASS = 'p-SideBarButton';
+const BUTTON_CLASS = 'p-SideBar-button';
 
 /**
- * The class name added to a button text node.
+ * The class name added to a side bar button text node.
  */
-const TEXT_CLASS = 'p-SideBarButton-text';
+const TEXT_CLASS = 'p-SideBar-button-text';
 
 /**
- * The class name added to a button icon node.
+ * The class name added to a side bar button icon node.
  */
-const ICON_CLASS = 'p-SideBarButton-icon';
+const ICON_CLASS = 'p-SideBar-button-icon';
 
 /**
  * The class name added to the current side bar button.

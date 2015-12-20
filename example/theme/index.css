@@ -64,29 +64,29 @@ body {
 }
 
 
-.p-SideBarButton {
+.p-SideBar-button {
   padding: 0 18px;
   line-height: 35px;
 }
 
 
-.p-SideBarButton:hover:not(.p-mod-current) {
+.p-SideBar-button:hover:not(.p-mod-current) {
   background: white;
 }
 
 
-.p-SideBarButton.p-mod-current {
+.p-SideBar-button.p-mod-current {
   background: white;
   min-height: 36px;
 }
 
 
-.p-SideBar.p-mod-left .p-SideBarButton {
+.p-SideBar.p-mod-left .p-SideBar-button {
   border-left: 1px solid #C0C0C0;
 }
 
 
-.p-SideBar.p-mod-right .p-SideBarButton {
+.p-SideBar.p-mod-right .p-SideBar-button {
   border-right: 1px solid #C0C0C0;
 }
 
