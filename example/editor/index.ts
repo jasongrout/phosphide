@@ -10,7 +10,7 @@
 import CodeMirror = require('codemirror');
 
 import {
-  IShellView
+  IAppShell
 } from 'phosphide';
 
 import {
@@ -37,24 +37,24 @@ function resolve(container: Container): Promise<void> {
 
 class EditorHandler {
 
-  static requires = [IShellView];
+  static requires = [IAppShell];
 
-  static create(shell: IShellView): EditorHandler {
+  static create(shell: IAppShell): EditorHandler {
     return new EditorHandler(shell);
   }
 
-  constructor(shell: IShellView) {
+  constructor(shell: IAppShell) {
     this._shell = shell;
   }
 
   run(): void {
     for (let i = 0; i < 5; ++i) {
       let editor = createEditor(i);
-      this._shell.addMainView(editor);
+      this._shell.addToMainArea(editor);
     }
   }
 
-  private _shell: IShellView;
+  private _shell: IAppShell;
 }
 
 

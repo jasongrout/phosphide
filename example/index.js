@@ -12,7 +12,7 @@ var di = require('phosphor-di');
 
 
 phosphide.loadPlugins(new di.Container(), [
-  require('phosphide/lib/shellview/plugin'),
+  require('phosphide/lib/appshell/plugin'),
   require('red/index'),
   require('blue/index'),
   require('green/index'),

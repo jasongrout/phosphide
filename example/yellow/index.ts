@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  IShellView
+  IAppShell
 } from 'phosphide';
 
 import {
@@ -28,22 +28,22 @@ function resolve(container: Container): Promise<void> {
 
 class YellowHandler {
 
-  static requires = [IShellView];
+  static requires = [IAppShell];
 
-  static create(shell: IShellView): YellowHandler {
+  static create(shell: IAppShell): YellowHandler {
     return new YellowHandler(shell);
   }
 
-  constructor(shell: IShellView) {
+  constructor(shell: IAppShell) {
     this._shell = shell;
   }
 
   run(): void {
-    let view = new Widget();
-    view.addClass('yellow-content');
-    view.title.text = 'Yellow';
-    this._shell.addLeftView(view);
+    let widget = new Widget();
+    widget.addClass('yellow-content');
+    widget.title.text = 'Yellow';
+    this._shell.addToLeftArea(widget, { rank: 20 });
   }
 
-  private _shell: IShellView;
+  private _shell: IAppShell;
 }
