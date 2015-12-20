@@ -19,6 +19,7 @@
   "devDependencies": {
     "coveralls": "^2.11.4",
     "expect.js": "^0.3.1",
+    "fs-extra": "^0.26.3",
     "istanbul": "^0.3.19",
     "mocha": "^2.2.5",
     "rimraf": "^2.4.2",
@@ -28,8 +29,9 @@
   "scripts": {
     "clean": "rimraf lib && rimraf test/build && rimraf test/coverage",
     "build:example": "rimraf example/node_modules/phosphide && cd example && npm install && npm run build",
+    "build:css": "node scripts/copycss.js",
     "build:src": "tsc --project src",
-    "build": "npm run build:src",
+    "build": "npm run build:src && npm run build:css",
     "docs": "rimraf docs/api && typedoc --options scripts/tdoptions.json",
     "postinstall": "npm dedupe",
     "prepublish": "npm run build"
