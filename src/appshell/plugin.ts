@@ -83,11 +83,11 @@ class AppShell extends Widget implements IAppShell {
    * Create a new application shell instance.
    */
   static create(): IAppShell {
-    let view = new AppShell();
-    let update = () => { view.update(); };
+    let shell = new AppShell();
+    let update = () => { shell.update(); };
     window.addEventListener('resize', update);
-    view.attach(document.body);
-    return view;
+    shell.attach(document.body);
+    return shell;
   }
 
   /**
@@ -111,12 +111,13 @@ class AppShell extends Widget implements IAppShell {
     this._leftHandler = leftHandler;
     this._rightHandler = rightHandler;
 
-    // leftStackedPanel.id = 'p-left-stack';
-    // rightStackedPanel.id = 'p-right-stack';
-    // this._dockPanel.id = 'p-main-dock-panel';
-    // this._splitPanel.id = 'p-main-split-panel';
-    // leftSideBar.addClass('p-mod-left');
-    // rightSideBar.addClass('p-mod-right');
+    // TODO fix these
+    hsplitPanel.id = 'p-main-split-panel';
+    leftHandler.sideBar.addClass('p-mod-left');
+    rightHandler.sideBar.addClass('p-mod-right');
+    leftHandler.stackedPanel.id = 'p-left-stack';
+    rightHandler.stackedPanel.id = 'p-right-stack';
+    //this._dockPanel.id = 'p-main-dock-panel';
 
     hsplitPanel.orientation = SplitPanel.Horizontal;
     hsplitPanel.spacing = 1; // TODO make this configurable?
