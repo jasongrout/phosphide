@@ -192,6 +192,7 @@ class SideBar extends Widget {
       arrays.move(this._titles, i, j);
     } else {
       arrays.insert(this._titles, j, title);
+      title.changed.connect(this._onTitleChanged, this);
     }
     this.update();
   }
@@ -212,6 +213,7 @@ class SideBar extends Widget {
     if (i === -1) {
       return;
     }
+    title.changed.disconnect(this._onTitleChanged, this);
     this.update();
   }
 
@@ -299,6 +301,13 @@ class SideBar extends Widget {
     } else {
       this.currentTitle = null;
     }
+  }
+
+  /**
+   * Handle the `changed` signal of a title object.
+   */
+  private _onTitleChanged(): void {
+    this.update();
   }
 
   private _titles: Title[] = [];
