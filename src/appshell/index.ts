@@ -17,86 +17,95 @@ import {
 
 
 /**
- * The options for adding widgets to the side areas of the shell.
+ * The options for adding a widget to a side area of the shell.
  */
 export
 interface ISideAreaOptions {
   /**
-   * The rank value for sorting the widget amongst its siblings.
+   * The rank order of the widget among its siblings.
    */
   rank?: number;
 }
 
 
 /**
- * The options for adding widgets to the main area of the shell.
+ * The options for adding a widget to the main area of the shell.
  */
 export
-interface IMainAreaOptions { }
+interface IMainAreaOptions { /* TODO */ }
 
 
 /**
- * An object which provides the main application layout.
+ * A widget which provides the main application layout.
  *
  * #### Notes
- * A shell view is the top-level widget in a Phosphide application. It
- * is responsible for dividing the browser window into separate widget
- * areas
+ * An application shell is the root widget in a Phosphide application.
  *
+ * The shell is responsible for separating the UI into multiple areas
+ * where plugins may contribute user-defined content widgets.
  */
 export
-interface IShell extends Widget {
+interface IAppShell extends Widget {
   /**
-   * Add a view to the top shell area.
+   * Add a widget to the top content area.
    *
-   * @param view - The view to add to the top area.
+   * @param widget - The widget to add to the top content area.
    *
-   * @param options - The configuration options for the view.
+   * @param options - The configuration options for the widget.
    *
    * #### Notes
-   * If the view is already added to the area, it will be moved.
+   * If the widget is already added to the area, it will be moved.
    *
-   * The view can be removed by setting its parent to `null`.
+   * The widget can be removed by setting its parent to `null`.
    */
   addToTopArea(widget: Widget, options?: ISideAreaOptions): void;
 
   /**
-   * Add a view to the left shell area.
+   * Add a widget to the left content area.
    *
-   * @param view - The view to add to the top area.
+   * @param widget - The widget to add to the left content area.
    *
-   * @param options - The configuration options for the view.
+   * @param options - The configuration options for the widget.
    *
    * #### Notes
-   * If the view is already added to the area, it will be moved.
+   * If the widget is already added to the area, it will be moved.
    *
-   * The view can be removed by setting its parent to `null`.
+   * The widget can be removed by setting its parent to `null`.
    */
   addToLeftArea(widget: Widget, options?: ISideAreaOptions): void;
 
   /**
-   * Add a view to the right shell area.
+   * Add a widget to the right content area.
    *
-   * @param view - The view to add to the top area.
+   * @param widget - The widget to add to the right content area.
    *
-   * @param options - The configuration options for the view.
+   * @param options - The configuration options for the widget.
    *
    * #### Notes
-   * If the view is already added to the area, it will be moved.
+   * If the widget is already added to the area, it will be moved.
    *
-   * The view can be removed by setting its parent to `null`.
+   * The widget can be removed by setting its parent to `null`.
    */
   addToRightArea(widget: Widget, options?: ISideAreaOptions): void;
 
   /**
+   * Add a widget to the main content area.
    *
+   * @param widget - The widget to add to the main content area.
+   *
+   * @param options - The configuration options for the widget.
+   *
+   * #### Notes
+   * If the widget is already added to the area, it will be moved.
+   *
+   * The widget can be removed by setting its parent to `null`.
    */
   addToMainArea(widget: Widget, options?: IMainAreaOptions): void;
 }
 
 
 /**
- * The dependency token for the `IShell` interface.
+ * The dependency token for the `IAppShell` interface.
  */
 export
-const IShell = new Token<IShell>('phosphide.IShell');
+const IAppShell = new Token<IAppShell>('phosphide.IAppShell');

@@ -13,8 +13,9 @@
     "../typings/es6-collections/es6-collections.d.ts",
     "../typings/es6-promise/es6-promise.d.ts",
     "index.ts",
-    "shellview/index.ts",
-    "shellview/plugin.ts",
-    "shellview/sidebar.ts"
+    "appshell/index.ts",
+    "appshell/plugin.ts",
+    "appshell/sidebar.ts",
+    "plugin/index.ts"
   ]
 }

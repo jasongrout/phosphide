@@ -7,6 +7,9 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
+import * as arrays
+  from 'phosphor-arrays';
+
 import {
   BoxLayout, BoxPanel
 } from 'phosphor-boxpanel';
@@ -36,7 +39,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  IMainViewOptions, IShellView, IViewOptions
+  IAppShell, IMainAreaOptions, ISideAreaOptions
 } from './index';
 
 import {
@@ -44,212 +47,265 @@ import {
 } from './sidebar';
 
 
+// TODO - need better solution for storing these class names
+
 /**
- *
+ * The class name added to AppShell instances.
  */
-const SHELL_VIEW_CLASS = 'p-ShellView';
+const APP_SHELL_CLASS = 'p-AppShell';
 
 
 /**
+ * Register the plugin contributions.
  *
+ * @param container - The dependency injection container to use for
+ *   registering the types provided by the plugin.
+ *
+ * #### Notes
+ * This is called automatically when the plugin is loaded.
  */
 export
 function register(container: Container): void {
-  container.register(IShellView, ShellView);
+  container.register(IAppShell, AppShell);
 }
 
 
 /**
- *
+ * A concrete implementation of `IAppShell`.
  */
-class ShellView extends Widget implements IShellView {
+class AppShell extends Widget implements IAppShell {
   /**
-   *
+   * The dependencies required by the application shell.
    */
   static requires: Token<any>[] = [];
 
   /**
-   *
+   * Create a new application shell instance.
    */
-  static create(): IShellView {
-    let view = new ShellView();
+  static create(): IAppShell {
+    let view = new AppShell();
+    let update = () => { view.update(); };
+    window.addEventListener('resize', update);
     view.attach(document.body);
-    window.addEventListener('resize', () => { view.update(); });
     return view;
   }
 
   /**
-   *
+   * Construct a new application shell.
    */
   constructor() {
     super();
-    this.addClass(SHELL_VIEW_CLASS);
+    this.addClass(APP_SHELL_CLASS);
 
-    // TODO fix many of these hard coded values
+    let topPanel = new Panel();
+    let dockPanel = new Widget();
+    let hboxPanel = new BoxPanel();
+    let hsplitPanel = new SplitPanel();
+    let leftHandler = new SideBarHandler();
+    let rightHandler = new SideBarHandler();
+    let rootLayout = new BoxLayout();
 
-    this._menuPanel = new Panel();
-    this._boxPanel = new BoxPanel();
-    this._dockPanel = new Widget(); //new DockPanel();
-    this._splitPanel = new SplitPanel();
-    let leftSideBar = new SideBar();
-    let rightSideBar = new SideBar();
-    let leftStackedPanel = new StackedPanel();
-    let rightStackedPanel = new StackedPanel();
-    this._leftHandler = new SideBarHandler(leftSideBar, leftStackedPanel);
-    this._rightHandler = new SideBarHandler(rightSideBar, rightStackedPanel);
+    this._topPanel = topPanel;
+    this._hboxPanel = hboxPanel;
+    this._hsplitPanel = hsplitPanel;
+    this._leftHandler = leftHandler;
+    this._rightHandler = rightHandler;
 
-    //leftSideBar.hide();
-    //rightSideBar.hide();
-    leftStackedPanel.hide();
-    rightStackedPanel.hide();
+    // leftStackedPanel.id = 'p-left-stack';
+    // rightStackedPanel.id = 'p-right-stack';
+    // this._dockPanel.id = 'p-main-dock-panel';
+    // this._splitPanel.id = 'p-main-split-panel';
+    // leftSideBar.addClass('p-mod-left');
+    // rightSideBar.addClass('p-mod-right');
 
-    this._boxPanel.direction = BoxPanel.LeftToRight;
-    this._boxPanel.spacing = 0;
+    hsplitPanel.orientation = SplitPanel.Horizontal;
+    hsplitPanel.spacing = 1; // TODO make this configurable?
 
-    this._splitPanel = new SplitPanel();
-    this._splitPanel.orientation = SplitPanel.Horizontal;
-    this._splitPanel.spacing = 1;
+    SplitPanel.setStretch(leftHandler.stackedPanel, 0);
+    SplitPanel.setStretch(dockPanel, 1);
+    SplitPanel.setStretch(rightHandler.stackedPanel, 0);
 
-    //this._dockPanel.spacing = 8;
+    hsplitPanel.addChild(leftHandler.stackedPanel);
+    hsplitPanel.addChild(dockPanel);
+    hsplitPanel.addChild(rightHandler.stackedPanel);
 
-    // this._leftSideBar.items = this._leftStackedPanel.children;
-    // this._leftSideBar.currentChanged.connect(this._onLeftCurrentChanged, this);
+    hboxPanel.direction = BoxPanel.LeftToRight;
+    hboxPanel.spacing = 0; // TODO make this configurable?
 
-    // this._rightSideBar.items = this._rightStackedPanel.children;
-    // this._rightSideBar.currentChanged.connect(this._onRightCurrentChanged, this);
+    BoxPanel.setStretch(leftHandler.sideBar, 0);
+    BoxPanel.setStretch(hsplitPanel, 1);
+    BoxPanel.setStretch(rightHandler.sideBar, 0);
 
-    SplitPanel.setStretch(leftStackedPanel, 0);
-    SplitPanel.setStretch(this._dockPanel, 1);
-    SplitPanel.setStretch(rightStackedPanel, 0);
+    hboxPanel.addChild(leftHandler.sideBar);
+    hboxPanel.addChild(hsplitPanel);
+    hboxPanel.addChild(rightHandler.sideBar);
 
-    this._splitPanel.addChild(leftStackedPanel);
-    this._splitPanel.addChild(this._dockPanel);
-    this._splitPanel.addChild(rightStackedPanel);
+    rootLayout.direction = BoxLayout.TopToBottom;
+    rootLayout.spacing = 0; // TODO make this configurable?
 
-    BoxPanel.setStretch(leftSideBar, 0);
-    BoxPanel.setStretch(this._splitPanel, 1);
-    BoxPanel.setStretch(rightSideBar, 0);
+    BoxLayout.setStretch(topPanel, 0);
+    BoxLayout.setStretch(hboxPanel, 1);
 
-    this._boxPanel.addChild(leftSideBar);
-    this._boxPanel.addChild(this._splitPanel);
-    this._boxPanel.addChild(rightSideBar);
+    rootLayout.addChild(topPanel);
+    rootLayout.addChild(hboxPanel);
 
-    // TOOD fix ids
-    this.id = 'p-shell-view';
-    leftStackedPanel.id = 'p-left-stack';
-    rightStackedPanel.id = 'p-right-stack';
-    this._dockPanel.id = 'p-main-dock-panel';
-    this._splitPanel.id = 'p-main-split-panel';
-    leftSideBar.addClass('p-mod-left');
-    rightSideBar.addClass('p-mod-right');
-
-    let layout = new BoxLayout();
-    layout.direction = BoxLayout.TopToBottom;
-    layout.spacing = 0;
-
-    BoxLayout.setStretch(this._menuPanel, 0);
-    BoxLayout.setStretch(this._boxPanel, 1);
-
-    layout.addChild(this._menuPanel);
-    layout.addChild(this._boxPanel);
-
-    this.layout = layout;
+    this.layout = rootLayout;
   }
 
   /**
-   *
+   * Add a widget to the top content area.
    */
-  dispose(): void {
-    this._menuPanel = null;
-    this._boxPanel = null;
-    this._dockPanel = null;
-    this._splitPanel = null;
-    this._leftHandler = null;
-    this._rightHandler = null;
-    super.dispose();
+  addToTopArea(widget: Widget, options: ISideAreaOptions = {}): void {
+    // TODO
   }
 
   /**
-   *
+   * Add a widget to the left content area.
    */
-  addTopView(view: Widget, options?: IViewOptions): void {
-    // TODO support options
-    // TODO support this panel
+  addToLeftArea(widget: Widget, options: ISideAreaOptions = {}): void {
+    let rank = 'rank' in options ? options.rank : 100;
+    this._leftHandler.addWidget(widget, rank);
   }
 
   /**
-   *
+   * Add a widget to the right content area.
    */
-  addLeftView(view: Widget, options?: IViewOptions): void {
-    this._leftHandler.add(view, options);
+  addToRightArea(widget: Widget, options: ISideAreaOptions = {}): void {
+    let rank = 'rank' in options ? options.rank : 100;
+    this._rightHandler.addWidget(widget, rank);
   }
 
   /**
-   *
+   * Add a widget to the main content area.
    */
-  addRightView(view: Widget, options?: IViewOptions): void {
-    this._rightHandler.add(view, options);
+  addToMainArea(widget: Widget, options: IMainAreaOptions = {}): void {
+    // TODO
   }
 
-  /**
-   *
-   */
-  addMainView(view: Widget, options?: IMainViewOptions): void {
-    // TODO support options
-    // this._dockPanel.insertTabAfter(view);
-  }
-
-
-  private _menuPanel: Panel;
-  private _boxPanel: BoxPanel;
-  //private _dockPanel: DockPanel;
-  private _dockPanel: Widget;
-  private _splitPanel: SplitPanel;
+  private _topPanel: Panel;
+  private _hboxPanel: BoxPanel;
+  private _hsplitPanel: SplitPanel;
   private _leftHandler: SideBarHandler;
   private _rightHandler: SideBarHandler;
 }
 
 
-class SideBarHandler {
+/**
+ * An object which holds a widget and its sort rank.
+ */
+interface IRankItem {
+  /**
+   * The widget for the item.
+   */
+  widget: Widget;
 
-  constructor(sideBar: SideBar, stackedPanel: StackedPanel) {
-    this._sideBar = sideBar;
-    this._stackedPanel = stackedPanel;
-    sideBar.currentChanged.connect(this._onCurrentChanged, this);
+  /**
+   * The sort rank of the widget.
+   */
+  rank: number;
+}
+
+
+/**
+ * A class which manages a side bar and related stacked panel.
+ */
+class SideBarHandler {
+  /**
+   * A less-than comparison function for side bar rank items.
+   */
+  static itemCmp(first: IRankItem, second: IRankItem): boolean {
+    return first.rank < second.rank;
   }
 
+  /**
+   * Construct a new side bar handler.
+   */
+  constructor() {
+    this._sideBar = new SideBar();
+    this._stackedPanel = new StackedPanel();
+    this._sideBar.hide();
+    this._stackedPanel.hide();
+    this._sideBar.currentChanged.connect(this._onCurrentChanged, this);
+    this._stackedPanel.widgetRemoved.connect(this._onWidgetRemoved, this);
+  }
+
+  /**
+   * Get the side bar managed by the handler.
+   */
   get sideBar(): SideBar {
     return this._sideBar;
   }
 
+  /**
+   * Get the stacked panel managed by the handler
+   */
   get stackedPanel(): StackedPanel {
     return this._stackedPanel;
   }
 
-  add(view: Widget, options?: IViewOptions): void {
-    this._stackedPanel.addChild(view);
-    this._sideBar.addTitle(view.title);
+  /**
+   * Add a widget and its title to the stacked panel and side bar.
+   *
+   * If the widget is already added, it will be moved.
+   */
+  addWidget(widget: Widget, rank: number): void {
+    widget.parent = null;
+    let item = { widget, rank };
+    let index = this._findInsertIndex(item);
+    arrays.insert(this._items, index, item);
+    this._stackedPanel.insertChild(index, widget);
+    this._sideBar.insertTitle(index, widget.title);
+    this._refreshVisibility();
   }
 
-  private _findWidget(title: Title): Widget {
-    let stack = this._stackedPanel;
-    for (let i = 0, n = stack.childCount(); i < n; ++i) {
-      let child = stack.childAt(i);
-      if (child.title === title) return child;
-    }
-    return null;
+  /**
+   * Find the insertion index for a rank item.
+   */
+  private _findInsertIndex(item: IRankItem): number {
+    return arrays.upperBound(this._items, item, SideBarHandler.itemCmp);
   }
 
+  /**
+   * Find the index of the item with the given widget, or `-1`.
+   */
+  private _findWidgetIndex(widget: Widget): number {
+    return arrays.findIndex(this._items, item => item.widget === widget);
+  }
+
+  /**
+   * Find the widget which owns the given title, or `null`.
+   */
+  private _findTitleWidget(title: Title): Widget {
+    let item = arrays.find(this._items, item => item.widget.title === title);
+    return item ? item.widget : null;
+  }
+
+  /**
+   * Refresh the visibility of the side bar and stacked panel.
+   */
+  private _refreshVisibility(): void {
+    this._sideBar.setHidden(this._sideBar.titleCount() === 0);
+    this._stackedPanel.setHidden(this._stackedPanel.currentWidget === null);
+  }
+
+  /**
+   * Handle the `currentChanged` signal from the sidebar.
+   */
   private _onCurrentChanged(sender: SideBar, args: IChangedArgs<Title>): void {
-    let widget = args.newValue ? this._findWidget(args.newValue) : null;
-    this._stackedPanel.currentWidget = widget;
-    if (widget) {
-      this._stackedPanel.show();
-    } else {
-      this._stackedPanel.hide();
-    }
+    this._stackedPanel.currentWidget = this._findTitleWidget(args.newValue);
+    this._refreshVisibility();
+  }
+
+  /*
+   * Handle the `widgetRemoved` signal from the stacked panel.
+   */
+  private _onWidgetRemoved(sender: StackedPanel, widget: Widget): void {
+    arrays.removeAt(this._items, this._findWidgetIndex(widget));
+    this._sideBar.removeTitle(widget.title);
+    this._refreshVisibility();
   }
 
   private _sideBar: SideBar;
   private _stackedPanel: StackedPanel;
+  private _items: IRankItem[] = [];
 }
