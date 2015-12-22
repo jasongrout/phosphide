@@ -154,17 +154,17 @@ body {
 }
 
 
-.p-DockPanelOverlay {
-  background: rgba(236, 110, 47, 0.1);
-  border: 1px dashed #EC6E2F;
+.p-DockPanel-overlay {
+  background: rgba(64, 151, 234, 0.1);
+  border: 1px dashed #4097EA;
 }
 
 
-.p-DockPanelOverlay.p-mod-root-top,
-.p-DockPanelOverlay.p-mod-root-left,
-.p-DockPanelOverlay.p-mod-root-right,
-.p-DockPanelOverlay.p-mod-root-bottom,
-.p-DockPanelOverlay.p-mod-root-center {
+.p-DockPanel-overlay.p-mod-root-top,
+.p-DockPanel-overlay.p-mod-root-left,
+.p-DockPanel-overlay.p-mod-root-right,
+.p-DockPanel-overlay.p-mod-root-bottom,
+.p-DockPanel-overlay.p-mod-root-center {
   border-width: 2px;
 }
 
@@ -174,6 +174,8 @@ body {
   background: #F7F7F7;
 }
 
+
+/* the child selectors just increase specificity :-( */
 
 .p-TabBar > .p-TabBar-body {
   top: 1px;
@@ -197,12 +199,12 @@ body {
 }
 
 
-.p-TabBar-content {
+.p-TabBar > .p-TabBar-content {
   align-items: stretch;
 }
 
 
-.p-Tab {
+.p-TabBar-tab {
   flex-basis: 125px;
   min-width: 35px;
   margin-left: -1px;
@@ -217,46 +219,47 @@ body {
 }
 
 
-.p-Tab.p-mod-first {
+.p-TabBar-tab.p-mod-first {
   margin-left: 0px;
 }
 
 
-.p-Tab.p-mod-current {
-  border-top: 2px solid #EC6E2F;
+.p-TabBar-tab.p-mod-current {
+  border-top: 1px solid #4097EA;
   background: white;
   min-height: 24px;
   transform: translateY(-1px);
 }
 
 
-.p-Tab:hover:not(.p-mod-current) {
+.p-TabBar-tab:hover:not(.p-mod-current) {
   background: #F0F0F0;
 }
 
 
-.p-Tab-icon,
-.p-Tab-text,
-.p-Tab-close {
+.p-TabBar-tab-icon,
+.p-TabBar-tab-text,
+.p-TabBar-tab-close {
   line-height: 23px;
 }
 
 
-.p-Tab.p-mod-closable > .p-Tab-close {
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tab-close {
   margin-left: 4px;
 }
 
 
-.p-Tab.p-mod-closable > .p-Tab-close:before {
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tab-close:before {
   content: '\f00d';
   font-family: FontAwesome;
 }
 
 
-.p-Tab.p-mod-drag-image {
+.p-TabBar-tab.p-mod-drag-image {
   min-height: 24px;
   min-width: 125px;
   border: none;
+  border-top: 1px solid #4097EA;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   transform: translateX(-40%) translateY(-58%);
 }
