@@ -60,8 +60,7 @@ const APP_SHELL_CLASS = 'p-AppShell';
 /**
  * Register the plugin contributions.
  *
- * @param container - The dependency injection container to use for
- *   registering the types provided by the plugin.
+ * @param container - The di container for type registration.
  *
  * #### Notes
  * This is called automatically when the plugin is loaded.
