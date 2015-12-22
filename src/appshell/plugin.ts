@@ -18,9 +18,9 @@ import {
   Container, Token
 } from 'phosphor-di';
 
-// import {
-//   DockPanel
-// } from 'phosphor-dockpanel';
+import {
+  DockPanel
+} from 'phosphor-dockpanel';
 
 import {
   IChangedArgs
@@ -100,8 +100,8 @@ class AppShell extends Widget implements IAppShell {
     this.addClass(APP_SHELL_CLASS);
 
     let topPanel = new Panel();
-    let dockPanel = new Widget();
     let hboxPanel = new BoxPanel();
+    let dockPanel = new DockPanel();
     let hsplitPanel = new SplitPanel();
     let leftHandler = new SideBarHandler();
     let rightHandler = new SideBarHandler();
@@ -109,6 +109,7 @@ class AppShell extends Widget implements IAppShell {
 
     this._topPanel = topPanel;
     this._hboxPanel = hboxPanel;
+    this._dockPanel = dockPanel;
     this._hsplitPanel = hsplitPanel;
     this._leftHandler = leftHandler;
     this._rightHandler = rightHandler;
@@ -119,7 +120,7 @@ class AppShell extends Widget implements IAppShell {
     rightHandler.sideBar.addClass('p-mod-right');
     leftHandler.stackedPanel.id = 'p-left-stack';
     rightHandler.stackedPanel.id = 'p-right-stack';
-    //this._dockPanel.id = 'p-main-dock-panel';
+    dockPanel.id = 'p-main-dock-panel';
 
     hsplitPanel.orientation = SplitPanel.Horizontal;
     hsplitPanel.spacing = 1; // TODO make this configurable?
@@ -183,10 +184,12 @@ class AppShell extends Widget implements IAppShell {
    */
   addToMainArea(widget: Widget, options: IMainAreaOptions = {}): void {
     // TODO
+    this._dockPanel.insertTabAfter(widget);
   }
 
   private _topPanel: Panel;
   private _hboxPanel: BoxPanel;
+  private _dockPanel: DockPanel;
   private _hsplitPanel: SplitPanel;
   private _leftHandler: SideBarHandler;
   private _rightHandler: SideBarHandler;
