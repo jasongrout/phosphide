@@ -16,6 +16,8 @@
     "appshell/index.ts",
     "appshell/plugin.ts",
     "appshell/sidebar.ts",
+    "commandregistry/index.ts",
+    "commandregistry/plugin.ts",
     "plugin/index.ts"
   ]
 }

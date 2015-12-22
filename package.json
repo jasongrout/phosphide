@@ -7,7 +7,9 @@
   "dependencies": {
     "phosphor-arrays": "^1.0.6",
     "phosphor-boxpanel": "^1.0.0-beta.3",
+    "phosphor-command": "^0.5.0",
     "phosphor-di": "^0.9.0",
+    "phosphor-disposable": "^1.0.5",
     "phosphor-dockpanel": "^0.9.4",
     "phosphor-domutil": "^1.2.0",
     "phosphor-messaging": "^1.0.6",
