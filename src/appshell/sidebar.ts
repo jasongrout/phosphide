@@ -330,7 +330,7 @@ namespace SideBarPrivate {
   export
   function updateButtons(owner: SideBar): void {
     let count = owner.titleCount();
-    let content = this.contentNode;
+    let content = owner.contentNode;
     let children = content.children;
     while (children.length > count) {
       content.removeChild(content.lastChild);
