@@ -194,6 +194,7 @@ class SideBar extends Widget {
       arrays.insert(this._titles, j, title);
       title.changed.connect(this._onTitleChanged, this);
     }
+    this._dirty = true;
     this.update();
   }
 
@@ -206,14 +207,13 @@ class SideBar extends Widget {
    * If the title is not in the side bar, this is a no-op.
    */
   removeTitle(title: Title): void {
-    if (this.currentTitle === title) {
-      this.currentTitle = null;
-    }
     let i = arrays.remove(this._titles, title);
     if (i === -1) {
       return;
     }
     title.changed.disconnect(this._onTitleChanged, this);
+    if (this.currentTitle === title) this.currentTitle = null;
+    this._dirty = true;
     this.update();
   }
 
@@ -251,27 +251,11 @@ class SideBar extends Widget {
    * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    // Fetch common variables.
-    let titles = this._titles;
-    let content = this.contentNode;
-    let children = content.children;
-
-    // Remove any excess button nodes.
-    while (children.length > titles.length) {
-      content.removeChild(content.lastChild);
-    }
-
-    // Add any missing button nodes.
-    while (children.length < titles.length) {
-      content.appendChild(SideBarPrivate.createButtonNode());
-    }
-
-    // Update the button nodes to match the titles.
-    let current = this.currentTitle;
-    for (let i = 0, n = titles.length; i < n; ++i) {
-      let node = children[i] as HTMLElement;
-      SideBarPrivate.updateButtonNode(node, titles[i]);
-      if (titles[i] === current) node.classList.add(CURRENT_CLASS);
+    if (this._dirty) {
+      this._dirty = false;
+      SideBarPrivate.updateButtons(this);
+    } else {
+      SideBarPrivate.updateCurrent(this);
     }
   }
 
@@ -307,9 +291,11 @@ class SideBar extends Widget {
    * Handle the `changed` signal of a title object.
    */
   private _onTitleChanged(): void {
+    this._dirty = true;
     this.update();
   }
 
+  private _dirty = false;
   private _titles: Title[] = [];
 }
 
@@ -337,37 +323,48 @@ namespace SideBarPrivate {
   });
 
   /**
-   * Create an uninitialized DOM node for a side bar button.
+   * Update the side bar buttons to match the current titles.
+   *
+   * This is a full update which also updates the currrent state.
    */
   export
-  function createButtonNode(): HTMLElement {
-    let node = document.createElement('li');
-    let icon = document.createElement('span');
-    let text = document.createElement('span');
-    text.className = TEXT_CLASS;
-    node.appendChild(icon);
-    node.appendChild(text);
-    return node;
+  function updateButtons(owner: SideBar): void {
+    let count = owner.titleCount();
+    let content = this.contentNode;
+    let children = content.children;
+    while (children.length > count) {
+      content.removeChild(content.lastChild);
+    }
+    while (children.length < count) {
+      content.appendChild(createButtonNode());
+    }
+    for (let i = 0; i < count; ++i) {
+      let node = children[i] as HTMLElement;
+      updateButtonNode(node, owner.titleAt(i));
+    }
+    updateCurrent(owner);
   }
 
   /**
-   * Update a button node to reflect the state of a title.
+   * Update the current state of the buttons to match the side bar.
+   *
+   * This is a partial update which only updates the current button
+   * class. It assumes the button count is the same as the title count.
    */
   export
-  function updateButtonNode(node: HTMLElement, title: Title): void {
-    let icon = node.firstChild as HTMLElement;
-    let text = node.lastChild as HTMLElement;
-    if (title.className) {
-      node.className = BUTTON_CLASS + ' ' + title.className;
-    } else {
-      node.className = BUTTON_CLASS;
+  function updateCurrent(owner: SideBar): void {
+    let count = owner.titleCount();
+    let content = owner.contentNode;
+    let children = content.children;
+    let current = owner.currentTitle;
+    for (let i = 0; i < count; ++i) {
+      let node = children[i] as HTMLElement;
+      if (owner.titleAt(i) === current) {
+        node.classList.add(CURRENT_CLASS);
+      } else {
+        node.classList.remove(CURRENT_CLASS);
+      }
     }
-    if (title.icon) {
-      icon.className = ICON_CLASS + ' ' + title.icon;
-    } else {
-      icon.className = ICON_CLASS;
-    }
-    text.textContent = title.text;
   }
 
   /**
@@ -386,19 +383,45 @@ namespace SideBarPrivate {
    * The coerce handler for the `currentTitle` property.
    */
   function coerceCurrentTitle(owner: SideBar, value: Title): Title {
-    return owner.titleIndex(value) !== -1 ? value : null;
+    return (value && owner.titleIndex(value) !== -1) ? value : null;
   }
 
   /**
    * The change handler for the `currentTitle` property.
    */
-  function onCurrentTitleChanged(owner: SideBar, old: Title, val: Title): void {
-    let children = owner.contentNode.children;
-    let oldIndex = owner.titleIndex(old);
-    let newIndex = owner.titleIndex(val);
-    let oldNode = children[oldIndex];
-    let newNode = children[newIndex];
-    if (oldNode) oldNode.classList.remove(CURRENT_CLASS);
-    if (newNode) newNode.classList.add(CURRENT_CLASS);
+  function onCurrentTitleChanged(owner: SideBar): void {
+    owner.update();
+  }
+
+  /**
+   * Create an uninitialized DOM node for a side bar button.
+   */
+  function createButtonNode(): HTMLElement {
+    let node = document.createElement('li');
+    let icon = document.createElement('span');
+    let text = document.createElement('span');
+    text.className = TEXT_CLASS;
+    node.appendChild(icon);
+    node.appendChild(text);
+    return node;
+  }
+
+  /**
+   * Update a button node to reflect the state of a title.
+   */
+  function updateButtonNode(node: HTMLElement, title: Title): void {
+    let icon = node.firstChild as HTMLElement;
+    let text = node.lastChild as HTMLElement;
+    if (title.className) {
+      node.className = BUTTON_CLASS + ' ' + title.className;
+    } else {
+      node.className = BUTTON_CLASS;
+    }
+    if (title.icon) {
+      icon.className = ICON_CLASS + ' ' + title.icon;
+    } else {
+      icon.className = ICON_CLASS;
+    }
+    text.textContent = title.text;
   }
 }
