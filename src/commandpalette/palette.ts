@@ -27,7 +27,7 @@ import {
 
 import {
   Panel
-} from 'phosphor-widget';
+} from 'phosphor-panel';
 
 import {
   ICommandItem
@@ -131,6 +131,7 @@ var searchID = 0;
 const executeSignal = new Signal<CommandPalette, ICommand>();
 
 const searchSignal = new Signal<CommandPalette, ICommandSearchQuery>();
+
 
 export
 class CommandPalette extends Panel {

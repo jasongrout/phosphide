@@ -15,13 +15,17 @@ import {
 Message
 } from 'phosphor-messaging';
 
-import {
-BoxPanel
-} from 'phosphor-boxpanel';
+// import {
+// BoxPanel
+// } from 'phosphor-boxpanel';
 
 import {
-Panel, Widget
+  Widget
 } from 'phosphor-widget';
+
+import {
+  Panel
+} from 'phosphor-panel';
 
 import {
   DockPanel
@@ -154,7 +158,7 @@ const matcher = new FuzzyMatcher('title', 'caption');
 //   return sections;
 // }
 
-
+export
 class CommandPaletteHandler {
 
   static requires = [IAppShell, ICommandRegistry];
@@ -174,11 +178,17 @@ class CommandPaletteHandler {
     // this._shell.addToRightArea(widget, { rank: 40 });
     console.log('HANDLER RUN');
     let palette = new CommandPalette();
+    palette.title.text = "Commands";
     console.log('PALETTE CREATED');
     palette.add([
       {
         text: 'Demo',
-        items: [{id: 'demo:id', title: 'D', caption: 'A Demo Command'}]
+        items: [
+          {id: 'demo:id', title: 'D', caption: 'A Demo Command'},
+          {id: 'demo:id:e', title: 'E', caption: 'Another Demo'},
+          {id: 'demo:id:m', title: 'M', caption: 'And another'},
+          {id: 'demo:id:o', title: 'O', caption: 'Last one'}
+        ]
       }
     ]);
     console.log('ADDING TO LEFT AREA');

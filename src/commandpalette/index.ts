@@ -6,42 +6,46 @@
 | The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
 'use-strict';
-
-import {
-  DelegateCommand, ICommand
-} from 'phosphor-command';
-
-import {
-  Token
-} from 'phosphor-di';
-
-import {
-Message
-} from 'phosphor-messaging';
-
-import {
-BoxPanel
-} from 'phosphor-boxpanel';
-
-import {
-Panel, Widget
-} from 'phosphor-widget';
-
-import {
-  DockPanel
-} from 'phosphor-dockpanel';
-
-import {
-  CommandPalette, ICommandSection, ICommandSectionHeading, ICommandSearchQuery
-} from './palette';
-
-import {
-  ICommandRegistry, ICommandItem
-} from '../commandregistry/index';
-
-import {
-  FuzzyMatcher, ICommandMatchResult
-} from './matcher';
+// 
+// import {
+//   DelegateCommand, ICommand
+// } from 'phosphor-command';
+//
+// import {
+//   Token
+// } from 'phosphor-di';
+//
+// import {
+// Message
+// } from 'phosphor-messaging';
+//
+// import {
+// BoxPanel
+// } from 'phosphor-boxpanel';
+//
+// import {
+//   Widget
+// } from 'phosphor-widget';
+//
+// import {
+//   Panel
+// } from 'phosphor-panel';
+//
+// import {
+//   DockPanel
+// } from 'phosphor-dockpanel';
+//
+// import {
+//   CommandPalette, ICommandSection, ICommandSectionHeading, ICommandSearchQuery
+// } from './palette';
+//
+// import {
+//   ICommandRegistry, ICommandItem
+// } from '../commandregistry/index';
+//
+// import {
+//   FuzzyMatcher, ICommandMatchResult
+// } from './matcher';
 
 // import './index.css';
 

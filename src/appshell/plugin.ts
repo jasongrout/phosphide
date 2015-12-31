@@ -23,6 +23,10 @@ import {
 } from 'phosphor-dockpanel';
 
 import {
+  Panel
+} from 'phosphor-panel';
+
+import {
   IChangedArgs
 } from 'phosphor-properties';
 
@@ -35,7 +39,7 @@ import {
 } from 'phosphor-stackedpanel';
 
 import {
-  Panel, Title, Widget
+  Title, Widget
 } from 'phosphor-widget';
 
 import {
@@ -290,14 +294,14 @@ class SideBarHandler {
    */
   private _refreshVisibility(): void {
     this._sideBar.setHidden(this._sideBar.titleCount() === 0);
-    this._stackedPanel.setHidden(this._stackedPanel.currentWidget === null);
+    this._stackedPanel.setHidden(this._stackedPanel.childAt(this._stackedPanel.childCount()) === null);
   }
 
   /**
    * Handle the `currentChanged` signal from the sidebar.
    */
   private _onCurrentChanged(sender: SideBar, args: IChangedArgs<Title>): void {
-    this._stackedPanel.currentWidget = this._findTitleWidget(args.newValue);
+    //this._stackedPanel.currentWidget = this._findTitleWidget(args.newValue);
     this._refreshVisibility();
   }
 

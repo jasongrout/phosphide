@@ -13,7 +13,7 @@ import {
 
 import {
   ICommandItem
-} from './registry';
+} from '../commandregistry/index';
 
 import * as FuzzySearch from 'fuzzysearch-js';
 import IndexOfFS = require('fuzzysearch-js/js/modules/IndexOfFS');
