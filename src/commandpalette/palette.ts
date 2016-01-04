@@ -42,7 +42,7 @@ import './palette.css';
 
 const COMMAND_ID = 'data-command-id';
 
-const PALETTE_CLASS = 'p-Command-Palette';
+const PALETTE_CLASS = 'p-CommandPalette';
 
 const HEADER_CLASS = 'p-header';
 
@@ -58,7 +58,10 @@ const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
 
+const matcher = new FuzzyMatcher('title', 'caption');
+
 var commandID = 0;
+
 
 
 /**
