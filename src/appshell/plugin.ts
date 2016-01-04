@@ -125,6 +125,8 @@ class AppShell extends Widget implements IAppShell {
     rightHandler.stackedPanel.id = 'p-right-stack';
     dockPanel.id = 'p-main-dock-panel';
 
+    dockPanel.spacing = 8; // TODO make this configurable?
+
     hsplitPanel.orientation = SplitPanel.Horizontal;
     hsplitPanel.spacing = 1; // TODO make this configurable?
 
@@ -294,14 +296,25 @@ class SideBarHandler {
    */
   private _refreshVisibility(): void {
     this._sideBar.setHidden(this._sideBar.titleCount() === 0);
+<<<<<<< HEAD
     this._stackedPanel.setHidden(this._stackedPanel.childAt(this._stackedPanel.childCount()) === null);
+=======
+    this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+>>>>>>> upstream/master
   }
 
   /**
    * Handle the `currentChanged` signal from the sidebar.
    */
   private _onCurrentChanged(sender: SideBar, args: IChangedArgs<Title>): void {
+<<<<<<< HEAD
     //this._stackedPanel.currentWidget = this._findTitleWidget(args.newValue);
+=======
+    let oldWidget = this._findTitleWidget(args.oldValue);
+    let newWidget = this._findTitleWidget(args.newValue);
+    if (oldWidget) oldWidget.hide();
+    if (newWidget) newWidget.show();
+>>>>>>> upstream/master
     this._refreshVisibility();
   }
 

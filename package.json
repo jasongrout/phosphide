@@ -1,6 +1,6 @@
 {
   "name": "phosphide",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Slightly opinionated scaffolding for building plugin-based IDE-style applications.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -11,12 +11,13 @@
     "phosphor-command": "^0.5.0",
     "phosphor-di": "^0.9.0",
     "phosphor-disposable": "^1.0.5",
-    "phosphor-dockpanel": "^0.9.4",
+    "phosphor-dockpanel": "^0.9.5",
     "phosphor-domutil": "^1.2.0",
     "phosphor-messaging": "^1.0.6",
+    "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
-    "phosphor-splitpanel": "^1.0.0-rc.0",
+    "phosphor-splitpanel": "^1.0.0-rc.1",
     "phosphor-stackedpanel": "^1.0.0-rc.0",
     "phosphor-widget": "^1.0.0-rc.0"
   },
