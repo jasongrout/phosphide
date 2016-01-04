@@ -55,6 +55,25 @@ interface ICommandMatchResult {
 
 
 /**
+ * Interface for searchable items.
+ */
+export
+interface ICommandSearchItem {
+  /**
+   * The command object's id.
+   */
+  id: string;
+  /**
+   * The command title.
+   */
+  title: string;
+  /**
+   * The command caption.
+   */
+  caption?: string;
+}
+
+/**
  * An abstract base class for implementing command searchers.
  */
 export
@@ -65,12 +84,12 @@ abstract class CommandMatcher {
    *
    * @param query - The string to be used as the search input.
    *
-   * @param commands = The list of ICommand-conforming objects to
+   * @param commands = The list of ICommandSearchItem-conforming objects to
    *    search over.
    *
    * This abstract method must be implemented by a subclass.
    */
-  abstract search(query: string, commands: ICommandItem[]): Promise<ICommandMatchResult[]>;
+  abstract search(query: string, commands: ICommandSearchItem[]): Promise<ICommandMatchResult[]>;
 }
 
 
@@ -104,7 +123,7 @@ class FuzzyMatcher extends CommandMatcher {
    *
    * @param query - The string to be used as the search input.
    *
-   * @param commands - The list of ICommand-conforming objects to
+   * @param commands - The list of ICommandSearchItem-conforming objects to
    *    search over.
    *
    * @returns - A Promise resolving to a list of ICommandMatchResult
@@ -115,7 +134,7 @@ class FuzzyMatcher extends CommandMatcher {
    * external fuzzy matching library. No details of the library used
    * should leak outside of this public API.
    */
-  search(query: string, commands: ICommandItem[]): Promise<ICommandMatchResult[]> {
+  search(query: string, commands: ICommandSearchItem[]): Promise<ICommandMatchResult[]> {
     let primarySearch = new FuzzySearch(commands, {
       'minimumScore': 300,
       'termPath': this._primary

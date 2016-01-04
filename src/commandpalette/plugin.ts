@@ -32,10 +32,6 @@ import {
 } from 'phosphor-dockpanel';
 
 import {
-  ICommandSection, ICommandSectionHeading, ICommandSearchQuery
-} from './palette';
-
-import {
   ICommandRegistry, ICommandItem
 } from '../commandregistry/index';
 

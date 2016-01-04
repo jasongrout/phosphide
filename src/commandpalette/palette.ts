@@ -34,7 +34,11 @@ import {
 } from '../commandregistry/index';
 
 import {
-  FuzzyMatcher, ICommandMatchResult
+  CommandRegistry
+} from '../commandregistry/plugin';
+
+import {
+  FuzzyMatcher, ICommandSearchItem, ICommandMatchResult
 } from './matcher';
 
 import './palette.css';
@@ -61,7 +65,6 @@ const DOWN_ARROW = 40;
 const matcher = new FuzzyMatcher('title', 'caption');
 
 var commandID = 0;
-
 
 
 /**
@@ -112,31 +115,6 @@ interface ICommandPaletteSection {
 };
 
 export
-interface ICommandSearchQuery {
-  id: number;
-  query: string;
-}
-
-export
-interface ICommandSectionHeading {
-  prefix: string;
-  title: string;
-};
-
-export
-interface ICommandSection {
-  heading: ICommandSectionHeading;
-  commands: ICommandItem[];
-};
-
-var searchID = 0;
-
-const executeSignal = new Signal<CommandPalette, ICommand>();
-
-const searchSignal = new Signal<CommandPalette, ICommandSearchQuery>();
-
-
-export
 class CommandPalette extends Panel {
 
   constructor() {
@@ -166,16 +144,10 @@ class CommandPalette extends Panel {
         Array.prototype.push.apply(registrations, ids);
       }
     }
-    this._empty();
-    this._prune();
-    this._sort();
-    this._sections.forEach(section => this._renderSection(section));
+    this._render();
     return new DisposableDelegate(() => {
       registrations.forEach(id => { this._removeItem(id); });
-      this._empty();
-      this._prune();
-      this._sort();
-      this._sections.forEach(section => this._renderSection(section));
+      this._render();
     });
 
   }
@@ -289,10 +261,8 @@ class CommandPalette extends Panel {
   }
 
   private _findCommandItemById(id: string): ICommandPaletteItem {
-    for (let i = 0; i < this._sections.length; ++i) {
-      let section = this._sections[i];
-      for (let j = 0; j < section.items.length; ++j) {
-        let item = section.items[j];
+    for (let section of this._sections) {
+      for (let item of section.items) {
         if (item.id === id) {
           return item;
         }
@@ -314,6 +284,13 @@ class CommandPalette extends Panel {
         }
       }
     }
+  }
+
+  private _render(): void {
+    this._empty();
+    this._prune();
+    this._sort();
+    this._sections.forEach(section => this._renderSection(section));
   }
 
   private _renderCommandItem(item: ICommandPaletteItem): void {
@@ -360,6 +337,15 @@ class CommandPalette extends Panel {
   private _renderSection(section: ICommandPaletteSection): void {
     this._renderHeading(section.text);
     section.items.forEach(item => { this._renderCommandItem(item); });
+  }
+
+  private _searchItems(): ICommandSearchItem[] {
+    return this._sections.reduce((acc, val) => {
+      val.items.forEach(val => {
+        acc.push({ id: val.id, title: val.title, caption: val.caption });
+      });
+      return acc;
+    }, [] as ICommandSearchItem[]);
   }
 
   private _sort(): void {
