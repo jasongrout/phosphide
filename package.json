@@ -13,6 +13,7 @@
     "phosphor-dockpanel": "^0.9.5",
     "phosphor-domutil": "^1.2.0",
     "phosphor-messaging": "^1.0.6",
+    "phosphor-panel": "^1.0.0-rc.1",
     "phosphor-properties": "^2.0.0",
     "phosphor-signaling": "^1.2.0",
     "phosphor-splitpanel": "^1.0.0-rc.1",
