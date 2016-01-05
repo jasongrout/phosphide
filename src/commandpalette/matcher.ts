@@ -15,7 +15,7 @@ import {
   ICommandItem
 } from '../commandregistry/index';
 
-import * as FuzzySearch from 'fuzzysearch-js';
+import FuzzySearch = require('fuzzysearch-js');
 import IndexOfFS = require('fuzzysearch-js/js/modules/IndexOfFS');
 import WordCountFS = require('fuzzysearch-js/js/modules/WordCountFS');
 
