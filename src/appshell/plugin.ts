@@ -261,6 +261,7 @@ class SideBarHandler {
    */
   addWidget(widget: Widget, rank: number): void {
     widget.parent = null;
+    widget.hide();
     let item = { widget, rank };
     let index = this._findInsertIndex(item);
     arrays.insert(this._items, index, item);
