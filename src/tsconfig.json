@@ -13,8 +13,6 @@
     "../typings/es6-collections/es6-collections.d.ts",
     "../typings/es6-promise/es6-promise.d.ts",
     "../typings/fuzzysearch-js/fuzzysearch-js.d.ts",
-    "../typings/indexOfFS/indexOfFS.d.ts",
-    "../typings/wordCountFS/wordCountFS.d.ts",
     "index.ts",
     "appshell/index.ts",
     "appshell/plugin.ts",
