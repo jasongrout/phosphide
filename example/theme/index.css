@@ -22,6 +22,11 @@ body {
 }
 
 
+.p-CommandPalette {
+  font-family: "Helvetica Neue", Helvetica;
+}
+
+
 .p-SideBar {
   min-width: 36px;
   max-width: 36px;
