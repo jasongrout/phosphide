@@ -357,9 +357,9 @@ class CommandPalette extends Panel {
           let item = this._findCommandItemById(val.command.id);
           acc[acc.length - 1].items.push(item);
         } else {
-          // Create a new group
+          // Create a new group.
           acc.push({
-            text: headings[val.command.id],
+            text: heading,
             items: [this._findCommandItemById(val.command.id)]
           } as ICommandPaletteSection);
         }
