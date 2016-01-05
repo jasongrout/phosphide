@@ -83,10 +83,22 @@ class CommandPaletteHandler {
       {
         text: 'Demo',
         items: [
-          {id: 'demo:id', title: 'D', caption: 'A Demo Command'},
-          {id: 'demo:id:e', title: 'E', caption: 'Another Demo'},
-          {id: 'demo:id:m', title: 'M', caption: 'And another'},
-          {id: 'demo:id:o', title: 'O', caption: 'Last one'}
+          {id: 'demo:id:a', title: 'A', caption: 'ABCD'},
+          {id: 'demo:id:e', title: 'E', caption: 'EFGH'}
+        ]
+      },
+      {
+        text: 'Demo',
+        items: [
+          {id: 'demo:id:i', title: 'I', caption: 'IJKL'},
+          {id: 'demo:id:m', title: 'M', caption: 'MNOP'}
+        ]
+      },
+      {
+        text: 'Omed',
+        items: [
+          {id: 'omed:id:q', title: 'Q', caption: 'QRST'},
+          {id: 'omed:id:u', title: 'U', caption: 'UVWX'}
         ]
       }
     ]);

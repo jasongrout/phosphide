@@ -45,7 +45,6 @@ function register(container: Container): void {
 /**
  * A concrete implementation of ICommandRegistry.
  */
-export
 class CommandRegistry implements ICommandRegistry {
   /**
    * The dependencies required by the command registry.

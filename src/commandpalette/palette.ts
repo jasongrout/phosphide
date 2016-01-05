@@ -34,10 +34,6 @@ import {
 } from '../commandregistry/index';
 
 import {
-  CommandRegistry
-} from '../commandregistry/plugin';
-
-import {
   FuzzyMatcher, ICommandSearchItem, ICommandMatchResult
 } from './matcher';
 
@@ -220,7 +216,7 @@ class CommandPalette extends Panel {
     }
     event.stopPropagation();
     event.preventDefault();
-    let target: HTMLElement = event.target as HTMLElement;
+    let target = event.target as HTMLElement;
     while (!target.hasAttribute(COMMAND_ID)) {
       if (target === this.node as HTMLElement) {
         return;
@@ -239,7 +235,9 @@ class CommandPalette extends Panel {
       requestAnimationFrame(() => {
         let newValue = input.value;
         if (newValue !== oldValue) {
-          console.log('search for:', newValue);
+          matcher.search(newValue, this._searchItems()).then(results => {
+            console.log('results', results);
+          });
         }
       });
       return;
@@ -281,6 +279,7 @@ class CommandPalette extends Panel {
         if (item === this._registry[registrationID]) {
           delete this._registry[registrationID];
           arrays.remove(section.items, item);
+          return;
         }
       }
     }
