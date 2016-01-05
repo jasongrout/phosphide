@@ -83,7 +83,7 @@ class CommandPaletteHandler {
       {
         text: 'Demo',
         items: [
-          {id: 'demo:id:a', title: 'A', caption: 'ABCD'},
+          {id: 'demo:id:a', title: 'A', caption: 'ABCDqrs'},
           {id: 'demo:id:e', title: 'E', caption: 'EFGH'}
         ]
       },
@@ -97,8 +97,8 @@ class CommandPaletteHandler {
       {
         text: 'Omed',
         items: [
-          {id: 'omed:id:q', title: 'Q', caption: 'QRST'},
-          {id: 'omed:id:u', title: 'U', caption: 'UVWX'}
+          {id: 'omed:id:q', title: 'Q', caption: 'QRSTabc'},
+          {id: 'omed:id:u', title: 'U', caption: 'UVWXq'}
         ]
       }
     ]);

@@ -140,10 +140,10 @@ class CommandPalette extends Panel {
         Array.prototype.push.apply(registrations, ids);
       }
     }
-    this._render();
+    this._renderAllItems();
     return new DisposableDelegate(() => {
       registrations.forEach(id => { this._removeItem(id); });
-      this._render();
+      this._renderAllItems();
     });
 
   }
@@ -234,9 +234,13 @@ class CommandPalette extends Panel {
       let oldValue = input.value;
       requestAnimationFrame(() => {
         let newValue = input.value;
+        if (newValue === '') {
+          this._renderAllItems();
+          return;
+        }
         if (newValue !== oldValue) {
           matcher.search(newValue, this._searchItems()).then(results => {
-            console.log('results', results);
+            this._renderSearchResults(results);
           });
         }
       });
@@ -285,7 +289,7 @@ class CommandPalette extends Panel {
     }
   }
 
-  private _render(): void {
+  private _renderAllItems(): void {
     this._empty();
     this._prune();
     this._sort();
@@ -331,6 +335,38 @@ class CommandPalette extends Panel {
     this._search.classList.add(SEARCH_CLASS);
     this._search.appendChild(input);
     this.node.appendChild(this._search);
+  }
+
+  private _renderSearchResults(items: ICommandMatchResult[]): void {
+    this._empty();
+    let headings: { [id: string]: string } = this._sections
+      .reduce((acc, section) => {
+        section.items.forEach(item => acc[item.id] = section.text);
+        return acc;
+      }, Object.create(null));
+    let sections: ICommandPaletteSection[] = items.reduce((acc, val, idx) => {
+      if (!idx) {
+        acc.push({
+          text: headings[val.command.id],
+          items: [this._findCommandItemById(val.command.id)]
+        } as ICommandPaletteSection);
+      } else {
+        let heading = headings[val.command.id];
+        if (acc[acc.length - 1].text === heading) {
+          // Add to the last group.
+          let item = this._findCommandItemById(val.command.id);
+          acc[acc.length - 1].items.push(item);
+        } else {
+          // Create a new group
+          acc.push({
+            text: headings[val.command.id],
+            items: [this._findCommandItemById(val.command.id)]
+          } as ICommandPaletteSection);
+        }
+      }
+      return acc;
+    }, []);
+    sections.forEach(section => this._renderSection(section));
   }
 
   private _renderSection(section: ICommandPaletteSection): void {
