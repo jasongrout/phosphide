@@ -59,7 +59,7 @@ import {
  export
  function resolve(container: Container): Promise<void> {
    return container.resolve(CommandPaletteHandler).then(handler => {
-     handler.run(container);
+     handler.run();
    });
  }
 
@@ -68,23 +68,22 @@ class CommandPaletteHandler {
 
   static requires = [IAppShell, ICommandRegistry];
 
-  static create(shell: IAppShell): CommandPaletteHandler {
-    return new CommandPaletteHandler(shell);
+  static create(shell: IAppShell, commands: ICommandRegistry): CommandPaletteHandler {
+    return new CommandPaletteHandler(shell, commands);
   }
 
-  constructor(shell: IAppShell) {
+  constructor(shell: IAppShell, commands: ICommandRegistry) {
     this._shell = shell;
+    this._commandRegistry = commands;
   }
 
-  run(container: Container): void {
+  run(): void {
     this._palette = new CommandPalette();
     this._palette.title.text = 'Commands';
 
-    container.resolve(ICommandRegistry).then(reg => {
-      reg.commandsAdded.connect(this._registryCommandsAdded, this);
-      this._commandIds = reg.list();
-      this._commandIds.map(x => { this._addToPalette(x); } );
-    }).catch(e => { console.log(e); });
+    this._commandRegistry.commandsAdded.connect(this._registryCommandsAdded, this);
+    this._commandIds = this._commandRegistry.list();
+    this._commandIds.map(x => { this._addToPalette(x); } );
 
     this._shell.addToLeftArea(this._palette, { rank: 40 });
   }
@@ -104,6 +103,7 @@ class CommandPaletteHandler {
 
   private _shell: IAppShell;
   private _commandIds: string[] = [];
+  private _commandRegistry: ICommandRegistry;
   private _palette: CommandPalette; // TODO - update CommandPalette so we dont
   // need this handle here.
 }
