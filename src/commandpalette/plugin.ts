@@ -59,7 +59,7 @@ import {
  export
  function resolve(container: Container): Promise<void> {
    return container.resolve(CommandPaletteHandler).then(handler => {
-     handler.run();
+     handler.run(container);
    });
  }
 
@@ -76,34 +76,34 @@ class CommandPaletteHandler {
     this._shell = shell;
   }
 
-  run(): void {
-    let palette = new CommandPalette();
-    palette.title.text = 'Commands';
-    palette.add([
-      {
-        text: 'Demo',
-        items: [
-          {id: 'demo:id:a', title: 'A', caption: 'ABCDqrs'},
-          {id: 'demo:id:e', title: 'E', caption: 'EFGH'}
-        ]
-      },
-      {
-        text: 'Demo',
-        items: [
-          {id: 'demo:id:i', title: 'I', caption: 'IJKL'},
-          {id: 'demo:id:m', title: 'M', caption: 'MNOP'}
-        ]
-      },
-      {
-        text: 'Omed',
-        items: [
-          {id: 'omed:id:q', title: 'Q', caption: 'QRSTabc'},
-          {id: 'omed:id:u', title: 'U', caption: 'UVWXq'}
-        ]
-      }
-    ]);
-    this._shell.addToLeftArea(palette, { rank: 40 });
+  run(container: Container): void {
+    this._palette = new CommandPalette();
+    this._palette.title.text = 'Commands';
+
+    container.resolve(ICommandRegistry).then(reg => {
+      reg.commandsAdded.connect(this._registryCommandsAdded, this);
+      this._commandIds = reg.list();
+      this._commandIds.map(x => { this._addToPalette(x); } );
+    }).catch(e => { console.log(e); });
+
+    this._shell.addToLeftArea(this._palette, { rank: 40 });
+  }
+
+  private _registryCommandsAdded(sender: ICommandRegistry, value: string[]) {
+    this._commandIds = this._commandIds.concat(value);
+    this._addToPalette(value[0]);
+  }
+
+  private _addToPalette(item: string) {
+    this._palette.add([{ text: 'From plugins...', items: [{
+      id: item,
+      title: item,
+      caption: item
+    }]}]);
   }
 
   private _shell: IAppShell;
+  private _commandIds: string[] = [];
+  private _palette: CommandPalette; // TODO - update CommandPalette so we dont
+  // need this handle here.
 }
