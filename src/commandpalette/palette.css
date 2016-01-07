@@ -58,11 +58,8 @@
   margin-right: 15px;
 }
 
-.p-CommandPalette .p-command:hover,
 .p-CommandPalette .p-command:focus,
-.p-CommandPalette .p-command:hover .p-description,
 .p-CommandPalette .p-command:focus .p-description,
-.p-CommandPalette .p-command:hover .p-shortcut,
 .p-CommandPalette .p-command:focus .p-shortcut {
   outline: 0;
   background: #2196f3;

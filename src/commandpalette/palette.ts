@@ -188,17 +188,22 @@ class CommandPalette extends Panel {
     case 'keydown':
       this._evtKeyDown(event as KeyboardEvent);
       break;
+    case 'mouseover':
+      this._evtMouseOver(event as MouseEvent);
+      break;
     }
   }
 
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
     this.node.addEventListener('keydown', this);
+    this.node.addEventListener('mouseover', this);
   }
 
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('keydown', this);
+    this.node.removeEventListener('mouseover', this);
   }
 
   private _addSection(section: ICommandPaletteSection): string[] {
@@ -300,6 +305,24 @@ class CommandPalette extends Panel {
     }
   }
 
+  private _evtMouseOver(event: MouseEvent): void {
+    let target = event.target as HTMLElement;
+    while (!target.hasAttribute(REGISTRATION_ID)) {
+      if (target === this.node as HTMLElement) {
+        return;
+      }
+      target = target.parentElement;
+    }
+    let focused = this.node.querySelector(`.${COMMAND_CLASS}:focus`);
+    if (target === focused) {
+      return;
+    }
+    if (focused) {
+      (focused as HTMLElement).blur();
+    }
+    target.focus();
+  }
+
   private _privatize(item: ICommandPaletteItem, registrationID: string): ICommandPaletteItemPrivate {
     return { item: item, registrationID: registrationID };
   }
@@ -371,32 +394,26 @@ class CommandPalette extends Panel {
 
   private _renderSearchResults(items: ICommandMatchResult[]): void {
     this._empty();
-    let headings: { [id: string]: string } = this._sections
-      .reduce((acc, section) => {
-        section.items.forEach(item => acc[item.registrationID] = section.text);
-        return acc;
-      }, Object.create(null));
-    let sections: ICommandPaletteSectionPrivate[] = items.reduce((acc, val, idx) => {
+    let headings = this._sections.reduce((acc, section) => {
+      section.items.forEach(item => acc[item.registrationID] = section.text);
+      return acc;
+    }, Object.create(null) as { [id: string]: string });
+    let sections = items.reduce((acc, val, idx) => {
+      let item = this._registry[val.id];
+      let heading = headings[val.id];
       if (!idx) {
-        acc.push({
-          text: headings[val.id],
-          items: [this._registry[val.id]]
-        } as ICommandPaletteSectionPrivate);
+        acc.push({ text: heading, items: [item] });
         return acc;
       }
-      let last = acc.length - 1;
-      let heading = headings[val.id];
-      if (acc[last].text === heading) {
+      if (acc[acc.length - 1].text === heading) {
         // Add to the last group.
-        let item = this._registry[val.id];
-        acc[last].items.push(item);
+        acc[acc.length - 1].items.push(item);
       } else {
         // Create a new group.
-        let item = this._registry[val.id];
         acc.push({ text: heading, items: [item] });
       }
       return acc;
-    }, []);
+    }, [] as ICommandPaletteSectionPrivate[]);
     sections.forEach(section => this._renderSection(section));
   }
 

@@ -86,6 +86,7 @@ class CommandPaletteHandler {
     this._commandIds.map(x => { this._addToPalette(x); } );
 
     this._shell.addToLeftArea(this._palette, { rank: 40 });
+    this._addToPalette(null);
   }
 
   private _registryCommandsAdded(sender: ICommandRegistry, value: string[]) {
@@ -94,11 +95,29 @@ class CommandPaletteHandler {
   }
 
   private _addToPalette(item: string) {
-    this._palette.add([{ text: 'From plugins...', items: [{
-      id: item,
-      title: item,
-      caption: item
-    }]}]);
+    this._palette.add([
+      {
+        text: 'Demo',
+        items: [
+          {id: 'demo:id:a', title: 'A', caption: 'ABCDqrs'},
+          {id: 'demo:id:e', title: 'E', caption: 'EFGH'}
+        ]
+      },
+      {
+        text: 'Demo',
+        items: [
+          {id: 'demo:id:i', title: 'I', caption: 'IJKL'},
+          {id: 'demo:id:m', title: 'M', caption: 'MNOP'}
+        ]
+      },
+      {
+        text: 'Omed',
+        items: [
+          {id: 'omed:id:q', title: 'Q', caption: 'QRSTabc'},
+          {id: 'omed:id:u', title: 'U', caption: 'UVWXq'}
+        ]
+      }
+    ]);
   }
 
   private _shell: IAppShell;
