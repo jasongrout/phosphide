@@ -49,8 +49,38 @@ class RedHandler {
         text: 'Colors',
         items: [
           {
+            id: 'demo:colors:red-0',
+            title: 'Red',
+            caption: 'Red is best!'
+          }
+        ]
+      },
+      {
+        text: 'Red',
+        items: [
+          {
             id: 'demo:colors:red-1',
-            title: 'Red 5',
+            title: 'Red #1',
+            caption: 'Red number one'
+          },
+          {
+            id: 'demo:colors:red-2',
+            title: 'Red #2',
+            caption: 'Red number two'
+          },
+          {
+            id: 'demo:colors:red-3',
+            title: 'Red #3',
+            caption: 'Red number three'
+          },
+          {
+            id: 'demo:colors:red-4',
+            title: 'Red #4',
+            caption: 'Red number four'
+          },
+          {
+            id: 'demo:colors:red-5',
+            title: 'Red #5',
             caption: 'Red number five'
           }
         ]

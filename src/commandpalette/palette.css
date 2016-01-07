@@ -39,9 +39,10 @@
 }
 
 .p-CommandPalette .p-command {
-  color: inherit;
+  color: #757575;
   display: block;
   font-weight: 500;
+  font-size: 13px;
   margin: 0 -3px;
   padding: 3px;
   text-decoration: none;
