@@ -34,13 +34,9 @@ interface ICommandMatchResult {
    */
   score: number;
   /**
-   * The original text of the item
+   * A reference ID for search item.
    */
-  originalText: string;
-  /**
-   * The command object.
-   */
-  command: ICommandItem;
+  id: string;
   /**
    * An optional parameter containing a representation of the original text with
    * additional markup.
@@ -60,7 +56,7 @@ interface ICommandMatchResult {
 export
 interface ICommandSearchItem {
   /**
-   * The command object's id.
+   * A reference ID for search item.
    */
   id: string;
   /**
@@ -157,28 +153,20 @@ class FuzzyMatcher extends CommandMatcher {
 
   private _processResults(results: any[]): ICommandMatchResult[] {
     let retval: ICommandMatchResult[] = [];
-    // TODO: This needs review.
     if (!results) {
       return retval;
     }
-    for (let i = 0; i < results.length; ++i) {
-      let res = results[i];
-      let item = {
-        score: res.score,
-        originalText: res.value.id,
-        command: res.value
-      };
-      retval.push(item);
+    for (let result of results) {
+      retval.push({ score: result.score, id: result.value.id });
     }
     return retval;
   }
 
   private _mergeResults(primary: ICommandMatchResult[], secondary: any[]): ICommandMatchResult[] {
-    // TODO: This needs review.
     if (!secondary) {
       return primary;
     }
-    let primaryIds = primary.map((x) => { return x.command.id; });
+    let primaryIds = primary.map((x) => { return x.id; });
     for (let i = 0; i < secondary.length; ++i) {
       let id = secondary[i].value.id;
       let pid = primaryIds.indexOf(id);

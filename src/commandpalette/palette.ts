@@ -40,7 +40,7 @@ import {
 import './palette.css';
 
 
-const COMMAND_ID = 'data-command-id';
+const REGISTRATION_ID = 'data-registration-id';
 
 const PALETTE_CLASS = 'p-CommandPalette';
 
@@ -96,6 +96,22 @@ interface ICommandPaletteItem {
 
 
 /**
+ * Private version of command palette item that holds registration ID.
+ */
+interface ICommandPaletteItemPrivate {
+  /**
+   * The internal registration ID for the command item.
+   */
+  registrationID: string;
+
+  /**
+   * The command palette item.
+   */
+  item: ICommandPaletteItem;
+}
+
+
+/**
  * A group of items that can added to a command palette with headings.
  */
 export
@@ -109,6 +125,22 @@ interface ICommandPaletteSection {
    */
   items: ICommandPaletteItem[];
 };
+
+
+/**
+ * A group of items that the command palette actually renders.
+ */
+interface ICommandPaletteSectionPrivate {
+  /**
+   * The heading for the command section.
+   */
+  text: string;
+  /**
+   * The palette command items.
+   */
+  items: ICommandPaletteItemPrivate[];
+};
+
 
 export
 class CommandPalette extends Panel {
@@ -172,12 +204,17 @@ class CommandPalette extends Panel {
   private _addSection(section: ICommandPaletteSection): string[] {
     let registrations: string[] = [];
     let registrationID: string;
-    this._sections.push(section);
+    let privSection: ICommandPaletteSectionPrivate = Object.create(null);
+    privSection.text = section.text;
+    privSection.items = [];
     for (let item of section.items) {
-      registrationID = `${++commandID}`;
-      this._registry[registrationID] = item;
+      registrationID = `palette-${++commandID}`;
+      let privItem = this._privatize(item, registrationID);
+      this._registry[registrationID] = privItem;
       registrations.push(registrationID);
+      privSection.items.push(privItem);
     }
+    this._sections.push(privSection);
     return registrations;
   }
 
@@ -188,15 +225,16 @@ class CommandPalette extends Panel {
     let itemIndex: number;
     for (item of items) {
       let existingItems = this._sections[sectionIndex].items;
-      itemIndex = arrays.findIndex(existingItems, i => {
-        return i === item;
+      itemIndex = arrays.findIndex(existingItems, priv => {
+        return priv.item === item;
       });
       if (itemIndex !== -1) {
         continue;
       }
-      registrationID = `${++commandID}`;
-      this._registry[registrationID] = item;
-      existingItems.push(item);
+      registrationID = `palette-${++commandID}`;
+      let privItem = this._privatize(item, registrationID);
+      this._registry[registrationID] = privItem;
+      existingItems.push(privItem);
       registrations.push(registrationID);
     }
     return registrations;
@@ -217,14 +255,14 @@ class CommandPalette extends Panel {
     event.stopPropagation();
     event.preventDefault();
     let target = event.target as HTMLElement;
-    while (!target.hasAttribute(COMMAND_ID)) {
+    while (!target.hasAttribute(REGISTRATION_ID)) {
       if (target === this.node as HTMLElement) {
         return;
       }
       target = target.parentElement;
     }
-    let item = this._findCommandItemById(target.getAttribute(COMMAND_ID));
-    console.log(`safeExecute command ${item.id} with args:`, item.args);
+    let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
+    console.log(`execute command ${priv.item.id} with args:`, priv.item.args);
   }
 
   private _evtKeyDown(event: KeyboardEvent): void {
@@ -262,15 +300,8 @@ class CommandPalette extends Panel {
     }
   }
 
-  private _findCommandItemById(id: string): ICommandPaletteItem {
-    for (let section of this._sections) {
-      for (let item of section.items) {
-        if (item.id === id) {
-          return item;
-        }
-      }
-    }
-    return null;
+  private _privatize(item: ICommandPaletteItem, registrationID: string): ICommandPaletteItemPrivate {
+    return { item: item, registrationID: registrationID };
   }
 
   private _prune(): void {
@@ -296,23 +327,24 @@ class CommandPalette extends Panel {
     this._sections.forEach(section => this._renderSection(section));
   }
 
-  private _renderCommandItem(item: ICommandPaletteItem): void {
-    let command = document.createElement('div');
+  private _renderCommandItem(priv: ICommandPaletteItemPrivate): void {
+    let command = document.createElement('a');
     let description = document.createElement('div');
     let shortcut = document.createElement('div');
+    command.setAttribute('href', '#');
     command.classList.add(COMMAND_CLASS);
     description.classList.add(DESCRIPTION_CLASS);
     shortcut.classList.add(SHORTCUT_CLASS);
-    command.textContent = item.title;
-    if (item.caption) {
-      description.textContent = item.caption;
+    command.textContent = priv.item.title;
+    if (priv.item.caption) {
+      description.textContent = priv.item.caption;
     }
-    if (item.shortcut) {
-      shortcut.textContent = item.shortcut;
+    if (priv.item.shortcut) {
+      shortcut.textContent = priv.item.shortcut;
     }
     command.appendChild(shortcut);
     command.appendChild(description);
-    command.setAttribute(COMMAND_ID, item.id);
+    command.setAttribute(REGISTRATION_ID, priv.registrationID);
     this._list.appendChild(command);
   }
 
@@ -341,35 +373,34 @@ class CommandPalette extends Panel {
     this._empty();
     let headings: { [id: string]: string } = this._sections
       .reduce((acc, section) => {
-        section.items.forEach(item => acc[item.id] = section.text);
+        section.items.forEach(item => acc[item.registrationID] = section.text);
         return acc;
       }, Object.create(null));
-    let sections: ICommandPaletteSection[] = items.reduce((acc, val, idx) => {
+    let sections: ICommandPaletteSectionPrivate[] = items.reduce((acc, val, idx) => {
       if (!idx) {
         acc.push({
-          text: headings[val.command.id],
-          items: [this._findCommandItemById(val.command.id)]
-        } as ICommandPaletteSection);
+          text: headings[val.id],
+          items: [this._registry[val.id]]
+        } as ICommandPaletteSectionPrivate);
+        return acc;
+      }
+      let last = acc.length - 1;
+      let heading = headings[val.id];
+      if (acc[last].text === heading) {
+        // Add to the last group.
+        let item = this._registry[val.id];
+        acc[last].items.push(item);
       } else {
-        let heading = headings[val.command.id];
-        if (acc[acc.length - 1].text === heading) {
-          // Add to the last group.
-          let item = this._findCommandItemById(val.command.id);
-          acc[acc.length - 1].items.push(item);
-        } else {
-          // Create a new group.
-          acc.push({
-            text: heading,
-            items: [this._findCommandItemById(val.command.id)]
-          } as ICommandPaletteSection);
-        }
+        // Create a new group.
+        let item = this._registry[val.id];
+        acc.push({ text: heading, items: [item] });
       }
       return acc;
     }, []);
     sections.forEach(section => this._renderSection(section));
   }
 
-  private _renderSection(section: ICommandPaletteSection): void {
+  private _renderSection(section: ICommandPaletteSectionPrivate): void {
     this._renderHeading(section.text);
     section.items.forEach(item => { this._renderCommandItem(item); });
   }
@@ -377,7 +408,11 @@ class CommandPalette extends Panel {
   private _searchItems(): ICommandSearchItem[] {
     return this._sections.reduce((acc, val) => {
       val.items.forEach(val => {
-        acc.push({ id: val.id, title: val.title, caption: val.caption });
+        acc.push({
+          id: val.registrationID,
+          title: val.item.title,
+          caption: val.item.caption
+        });
       });
       return acc;
     }, [] as ICommandSearchItem[]);
@@ -386,14 +421,14 @@ class CommandPalette extends Panel {
   private _sort(): void {
     this._sections.sort((a, b) => { return a.text.localeCompare(b.text); });
     this._sections.forEach(section => section.items.sort((a, b) => {
-      return a.title.localeCompare(b.title);
+      return a.item.title.localeCompare(b.item.title);
     }));
   }
 
-  private _sections: ICommandPaletteSection[] = [];
+  private _sections: ICommandPaletteSectionPrivate[] = [];
   private _list: HTMLDivElement = null;
   private _search: HTMLDivElement = null;
   private _registry: {
-    [id: string]: ICommandPaletteItem;
+    [id: string]: ICommandPaletteItemPrivate;
   } = Object.create(null);
 }
