@@ -16,7 +16,7 @@ import {
 } from 'phosphor-disposable';
 
 import {
-  Title
+  Widget
 } from 'phosphor-widget';
 
 
@@ -73,12 +73,7 @@ interface ICommandPaletteItem {
  * The public interface of the command palette.
  */
 export
-interface ICommandPalette {
-  /**
-   * The title object for the command palette.
-   */
-  title: Title;
-
+interface ICommandPalette extends Widget {
   /**
    * Add new items to the command palette.
    */

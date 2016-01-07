@@ -30,8 +30,8 @@ import {
 } from 'phosphor-signaling';
 
 import {
-  Panel
-} from 'phosphor-panel';
+  Widget
+} from 'phosphor-widget';
 
 import {
   ICommandItem, ICommandRegistry
@@ -103,7 +103,7 @@ interface ICommandPaletteSectionPrivate {
 
 
 export
-class CommandPalette extends Panel implements ICommandPalette {
+class CommandPalette extends Widget implements ICommandPalette {
 
   static create(commandRegistry: ICommandRegistry): ICommandPalette {
     return new CommandPalette(commandRegistry);
