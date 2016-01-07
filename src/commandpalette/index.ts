@@ -5,7 +5,7 @@
 |
 | The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
-'use-strict';
+'use strict';
 
 import {
   Token
@@ -29,11 +29,12 @@ interface ICommandPaletteSection {
    * The heading for the command section.
    */
   text: string;
+
   /**
    * The palette command items.
    */
   items: ICommandPaletteItem[];
-};
+}
 
 
 /**
@@ -67,20 +68,23 @@ interface ICommandPaletteItem {
   caption?: string;
 }
 
+
 /**
  * The public interface of the command palette.
  */
 export
 interface ICommandPalette {
   /**
-   * Add new items to the command palette.
-   */
-  add(sections: ICommandPaletteSection[]): IDisposable;
-  /**
    * The title object for the command palette.
    */
   title: Title;
+
+  /**
+   * Add new items to the command palette.
+   */
+  add(sections: ICommandPaletteSection[]): IDisposable;
 }
+
 
 /**
  * The dependency token for the `ICommandPalette` interface.
