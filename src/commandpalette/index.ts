@@ -5,7 +5,7 @@
 |
 | The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
-'use-strict';
+'use strict';
 
 import {
   Token
@@ -16,7 +16,7 @@ import {
 } from 'phosphor-disposable';
 
 import {
-  Title
+  Widget
 } from 'phosphor-widget';
 
 
@@ -29,11 +29,12 @@ interface ICommandPaletteSection {
    * The heading for the command section.
    */
   text: string;
+
   /**
    * The palette command items.
    */
   items: ICommandPaletteItem[];
-};
+}
 
 
 /**
@@ -67,20 +68,18 @@ interface ICommandPaletteItem {
   caption?: string;
 }
 
+
 /**
  * The public interface of the command palette.
  */
 export
-interface ICommandPalette {
+interface ICommandPalette extends Widget {
   /**
    * Add new items to the command palette.
    */
   add(sections: ICommandPaletteSection[]): IDisposable;
-  /**
-   * The title object for the command palette.
-   */
-  title: Title;
 }
+
 
 /**
  * The dependency token for the `ICommandPalette` interface.
