@@ -7,5 +7,83 @@
 |----------------------------------------------------------------------------*/
 'use-strict';
 
-// export
-// const ICommandPalette = new Token<ICommandPalette>('phosphide.ICommandPalette');
+import {
+  Token
+} from 'phosphor-di';
+
+import {
+  IDisposable
+} from 'phosphor-disposable';
+
+import {
+  Title
+} from 'phosphor-widget';
+
+
+/**
+ * A group of items that can added to a command palette with headings.
+ */
+export
+interface ICommandPaletteSection {
+  /**
+   * The heading for the command section.
+   */
+  text: string;
+  /**
+   * The palette command items.
+   */
+  items: ICommandPaletteItem[];
+};
+
+
+/**
+ * An object which can be added to a command palette section.
+ */
+export
+interface ICommandPaletteItem {
+  /**
+   * The unique id for the command.
+   */
+  id: string;
+
+  /**
+   * The arguments the command will be called with.
+   */
+  args?: any;
+
+  /**
+   * The shortcut for the command.
+   */
+  shortcut?: string;
+
+  /**
+   * The title of the command.
+   */
+  title: string;
+
+  /**
+   * A descriptive caption for the command.
+   */
+  caption?: string;
+}
+
+/**
+ * The public interface of the command palette.
+ */
+export
+interface ICommandPalette {
+  /**
+   * Add new items to the command palette.
+   */
+  add(sections: ICommandPaletteSection[]): IDisposable;
+  /**
+   * The title object for the command palette.
+   */
+  title: Title;
+}
+
+/**
+ * The dependency token for the `ICommandPalette` interface.
+ */
+export
+const ICommandPalette = new Token<ICommandPalette>('phosphide.ICommandPalette');

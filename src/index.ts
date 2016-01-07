@@ -8,5 +8,6 @@
 'use strict';
 
 export * from './appshell/index';
+export * from './commandpalette/index';
 export * from './commandregistry/index';
 export * from './plugin/index';

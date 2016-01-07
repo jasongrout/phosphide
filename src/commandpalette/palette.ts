@@ -14,6 +14,10 @@ import {
 } from 'phosphor-command';
 
 import {
+  Token
+} from 'phosphor-di';
+
+import {
   IDisposable, DisposableDelegate
 } from 'phosphor-disposable';
 
@@ -30,8 +34,12 @@ import {
 } from 'phosphor-panel';
 
 import {
-  ICommandItem
+  ICommandItem, ICommandRegistry
 } from '../commandregistry/index';
+
+import {
+  ICommandPalette, ICommandPaletteItem, ICommandPaletteSection
+} from './index';
 
 import {
   FuzzyMatcher, ICommandSearchItem, ICommandMatchResult
@@ -64,38 +72,6 @@ var commandID = 0;
 
 
 /**
- * An object which can be added to a command palette section.
- */
-export
-interface ICommandPaletteItem {
-  /**
-   * The unique id for the command.
-   */
-  id: string;
-
-  /**
-   * The arguments the command will be called with.
-   */
-  args?: any;
-
-  /**
-   * The shortcut for the command.
-   */
-  shortcut?: string;
-
-  /**
-   * The title of the command.
-   */
-  title: string;
-
-  /**
-   * A descriptive caption for the command.
-   */
-  caption?: string;
-}
-
-
-/**
  * Private version of command palette item that holds registration ID.
  */
 interface ICommandPaletteItemPrivate {
@@ -109,22 +85,6 @@ interface ICommandPaletteItemPrivate {
    */
   item: ICommandPaletteItem;
 }
-
-
-/**
- * A group of items that can added to a command palette with headings.
- */
-export
-interface ICommandPaletteSection {
-  /**
-   * The heading for the command section.
-   */
-  text: string;
-  /**
-   * The palette command items.
-   */
-  items: ICommandPaletteItem[];
-};
 
 
 /**
@@ -143,7 +103,23 @@ interface ICommandPaletteSectionPrivate {
 
 
 export
-class CommandPalette extends Panel {
+class CommandPalette extends Panel implements ICommandPalette {
+
+  static create(): ICommandPalette {
+    return new CommandPalette();
+  }
+
+  static requires: Token<any>[] = [];
+
+  set commandRegistry(commandRegistry: ICommandRegistry) {
+    if (!this._commandRegistry) {
+      this._commandRegistry = commandRegistry;
+    }
+  }
+
+  get commandRegistry(): ICommandRegistry {
+    return this._commandRegistry;
+  }
 
   constructor() {
     super();
@@ -462,6 +438,7 @@ class CommandPalette extends Panel {
     }));
   }
 
+  private _commandRegistry: ICommandRegistry = null;
   private _sections: ICommandPaletteSectionPrivate[] = [];
   private _list: HTMLDivElement = null;
   private _search: HTMLDivElement = null;

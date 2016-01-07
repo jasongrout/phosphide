@@ -8,30 +8,6 @@
 'use strict';
 
 import {
-  DelegateCommand, ICommand
-} from 'phosphor-command';
-
-import {
-Message
-} from 'phosphor-messaging';
-
-// import {
-// BoxPanel
-// } from 'phosphor-boxpanel';
-
-import {
-  Widget
-} from 'phosphor-widget';
-
-import {
-  Panel
-} from 'phosphor-panel';
-
-import {
-  DockPanel
-} from 'phosphor-dockpanel';
-
-import {
   ICommandRegistry, ICommandItem
 } from '../commandregistry/index';
 
@@ -42,6 +18,10 @@ import {
 import {
   CommandPalette
 } from './palette';
+
+import {
+  ICommandPalette
+} from './index';
 
 import {
   IAppShell
@@ -63,66 +43,37 @@ import {
    });
  }
 
+/**
+ * Register the plugin contributions.
+ *
+ * @param container - The di container for type registration.
+ *
+ * #### Notes
+ * This is called automatically when the plugin is loaded.
+ */
 export
+function register(container: Container): void {
+  container.register(ICommandPalette, CommandPalette);
+}
+
 class CommandPaletteHandler {
 
-  static requires = [IAppShell, ICommandRegistry];
+  static requires = [IAppShell, ICommandRegistry, ICommandPalette];
 
-  static create(shell: IAppShell, commands: ICommandRegistry): CommandPaletteHandler {
-    return new CommandPaletteHandler(shell, commands);
+  static create(shell: IAppShell, commands: ICommandRegistry, palette: CommandPalette): CommandPaletteHandler {
+    return new CommandPaletteHandler(shell, commands, palette);
   }
 
-  constructor(shell: IAppShell, commands: ICommandRegistry) {
+  constructor(shell: IAppShell, commands: ICommandRegistry, palette: CommandPalette) {
     this._shell = shell;
-    this._commandRegistry = commands;
+    this._palette = palette;
+    this._palette.title.text = 'Commands';
   }
 
   run(): void {
-    this._palette = new CommandPalette();
-    this._palette.title.text = 'Commands';
-
-    this._commandRegistry.commandsAdded.connect(this._registryCommandsAdded, this);
-    this._commandIds = this._commandRegistry.list();
-    this._commandIds.map(x => { this._addToPalette(x); } );
-
-    this._shell.addToLeftArea(this._palette, { rank: 40 });
-    this._addToPalette(null);
-  }
-
-  private _registryCommandsAdded(sender: ICommandRegistry, value: string[]) {
-    this._commandIds = this._commandIds.concat(value);
-    this._addToPalette(value[0]);
-  }
-
-  private _addToPalette(item: string) {
-    this._palette.add([
-      {
-        text: 'Demo',
-        items: [
-          {id: 'demo:id:a', title: 'A', caption: 'ABCDqrs'},
-          {id: 'demo:id:e', title: 'E', caption: 'EFGH'}
-        ]
-      },
-      {
-        text: 'Demo',
-        items: [
-          {id: 'demo:id:i', title: 'I', caption: 'IJKL'},
-          {id: 'demo:id:m', title: 'M', caption: 'MNOP'}
-        ]
-      },
-      {
-        text: 'Omed',
-        items: [
-          {id: 'omed:id:q', title: 'Q', caption: 'QRSTabc'},
-          {id: 'omed:id:u', title: 'U', caption: 'UVWXq'}
-        ]
-      }
-    ]);
+    this._shell.addToLeftArea(this._palette as CommandPalette, { rank: 40 });
   }
 
   private _shell: IAppShell;
-  private _commandIds: string[] = [];
-  private _commandRegistry: ICommandRegistry;
-  private _palette: CommandPalette; // TODO - update CommandPalette so we dont
-  // need this handle here.
+  private _palette: ICommandPalette;
 }
