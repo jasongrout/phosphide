@@ -11,9 +11,24 @@ import {
   IMenuItemOptions, MenuItem
 } from 'phosphor-menus';
 
-// import {
-//   receiveInvoke
-// } from '../commands/index';
+
+/**
+ * The interface required for declaring before/after constraints.
+ */
+export
+interface IConstraints {
+  /**
+   * An array of strings defining the items which this item comes before.
+   */
+  before?: string[];
+  /**
+   * An array of strings defining the items which this item comes after.
+   */
+  after?: string[];
+}
+
+
+export type ConstraintsMap = { [id: string]: IConstraints };
 
 
 /**
@@ -48,7 +63,7 @@ interface ICommandMenuItem {
    * in order that the constraints can be defined for any level in the
    * hierarchy.
    */
-  constraints?: [string, string][];
+  constraints?: ConstraintsMap;
 
   /**
    * Allows menu items to override the default text from the command
@@ -69,11 +84,7 @@ class CommandMenuItem extends MenuItem {
   constructor(options?: any) {
     super(options as IMenuItemOptions);
     this._command = options.command;
-    // if (this._command) {
-    //   this.handler = () => {
-    //     receiveInvoke(this._command);
-    //   };
-    // }
+    // TODO: set command invoker here.
   }
 
   private _command: string;
