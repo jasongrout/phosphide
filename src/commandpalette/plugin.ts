@@ -8,10 +8,6 @@
 'use strict';
 
 import {
-  ICommandRegistry, ICommandItem
-} from '../commandregistry/index';
-
-import {
   Container, Token
 } from 'phosphor-di';
 
@@ -58,13 +54,13 @@ function register(container: Container): void {
 
 class CommandPaletteHandler {
 
-  static requires = [IAppShell, ICommandRegistry, ICommandPalette];
+  static requires = [IAppShell, ICommandPalette];
 
-  static create(shell: IAppShell, commands: ICommandRegistry, palette: CommandPalette): CommandPaletteHandler {
-    return new CommandPaletteHandler(shell, commands, palette);
+  static create(shell: IAppShell, palette: CommandPalette): CommandPaletteHandler {
+    return new CommandPaletteHandler(shell, palette);
   }
 
-  constructor(shell: IAppShell, commands: ICommandRegistry, palette: CommandPalette) {
+  constructor(shell: IAppShell, palette: CommandPalette) {
     this._shell = shell;
     this._palette = palette;
     this._palette.title.text = 'Commands';
