@@ -147,10 +147,12 @@ class FuzzyMatcher extends CommandMatcher {
 
     primarySearch.addModule(this._ind);
     primarySearch.addModule(this._word);
-    primarySearch.addModule(this._lev);
     secondarySearch.addModule(this._ind);
     secondarySearch.addModule(this._word);
-    secondarySearch.addModule(this._lev);
+    if (query.length > 2) {
+      primarySearch.addModule(this._lev);
+      secondarySearch.addModule(this._lev);
+    }
 
     let primaryResult = this._processResults(primarySearch.search(query));
     let secondaryResult = secondarySearch.search(query);

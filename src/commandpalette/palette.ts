@@ -191,6 +191,9 @@ class CommandPalette extends Panel {
     case 'mouseover':
       this._evtMouseOver(event as MouseEvent);
       break;
+    case 'mouseout':
+      this._evtMouseOut(event as MouseEvent);
+      break;
     }
   }
 
@@ -198,12 +201,14 @@ class CommandPalette extends Panel {
     this.node.addEventListener('click', this);
     this.node.addEventListener('keydown', this);
     this.node.addEventListener('mouseover', this);
+    this.node.addEventListener('mouseout', this);
   }
 
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('keydown', this);
     this.node.removeEventListener('mouseover', this);
+    this.node.removeEventListener('mouseout', this);
   }
 
   private _addSection(section: ICommandPaletteSection): string[] {
@@ -313,14 +318,32 @@ class CommandPalette extends Panel {
       }
       target = target.parentElement;
     }
-    let focused = this.node.querySelector(`.${COMMAND_CLASS}:focus`);
+    let focused = this._findFocus();
     if (target === focused) {
       return;
     }
     if (focused) {
-      (focused as HTMLElement).blur();
+      focused.blur();
     }
     target.focus();
+  }
+
+  private _evtMouseOut(event: MouseEvent): void {
+    let target = event.target as HTMLElement;
+    while (!target.hasAttribute(REGISTRATION_ID)) {
+      if (target === this.node as HTMLElement) {
+        return;
+      }
+      target = target.parentElement;
+    }
+    let focused = this._findFocus();
+    if (focused) {
+      focused.blur();
+    }
+  }
+
+  private _findFocus(): HTMLElement {
+    return this.node.querySelector(`.${COMMAND_CLASS}:focus`) as HTMLElement;
   }
 
   private _privatize(item: ICommandPaletteItem, registrationID: string): ICommandPaletteItemPrivate {
