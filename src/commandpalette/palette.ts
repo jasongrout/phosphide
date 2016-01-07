@@ -105,24 +105,15 @@ interface ICommandPaletteSectionPrivate {
 export
 class CommandPalette extends Panel implements ICommandPalette {
 
-  static create(): ICommandPalette {
-    return new CommandPalette();
+  static create(commandRegistry: ICommandRegistry): ICommandPalette {
+    return new CommandPalette(commandRegistry);
   }
 
-  static requires: Token<any>[] = [];
+  static requires: Token<any>[] = [ICommandRegistry];
 
-  set commandRegistry(commandRegistry: ICommandRegistry) {
-    if (!this._commandRegistry) {
-      this._commandRegistry = commandRegistry;
-    }
-  }
-
-  get commandRegistry(): ICommandRegistry {
-    return this._commandRegistry;
-  }
-
-  constructor() {
+  constructor(commandRegistry: ICommandRegistry) {
     super();
+    this._commandRegistry = commandRegistry;
     this.addClass(PALETTE_CLASS);
     this._renderSearch();
     this._renderList();
