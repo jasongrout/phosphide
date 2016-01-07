@@ -46,7 +46,7 @@ class RedHandler {
     this._shell.addToRightArea(widget, { rank: 30 });
     this._palette.add([
       {
-        text: 'Colors',
+        text: 'All colors',
         items: [
           {
             id: 'demo:colors:red-0',

@@ -46,7 +46,7 @@ class GreenHandler {
     this._shell.addToRightArea(widget, { rank: 40 });
     this._palette.add([
       {
-        text: 'Colors',
+        text: 'All colors',
         items: [
           {
             id: 'demo:colors:green-0',

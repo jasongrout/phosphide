@@ -46,7 +46,7 @@ class BlueHandler {
     this._shell.addToLeftArea(widget, { rank: 10 });
     this._palette.add([
       {
-        text: 'Colors',
+        text: 'All colors',
         items: [
           {
             id: 'demo:colors:blue-0',

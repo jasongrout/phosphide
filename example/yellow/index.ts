@@ -46,7 +46,7 @@ class YellowHandler {
     this._shell.addToLeftArea(widget, { rank: 20 });
     this._palette.add([
       {
-        text: 'Colors',
+        text: 'All colors',
         items: [
           {
             id: 'demo:colors:yellow-0',
