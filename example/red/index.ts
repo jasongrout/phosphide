@@ -28,7 +28,7 @@ function resolve(container: Container): Promise<void> {
 
 class RedHandler {
 
-  static requires = [IAppShell];
+  static requires = [IAppShell, ICommandPalette];
 
   static create(shell: IAppShell, palette: ICommandPalette): RedHandler {
     return new RedHandler(shell, palette);
