@@ -318,24 +318,10 @@ class CommandPalette extends Panel {
       }
       target = target.parentElement;
     }
-    let focused = this._findFocus();
-    if (target === focused) {
-      return;
-    }
-    if (focused) {
-      focused.blur();
-    }
-    target.focus();
+    this._focus(target);
   }
 
   private _evtMouseOut(event: MouseEvent): void {
-    let target = event.target as HTMLElement;
-    while (!target.hasAttribute(REGISTRATION_ID)) {
-      if (target === this.node as HTMLElement) {
-        return;
-      }
-      target = target.parentElement;
-    }
     let focused = this._findFocus();
     if (focused) {
       focused.blur();
@@ -344,6 +330,17 @@ class CommandPalette extends Panel {
 
   private _findFocus(): HTMLElement {
     return this.node.querySelector(`.${COMMAND_CLASS}:focus`) as HTMLElement;
+  }
+
+  private _focus(target: HTMLElement): void {
+    let focused = this._findFocus();
+    if (target === focused) {
+      return;
+    }
+    if (focused) {
+      focused.blur();
+    }
+    target.focus();
   }
 
   private _privatize(item: ICommandPaletteItem, registrationID: string): ICommandPaletteItemPrivate {
