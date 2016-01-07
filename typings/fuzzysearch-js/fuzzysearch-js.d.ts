@@ -60,6 +60,19 @@ declare module 'fuzzysearch-js/js/modules/FSModule' {
   export = FSModule;
 }
 
+declare module 'fuzzysearch-js/js/modules/LevenshteinFS' {
+
+  import FSModule = require('fuzzysearch-js/js/modules/FSModule');
+
+  interface LevenshteinFS extends FSModule {
+    search(term: string, haystack: string): LevenshteinFS
+  }
+
+  function LevenshteinFS(options: any): LevenshteinFS;
+
+  export = LevenshteinFS;
+}
+
 
 declare module 'fuzzysearch-js/js/modules/IndexOfFS' {
 

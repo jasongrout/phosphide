@@ -68,42 +68,42 @@ class CommandPaletteHandler {
 
   static requires = [IAppShell, ICommandRegistry];
 
-  static create(shell: IAppShell): CommandPaletteHandler {
-    return new CommandPaletteHandler(shell);
+  static create(shell: IAppShell, commands: ICommandRegistry): CommandPaletteHandler {
+    return new CommandPaletteHandler(shell, commands);
   }
 
-  constructor(shell: IAppShell) {
+  constructor(shell: IAppShell, commands: ICommandRegistry) {
     this._shell = shell;
+    this._commandRegistry = commands;
   }
 
   run(): void {
-    let palette = new CommandPalette();
-    palette.title.text = 'Commands';
-    palette.add([
-      {
-        text: 'Demo',
-        items: [
-          {id: 'demo:id:a', title: 'A', caption: 'ABCDqrs'},
-          {id: 'demo:id:e', title: 'E', caption: 'EFGH'}
-        ]
-      },
-      {
-        text: 'Demo',
-        items: [
-          {id: 'demo:id:i', title: 'I', caption: 'IJKL'},
-          {id: 'demo:id:m', title: 'M', caption: 'MNOP'}
-        ]
-      },
-      {
-        text: 'Omed',
-        items: [
-          {id: 'omed:id:q', title: 'Q', caption: 'QRSTabc'},
-          {id: 'omed:id:u', title: 'U', caption: 'UVWXq'}
-        ]
-      }
-    ]);
-    this._shell.addToLeftArea(palette, { rank: 40 });
+    this._palette = new CommandPalette();
+    this._palette.title.text = 'Commands';
+
+    this._commandRegistry.commandsAdded.connect(this._registryCommandsAdded, this);
+    this._commandIds = this._commandRegistry.list();
+    this._commandIds.map(x => { this._addToPalette(x); } );
+
+    this._shell.addToLeftArea(this._palette, { rank: 40 });
+  }
+
+  private _registryCommandsAdded(sender: ICommandRegistry, value: string[]) {
+    this._commandIds = this._commandIds.concat(value);
+    this._addToPalette(value[0]);
+  }
+
+  private _addToPalette(item: string) {
+    this._palette.add([{ text: 'From plugins...', items: [{
+      id: item,
+      title: item,
+      caption: item
+    }]}]);
   }
 
   private _shell: IAppShell;
+  private _commandIds: string[] = [];
+  private _commandRegistry: ICommandRegistry;
+  private _palette: CommandPalette; // TODO - update CommandPalette so we dont
+  // need this handle here.
 }

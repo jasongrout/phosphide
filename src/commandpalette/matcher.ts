@@ -18,6 +18,7 @@ import {
 import FuzzySearch = require('fuzzysearch-js');
 import IndexOfFS = require('fuzzysearch-js/js/modules/IndexOfFS');
 import WordCountFS = require('fuzzysearch-js/js/modules/WordCountFS');
+import LevenshteinFS = require('fuzzysearch-js/js/modules/LevenshteinFS');
 
 
 /**
@@ -112,6 +113,10 @@ class FuzzyMatcher extends CommandMatcher {
       'maxWordTolerance': 3,
       'factor': 1
     });
+    this._lev = LevenshteinFS({
+      'maxDistanceTolerance': 3,
+      'factor': 3
+    });
   }
 
   /**
@@ -142,8 +147,10 @@ class FuzzyMatcher extends CommandMatcher {
 
     primarySearch.addModule(this._ind);
     primarySearch.addModule(this._word);
+    primarySearch.addModule(this._lev);
     secondarySearch.addModule(this._ind);
     secondarySearch.addModule(this._word);
+    secondarySearch.addModule(this._lev);
 
     let primaryResult = this._processResults(primarySearch.search(query));
     let secondaryResult = secondarySearch.search(query);
