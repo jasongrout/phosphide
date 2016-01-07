@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  IAppShell
+  IAppShell, ICommandPalette
 } from 'phosphide';
 
 import {
@@ -28,14 +28,15 @@ function resolve(container: Container): Promise<void> {
 
 class RedHandler {
 
-  static requires = [IAppShell];
+  static requires = [IAppShell, ICommandPalette];
 
-  static create(shell: IAppShell): RedHandler {
-    return new RedHandler(shell);
+  static create(shell: IAppShell, palette: ICommandPalette): RedHandler {
+    return new RedHandler(shell, palette);
   }
 
-  constructor(shell: IAppShell) {
+  constructor(shell: IAppShell, palette: ICommandPalette) {
     this._shell = shell;
+    this._palette = palette;
   }
 
   run(): void {
@@ -43,7 +44,50 @@ class RedHandler {
     widget.addClass('red-content');
     widget.title.text = 'Red';
     this._shell.addToRightArea(widget, { rank: 30 });
+    this._palette.add([
+      {
+        text: 'All colors',
+        items: [
+          {
+            id: 'demo:colors:red-0',
+            title: 'Red',
+            caption: 'Red is best!'
+          }
+        ]
+      },
+      {
+        text: 'Red',
+        items: [
+          {
+            id: 'demo:colors:red-1',
+            title: 'Red #1',
+            caption: 'Red number one'
+          },
+          {
+            id: 'demo:colors:red-2',
+            title: 'Red #2',
+            caption: 'Red number two'
+          },
+          {
+            id: 'demo:colors:red-3',
+            title: 'Red #3',
+            caption: 'Red number three'
+          },
+          {
+            id: 'demo:colors:red-4',
+            title: 'Red #4',
+            caption: 'Red number four'
+          },
+          {
+            id: 'demo:colors:red-5',
+            title: 'Red #5',
+            caption: 'Red number five'
+          }
+        ]
+      }
+    ]);
   }
 
   private _shell: IAppShell;
+  private _palette: ICommandPalette;
 }

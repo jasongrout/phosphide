@@ -8,40 +8,16 @@
 'use strict';
 
 import {
-  DelegateCommand, ICommand
-} from 'phosphor-command';
-
-import {
-Message
-} from 'phosphor-messaging';
-
-// import {
-// BoxPanel
-// } from 'phosphor-boxpanel';
-
-import {
-  Widget
-} from 'phosphor-widget';
-
-import {
-  Panel
-} from 'phosphor-panel';
-
-import {
-  DockPanel
-} from 'phosphor-dockpanel';
-
-import {
-  ICommandRegistry, ICommandItem
-} from '../commandregistry/index';
-
-import {
   Container, Token
 } from 'phosphor-di';
 
 import {
   CommandPalette
 } from './palette';
+
+import {
+  ICommandPalette
+} from './index';
 
 import {
   IAppShell
@@ -63,47 +39,37 @@ import {
    });
  }
 
+/**
+ * Register the plugin contributions.
+ *
+ * @param container - The di container for type registration.
+ *
+ * #### Notes
+ * This is called automatically when the plugin is loaded.
+ */
 export
+function register(container: Container): void {
+  container.register(ICommandPalette, CommandPalette);
+}
+
 class CommandPaletteHandler {
 
-  static requires = [IAppShell, ICommandRegistry];
+  static requires = [IAppShell, ICommandPalette];
 
-  static create(shell: IAppShell): CommandPaletteHandler {
-    return new CommandPaletteHandler(shell);
+  static create(shell: IAppShell, palette: CommandPalette): CommandPaletteHandler {
+    return new CommandPaletteHandler(shell, palette);
   }
 
-  constructor(shell: IAppShell) {
+  constructor(shell: IAppShell, palette: CommandPalette) {
     this._shell = shell;
+    this._palette = palette;
+    this._palette.title.text = 'Commands';
   }
 
   run(): void {
-    let palette = new CommandPalette();
-    palette.title.text = 'Commands';
-    palette.add([
-      {
-        text: 'Demo',
-        items: [
-          {id: 'demo:id:a', title: 'A', caption: 'ABCDqrs'},
-          {id: 'demo:id:e', title: 'E', caption: 'EFGH'}
-        ]
-      },
-      {
-        text: 'Demo',
-        items: [
-          {id: 'demo:id:i', title: 'I', caption: 'IJKL'},
-          {id: 'demo:id:m', title: 'M', caption: 'MNOP'}
-        ]
-      },
-      {
-        text: 'Omed',
-        items: [
-          {id: 'omed:id:q', title: 'Q', caption: 'QRSTabc'},
-          {id: 'omed:id:u', title: 'U', caption: 'UVWXq'}
-        ]
-      }
-    ]);
-    this._shell.addToLeftArea(palette, { rank: 40 });
+    this._shell.addToLeftArea(this._palette as CommandPalette, { rank: 40 });
   }
 
   private _shell: IAppShell;
+  private _palette: ICommandPalette;
 }

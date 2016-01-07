@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  IAppShell
+  IAppShell, ICommandPalette
 } from 'phosphide';
 
 import {
@@ -28,14 +28,15 @@ function resolve(container: Container): Promise<void> {
 
 class BlueHandler {
 
-  static requires = [IAppShell];
+  static requires = [IAppShell, ICommandPalette];
 
-  static create(shell: IAppShell): BlueHandler {
-    return new BlueHandler(shell);
+  static create(shell: IAppShell, palette: ICommandPalette): BlueHandler {
+    return new BlueHandler(shell, palette);
   }
 
-  constructor(shell: IAppShell) {
+  constructor(shell: IAppShell, palette: ICommandPalette) {
     this._shell = shell;
+    this._palette = palette;
   }
 
   run(): void {
@@ -43,7 +44,50 @@ class BlueHandler {
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
+    this._palette.add([
+      {
+        text: 'All colors',
+        items: [
+          {
+            id: 'demo:colors:blue-0',
+            title: 'Blue',
+            caption: 'Blue is best!'
+          }
+        ]
+      },
+      {
+        text: 'Blue',
+        items: [
+          {
+            id: 'demo:colors:blue-1',
+            title: 'Blue #1',
+            caption: 'Blue number one'
+          },
+          {
+            id: 'demo:colors:blue-2',
+            title: 'Blue #2',
+            caption: 'Blue number two'
+          },
+          {
+            id: 'demo:colors:blue-3',
+            title: 'Blue #3',
+            caption: 'Blue number three'
+          },
+          {
+            id: 'demo:colors:blue-4',
+            title: 'Blue #4',
+            caption: 'Blue number four'
+          },
+          {
+            id: 'demo:colors:blue-5',
+            title: 'Blue #5',
+            caption: 'Blue number five'
+          }
+        ]
+      }
+    ]);
   }
 
   private _shell: IAppShell;
+  private _palette: ICommandPalette;
 }
