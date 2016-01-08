@@ -33,8 +33,8 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(YellowHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(id: string, message: string): ICommandItem {
-  let command = new DelegateCommand(() => {
+function createCommand(id: string): ICommandItem {
+  let command = new DelegateCommand((message: string) => {
     console.log(`COMMAND: ${message}`);
   });
   return { id, command };
@@ -61,12 +61,12 @@ class YellowHandler {
     widget.title.text = 'Yellow';
     this._shell.addToLeftArea(widget, { rank: 20 });
     this._commandDisposable = this._registry.add([
-      createCommand('demo:colors:yellow-0', 'Yellow zero'),
-      createCommand('demo:colors:yellow-1', 'Yellow one'),
-      createCommand('demo:colors:yellow-2', 'Yellow two'),
-      createCommand('demo:colors:yellow-3', 'Yellow three'),
-      createCommand('demo:colors:yellow-4', 'Yellow four'),
-      createCommand('demo:colors:yellow-5', 'Yellow five')
+      createCommand('demo:colors:yellow-0'),
+      createCommand('demo:colors:yellow-1'),
+      createCommand('demo:colors:yellow-2'),
+      createCommand('demo:colors:yellow-3'),
+      createCommand('demo:colors:yellow-4'),
+      createCommand('demo:colors:yellow-5')
     ]);
     this._palette.add([
       {
@@ -75,7 +75,8 @@ class YellowHandler {
           {
             id: 'demo:colors:yellow-0',
             title: 'Yellow',
-            caption: 'Yellow is best!'
+            caption: 'Yellow is best!',
+            args: 'Yellow is best!'
           }
         ]
       },
@@ -85,27 +86,32 @@ class YellowHandler {
           {
             id: 'demo:colors:yellow-1',
             title: 'Yellow #1',
-            caption: 'Yellow number one'
+            caption: 'Yellow number one',
+            args: 'Yellow number one'
           },
           {
             id: 'demo:colors:yellow-2',
             title: 'Yellow #2',
-            caption: 'Yellow number two'
+            caption: 'Yellow number two',
+            args: 'Yellow number two'
           },
           {
             id: 'demo:colors:yellow-3',
             title: 'Yellow #3',
-            caption: 'Yellow number three'
+            caption: 'Yellow number three',
+            args: 'Yellow number three'
           },
           {
             id: 'demo:colors:yellow-4',
             title: 'Yellow #4',
-            caption: 'Yellow number four'
+            caption: 'Yellow number four',
+            args: 'Yellow number four'
           },
           {
             id: 'demo:colors:yellow-5',
             title: 'Yellow #5',
-            caption: 'Yellow number five'
+            caption: 'Yellow number five',
+            args: 'Yellow number five'
           }
         ]
       }

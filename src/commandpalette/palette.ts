@@ -50,9 +50,13 @@ import './palette.css';
 
 const REGISTRATION_ID = 'data-registration-id';
 
+const CONTENT_CLASS = 'p-content';
+
 const PALETTE_CLASS = 'p-CommandPalette';
 
 const HEADER_CLASS = 'p-header';
+
+const INPUT_CLASS = 'p-input-wrapper';
 
 const DISABLED_CLASS = 'p-mod-disabled';
 
@@ -233,7 +237,6 @@ class CommandPalette extends Widget implements ICommandPalette {
       return this._registry[registrationID].item.id in added;
     });
     if (staleRegistry) {
-      this._empty();
       this._renderBuffer();
     }
   }
@@ -364,7 +367,6 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _renderAllItems(): void {
-    this._empty();
     this._prune();
     this._sort();
     this._buffer = this._sections;
@@ -372,6 +374,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _renderBuffer(): void {
+    this._empty();
     this._refreshCommands();
     this._buffer.forEach(section => this._renderSection(section));
   }
@@ -414,7 +417,7 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   private _renderList(): void {
     let content = document.createElement('div');
-    content.className = 'p-content';
+    content.className = CONTENT_CLASS;
     this._list = document.createElement('div');
     content.appendChild(this._list);
     this.node.appendChild(content);
@@ -423,7 +426,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _renderSearch(): void {
     let input = document.createElement('input');
     let wrapper = document.createElement('div');
-    wrapper.className = 'p-input-wrapper';
+    wrapper.className = INPUT_CLASS;
     wrapper.appendChild(input);
     this._search = document.createElement('div');
     this._search.classList.add(SEARCH_CLASS);
@@ -432,7 +435,6 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _renderSearchResults(items: ICommandMatchResult[]): void {
-    this._empty();
     let headings = this._sections.reduce((acc, section) => {
       section.items.forEach(id => acc[id] = section.text);
       return acc;

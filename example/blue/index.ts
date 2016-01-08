@@ -33,8 +33,8 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(BlueHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(id: string, message: string): ICommandItem {
-  let command = new DelegateCommand(() => {
+function createCommand(id: string): ICommandItem {
+  let command = new DelegateCommand((message: string) => {
     console.log(`COMMAND: ${message}`);
   });
   return { id, command };
@@ -61,12 +61,12 @@ class BlueHandler {
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
     this._commandDisposable = this._registry.add([
-      createCommand('demo:colors:blue-0', 'Blue zero'),
-      createCommand('demo:colors:blue-1', 'Blue one'),
-      createCommand('demo:colors:blue-2', 'Blue two'),
-      createCommand('demo:colors:blue-3', 'Blue three'),
-      createCommand('demo:colors:blue-4', 'Blue four'),
-      createCommand('demo:colors:blue-5', 'Blue five')
+      createCommand('demo:colors:blue-0'),
+      createCommand('demo:colors:blue-1'),
+      createCommand('demo:colors:blue-2'),
+      createCommand('demo:colors:blue-3'),
+      createCommand('demo:colors:blue-4'),
+      createCommand('demo:colors:blue-5')
     ]);
     this._palette.add([
       {
@@ -75,7 +75,8 @@ class BlueHandler {
           {
             id: 'demo:colors:blue-0',
             title: 'Blue',
-            caption: 'Blue is best!'
+            caption: 'Blue is best!',
+            args: 'Blue is best!'
           }
         ]
       },
@@ -85,27 +86,32 @@ class BlueHandler {
           {
             id: 'demo:colors:blue-1',
             title: 'Blue #1',
-            caption: 'Blue number one'
+            caption: 'Blue number one',
+            args: 'Blue number one'
           },
           {
             id: 'demo:colors:blue-2',
             title: 'Blue #2',
-            caption: 'Blue number two'
+            caption: 'Blue number two',
+            args: 'Blue number two'
           },
           {
             id: 'demo:colors:blue-3',
             title: 'Blue #3',
-            caption: 'Blue number three'
+            caption: 'Blue number three',
+            args: 'Blue number three'
           },
           {
             id: 'demo:colors:blue-4',
             title: 'Blue #4',
-            caption: 'Blue number four'
+            caption: 'Blue number four',
+            args: 'Blue number four'
           },
           {
             id: 'demo:colors:blue-5',
             title: 'Blue #5',
-            caption: 'Blue number five'
+            caption: 'Blue number five',
+            args: 'Blue number five'
           }
         ]
       }

@@ -33,8 +33,8 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(RedHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(id: string, message: string): ICommandItem {
-  let command = new DelegateCommand(() => {
+function createCommand(id: string): ICommandItem {
+  let command = new DelegateCommand((message: string) => {
     console.log(`COMMAND: ${message}`);
   });
   return { id, command };
@@ -61,12 +61,12 @@ class RedHandler {
     widget.title.text = 'Red';
     this._shell.addToRightArea(widget, { rank: 30 });
     this._commandDisposable = this._registry.add([
-      createCommand('demo:colors:red-0', 'Red zero'),
-      createCommand('demo:colors:red-1', 'Red one'),
-      createCommand('demo:colors:red-2', 'Red two'),
-      createCommand('demo:colors:red-3', 'Red three'),
-      createCommand('demo:colors:red-4', 'Red four'),
-      createCommand('demo:colors:red-5', 'Red five')
+      createCommand('demo:colors:red-0'),
+      createCommand('demo:colors:red-1'),
+      createCommand('demo:colors:red-2'),
+      createCommand('demo:colors:red-3'),
+      createCommand('demo:colors:red-4'),
+      createCommand('demo:colors:red-5')
     ]);
     this._palette.add([
       {
@@ -75,7 +75,8 @@ class RedHandler {
           {
             id: 'demo:colors:red-0',
             title: 'Red',
-            caption: 'Red is best!'
+            caption: 'Red is best!',
+            args: 'Red is best!'
           }
         ]
       },
@@ -85,27 +86,32 @@ class RedHandler {
           {
             id: 'demo:colors:red-1',
             title: 'Red #1',
-            caption: 'Red number one'
+            caption: 'Red number one',
+            args: 'Red number one'
           },
           {
             id: 'demo:colors:red-2',
             title: 'Red #2',
-            caption: 'Red number two'
+            caption: 'Red number two',
+            args: 'Red number two'
           },
           {
             id: 'demo:colors:red-3',
             title: 'Red #3',
-            caption: 'Red number three'
+            caption: 'Red number three',
+            args: 'Red number three'
           },
           {
             id: 'demo:colors:red-4',
             title: 'Red #4',
-            caption: 'Red number four'
+            caption: 'Red number four',
+            args: 'Red number four'
           },
           {
             id: 'demo:colors:red-5',
             title: 'Red #5',
-            caption: 'Red number five'
+            caption: 'Red number five',
+            args: 'Red number five'
           }
         ]
       }
