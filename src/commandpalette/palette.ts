@@ -225,21 +225,17 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _commandsUpdated(sender: ICommandRegistry, args: string[]): void {
-      // The "this" keyword is set to a specific CommandPalette instance.
-      let palette = this as CommandPalette;
-      let added = args.reduce((acc, val) => {
-        acc[val] = null;
-        return acc;
-      }, Object.create(null) as { [id: string]: void });
-      let staleRegistry = Object.keys(this._registry).some(registrationID => {
-        return this._registry[registrationID].item.id in added;
-      });
-      if (!staleRegistry) {
-        return;
-      } else {
-        this._empty();
-        this._renderBuffer();
-      }
+    let added = args.reduce((acc, val) => {
+      acc[val] = null;
+      return acc;
+    }, Object.create(null) as { [id: string]: void });
+    let staleRegistry = Object.keys(this._registry).some(registrationID => {
+      return this._registry[registrationID].item.id in added;
+    });
+    if (staleRegistry) {
+      this._empty();
+      this._renderBuffer();
+    }
   }
 
   private _empty(): void {
