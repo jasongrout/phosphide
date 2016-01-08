@@ -260,7 +260,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       target = target.parentElement;
     }
     let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
-    console.log(`execute command ${priv.item.id} with args:`, priv.item.args);
+    this._commandRegistry.safeExecute(priv.item.id, priv.item.args);
   }
 
   private _evtKeyDown(event: KeyboardEvent): void {
