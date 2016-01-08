@@ -8,12 +8,20 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette
+  IAppShell, ICommandPalette, ICommandRegistry, ICommandItem
 } from 'phosphide';
+
+import {
+  DelegateCommand
+} from 'phosphor-command';
 
 import {
   Container
 } from 'phosphor-di';
+
+import {
+  IDisposable
+} from 'phosphor-disposable';
 
 import {
   Widget
@@ -25,18 +33,26 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(GreenHandler).then(handler => { handler.run(); });
 }
 
+function createCommand(id: string, message: string): ICommandItem {
+  let command = new DelegateCommand(() => {
+    console.log(`COMMAND: ${message}`);
+  });
+  return { id, command };
+}
+
 
 class GreenHandler {
 
-  static requires = [IAppShell, ICommandPalette];
+  static requires = [IAppShell, ICommandPalette, ICommandRegistry];
 
-  static create(shell: IAppShell, palette: ICommandPalette): GreenHandler {
-    return new GreenHandler(shell, palette);
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): GreenHandler {
+    return new GreenHandler(shell, palette, registry);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette) {
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
     this._shell = shell;
     this._palette = palette;
+    this._registry = registry;
   }
 
   run(): void {
@@ -44,6 +60,14 @@ class GreenHandler {
     widget.addClass('green-content');
     widget.title.text = 'Green';
     this._shell.addToRightArea(widget, { rank: 40 });
+    this._commandDisposable = this._registry.add([
+      createCommand('demo:colors:green-0', 'Green zero'),
+      createCommand('demo:colors:green-1', 'Green one'),
+      createCommand('demo:colors:green-2', 'Green two'),
+      createCommand('demo:colors:green-3', 'Green three'),
+      createCommand('demo:colors:green-4', 'Green four'),
+      createCommand('demo:colors:green-5', 'Green five')
+    ]);
     this._palette.add([
       {
         text: 'All colors',
@@ -88,6 +112,8 @@ class GreenHandler {
     ]);
   }
 
+  private _commandDisposable: IDisposable;
   private _shell: IAppShell;
   private _palette: ICommandPalette;
+  private _registry: ICommandRegistry;
 }

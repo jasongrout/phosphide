@@ -8,12 +8,20 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette
+  IAppShell, ICommandPalette, ICommandRegistry, ICommandItem
 } from 'phosphide';
+
+import {
+  DelegateCommand
+} from 'phosphor-command';
 
 import {
   Container
 } from 'phosphor-di';
+
+import {
+  IDisposable
+} from 'phosphor-disposable';
 
 import {
   Widget
@@ -25,18 +33,26 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(RedHandler).then(handler => { handler.run(); });
 }
 
+function createCommand(id: string, message: string): ICommandItem {
+  let command = new DelegateCommand(() => {
+    console.log(`COMMAND: ${message}`);
+  });
+  return { id, command };
+}
+
 
 class RedHandler {
 
-  static requires = [IAppShell, ICommandPalette];
+  static requires = [IAppShell, ICommandPalette, ICommandRegistry];
 
-  static create(shell: IAppShell, palette: ICommandPalette): RedHandler {
-    return new RedHandler(shell, palette);
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): RedHandler {
+    return new RedHandler(shell, palette, registry);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette) {
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
     this._shell = shell;
     this._palette = palette;
+    this._registry = registry;
   }
 
   run(): void {
@@ -44,6 +60,14 @@ class RedHandler {
     widget.addClass('red-content');
     widget.title.text = 'Red';
     this._shell.addToRightArea(widget, { rank: 30 });
+    this._commandDisposable = this._registry.add([
+      createCommand('demo:colors:red-0', 'Red zero'),
+      createCommand('demo:colors:red-1', 'Red one'),
+      createCommand('demo:colors:red-2', 'Red two'),
+      createCommand('demo:colors:red-3', 'Red three'),
+      createCommand('demo:colors:red-4', 'Red four'),
+      createCommand('demo:colors:red-5', 'Red five')
+    ]);
     this._palette.add([
       {
         text: 'All colors',
@@ -88,6 +112,8 @@ class RedHandler {
     ]);
   }
 
+  private _commandDisposable: IDisposable;
   private _shell: IAppShell;
   private _palette: ICommandPalette;
+  private _registry: ICommandRegistry;
 }
