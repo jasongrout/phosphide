@@ -8,12 +8,20 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette
+  IAppShell, ICommandPalette, ICommandRegistry, ICommandItem
 } from 'phosphide';
+
+import {
+  DelegateCommand
+} from 'phosphor-command';
 
 import {
   Container
 } from 'phosphor-di';
+
+import {
+  IDisposable
+} from 'phosphor-disposable';
 
 import {
   Widget
@@ -25,18 +33,26 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(BlueHandler).then(handler => { handler.run(); });
 }
 
+function createCommand(id: string, message: string): ICommandItem {
+  let command = new DelegateCommand(() => {
+    console.log(`COMMAND: ${message}`);
+  });
+  return { id, command };
+}
+
 
 class BlueHandler {
 
-  static requires = [IAppShell, ICommandPalette];
+  static requires = [IAppShell, ICommandPalette, ICommandRegistry];
 
-  static create(shell: IAppShell, palette: ICommandPalette): BlueHandler {
-    return new BlueHandler(shell, palette);
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): BlueHandler {
+    return new BlueHandler(shell, palette, registry);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette) {
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
     this._shell = shell;
     this._palette = palette;
+    this._registry = registry;
   }
 
   run(): void {
@@ -44,6 +60,9 @@ class BlueHandler {
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
+    this._disposable = this._registry.add([
+      createCommand('demo:colors:blue-0', 'Blue is best!')
+    ]);
     this._palette.add([
       {
         text: 'All colors',
@@ -90,4 +109,6 @@ class BlueHandler {
 
   private _shell: IAppShell;
   private _palette: ICommandPalette;
+  private _registry: ICommandRegistry;
+  private _disposable: IDisposable;
 }
