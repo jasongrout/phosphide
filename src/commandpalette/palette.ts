@@ -82,7 +82,7 @@ interface ICommandPaletteItemPrivate {
    */
   disabled: boolean;
   /**
-   * Flag denoting whether the section has visible items.
+   * Flag denoting whether the item is visible.
    */
   visible: boolean;
   /**
