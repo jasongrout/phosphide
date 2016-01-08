@@ -8,12 +8,20 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette
+  IAppShell, ICommandPalette, ICommandRegistry, ICommandItem
 } from 'phosphide';
+
+import {
+  DelegateCommand
+} from 'phosphor-command';
 
 import {
   Container
 } from 'phosphor-di';
+
+import {
+  IDisposable
+} from 'phosphor-disposable';
 
 import {
   Widget
@@ -25,18 +33,26 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(YellowHandler).then(handler => { handler.run(); });
 }
 
+function createCommand(id: string, message: string): ICommandItem {
+  let command = new DelegateCommand(() => {
+    console.log(`COMMAND: ${message}`);
+  });
+  return { id, command };
+}
+
 
 class YellowHandler {
 
-  static requires = [IAppShell, ICommandPalette];
+  static requires = [IAppShell, ICommandPalette, ICommandRegistry];
 
-  static create(shell: IAppShell, palette: ICommandPalette): YellowHandler {
-    return new YellowHandler(shell, palette);
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): YellowHandler {
+    return new YellowHandler(shell, palette, registry);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette) {
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
     this._shell = shell;
     this._palette = palette;
+    this._registry = registry;
   }
 
   run(): void {
@@ -44,6 +60,14 @@ class YellowHandler {
     widget.addClass('yellow-content');
     widget.title.text = 'Yellow';
     this._shell.addToLeftArea(widget, { rank: 20 });
+    this._commandDisposable = this._registry.add([
+      createCommand('demo:colors:yellow-0', 'Yellow zero'),
+      createCommand('demo:colors:yellow-1', 'Yellow one'),
+      createCommand('demo:colors:yellow-2', 'Yellow two'),
+      createCommand('demo:colors:yellow-3', 'Yellow three'),
+      createCommand('demo:colors:yellow-4', 'Yellow four'),
+      createCommand('demo:colors:yellow-5', 'Yellow five')
+    ]);
     this._palette.add([
       {
         text: 'All colors',
@@ -88,6 +112,8 @@ class YellowHandler {
     ]);
   }
 
+  private _commandDisposable: IDisposable;
   private _shell: IAppShell;
   private _palette: ICommandPalette;
+  private _registry: ICommandRegistry;
 }

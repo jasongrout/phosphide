@@ -78,13 +78,13 @@ var commandID = 0;
  */
 interface ICommandPaletteItemPrivate {
   /**
-   * Flag denoting whether the item is disabled.
-   */
-  disabled: boolean;
-  /**
    * Flag denoting whether the item is visible.
    */
   visible: boolean;
+  /**
+   * Flag denoting whether the item is disabled.
+   */
+  disabled: boolean;
   /**
    * The command palette item.
    */
@@ -118,6 +118,8 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   constructor(commandRegistry: ICommandRegistry) {
     super();
+    commandRegistry.commandsAdded.connect(this._commandsUpdated, this);
+    commandRegistry.commandsRemoved.connect(this._commandsUpdated, this);
     this._commandRegistry = commandRegistry;
     this.addClass(PALETTE_CLASS);
     this._renderSearch();
@@ -222,6 +224,24 @@ class CommandPalette extends Widget implements ICommandPalette {
     return registrations;
   }
 
+  private _commandsUpdated(sender: ICommandRegistry, args: string[]): void {
+      // The "this" keyword is set to a specific CommandPalette instance.
+      let palette = this as CommandPalette;
+      let added = args.reduce((acc, val) => {
+        acc[val] = null;
+        return acc;
+      }, Object.create(null) as { [id: string]: void });
+      let staleRegistry = Object.keys(this._registry).some(registrationID => {
+        return this._registry[registrationID].item.id in added;
+      });
+      if (!staleRegistry) {
+        return;
+      } else {
+        this._empty();
+        this._renderBuffer();
+      }
+  }
+
   private _empty(): void {
     let list = this._list;
     while (list.firstChild) {
@@ -316,14 +336,23 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _privatize(item: ICommandPaletteItem): ICommandPaletteItemPrivate {
-    let command = this._commandRegistry.get(item.id);
-    let visible = !!command;
-    let disabled = visible && !command.isEnabled;
+    // By default, until the registry is checked, all added items work.
+    let disabled = false;
+    let visible = true;
     return { disabled, item, visible };
   }
 
   private _prune(): void {
     this._sections = this._sections.filter(section => !!section.items.length);
+  }
+
+  private _refreshCommands(): void {
+    Object.keys(this._registry).forEach(registrationID => {
+      let priv = this._registry[registrationID];
+      let command = this._commandRegistry.get(priv.item.id);
+      priv.visible = !!command;
+      priv.disabled = priv.visible && !command.isEnabled;
+    });
   }
 
   private _removeItem(registrationID: string): void {
@@ -347,6 +376,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _renderBuffer(): void {
+    this._refreshCommands();
     this._buffer.forEach(section => this._renderSection(section));
   }
 
@@ -425,7 +455,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _renderSection(section: ICommandPaletteSectionPrivate): void {
-    if (!section.items.some(id => { return this._registry[id].visible })) {
+    if (!section.items.some(id => this._registry[id].visible)) {
       return;
     }
     this._renderHeading(section.text);

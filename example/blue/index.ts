@@ -60,8 +60,13 @@ class BlueHandler {
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
-    this._disposable = this._registry.add([
-      createCommand('demo:colors:blue-0', 'Blue is best!')
+    this._commandDisposable = this._registry.add([
+      createCommand('demo:colors:blue-0', 'Blue zero'),
+      createCommand('demo:colors:blue-1', 'Blue one'),
+      createCommand('demo:colors:blue-2', 'Blue two'),
+      createCommand('demo:colors:blue-3', 'Blue three'),
+      createCommand('demo:colors:blue-4', 'Blue four'),
+      createCommand('demo:colors:blue-5', 'Blue five')
     ]);
     this._palette.add([
       {
@@ -107,8 +112,8 @@ class BlueHandler {
     ]);
   }
 
+  private _commandDisposable: IDisposable;
   private _shell: IAppShell;
   private _palette: ICommandPalette;
   private _registry: ICommandRegistry;
-  private _disposable: IDisposable;
 }
