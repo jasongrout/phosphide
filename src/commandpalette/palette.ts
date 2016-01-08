@@ -413,15 +413,21 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _renderList(): void {
+    let content = document.createElement('div');
+    content.className = 'p-content';
     this._list = document.createElement('div');
-    this.node.appendChild(this._list);
+    content.appendChild(this._list);
+    this.node.appendChild(content);
   }
 
   private _renderSearch(): void {
     let input = document.createElement('input');
+    let wrapper = document.createElement('div');
+    wrapper.className = 'p-input-wrapper';
+    wrapper.appendChild(input);
     this._search = document.createElement('div');
     this._search.classList.add(SEARCH_CLASS);
-    this._search.appendChild(input);
+    this._search.appendChild(wrapper);
     this.node.appendChild(this._search);
   }
 
