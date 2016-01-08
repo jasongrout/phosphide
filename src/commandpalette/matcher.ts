@@ -136,6 +136,8 @@ class FuzzyMatcher extends CommandMatcher {
    * should leak outside of this public API.
    */
   search(query: string, commands: ICommandSearchItem[]): Promise<ICommandMatchResult[]> {
+    // Even though captions are optional, FuzzySearch needs them to be defined.
+    commands.forEach(item => item.caption = item.caption || '');
     let primarySearch = new FuzzySearch(commands, {
       'minimumScore': 300,
       'termPath': this._primary

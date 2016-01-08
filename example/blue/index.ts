@@ -8,12 +8,20 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette
+  IAppShell, ICommandPalette, ICommandRegistry, ICommandItem
 } from 'phosphide';
+
+import {
+  DelegateCommand
+} from 'phosphor-command';
 
 import {
   Container
 } from 'phosphor-di';
+
+import {
+  IDisposable
+} from 'phosphor-disposable';
 
 import {
   Widget
@@ -25,18 +33,26 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(BlueHandler).then(handler => { handler.run(); });
 }
 
+function createCommand(id: string): ICommandItem {
+  let command = new DelegateCommand((message: string) => {
+    console.log(`COMMAND: ${message}`);
+  });
+  return { id, command };
+}
+
 
 class BlueHandler {
 
-  static requires = [IAppShell, ICommandPalette];
+  static requires = [IAppShell, ICommandPalette, ICommandRegistry];
 
-  static create(shell: IAppShell, palette: ICommandPalette): BlueHandler {
-    return new BlueHandler(shell, palette);
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): BlueHandler {
+    return new BlueHandler(shell, palette, registry);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette) {
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
     this._shell = shell;
     this._palette = palette;
+    this._registry = registry;
   }
 
   run(): void {
@@ -44,6 +60,9 @@ class BlueHandler {
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
+    this._commandDisposable = this._registry.add([
+      createCommand('demo:colors:blue-0')
+    ]);
     this._palette.add([
       {
         text: 'All colors',
@@ -51,7 +70,8 @@ class BlueHandler {
           {
             id: 'demo:colors:blue-0',
             title: 'Blue',
-            caption: 'Blue is best!'
+            caption: 'Blue is best!',
+            args: 'Blue is best!'
           }
         ]
       },
@@ -59,35 +79,42 @@ class BlueHandler {
         text: 'Blue',
         items: [
           {
-            id: 'demo:colors:blue-1',
+            id: 'demo:colors:blue-0',
             title: 'Blue #1',
-            caption: 'Blue number one'
+            caption: 'Blue number one',
+            args: 'Blue number one'
           },
           {
-            id: 'demo:colors:blue-2',
+            id: 'demo:colors:blue-0',
             title: 'Blue #2',
-            caption: 'Blue number two'
+            caption: 'Blue number two',
+            args: 'Blue number two'
           },
           {
-            id: 'demo:colors:blue-3',
+            id: 'demo:colors:blue-0',
             title: 'Blue #3',
-            caption: 'Blue number three'
+            caption: 'Blue number three',
+            args: 'Blue number three'
           },
           {
-            id: 'demo:colors:blue-4',
+            id: 'demo:colors:blue-0',
             title: 'Blue #4',
-            caption: 'Blue number four'
+            caption: 'Blue number four',
+            args: 'Blue number four'
           },
           {
-            id: 'demo:colors:blue-5',
+            id: 'demo:colors:blue-0',
             title: 'Blue #5',
-            caption: 'Blue number five'
+            caption: 'Blue number five',
+            args: 'Blue number five'
           }
         ]
       }
     ]);
   }
 
+  private _commandDisposable: IDisposable;
   private _shell: IAppShell;
   private _palette: ICommandPalette;
+  private _registry: ICommandRegistry;
 }
