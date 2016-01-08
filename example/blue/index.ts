@@ -61,12 +61,7 @@ class BlueHandler {
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
     this._commandDisposable = this._registry.add([
-      createCommand('demo:colors:blue-0'),
-      createCommand('demo:colors:blue-1'),
-      createCommand('demo:colors:blue-2'),
-      createCommand('demo:colors:blue-3'),
-      createCommand('demo:colors:blue-4'),
-      createCommand('demo:colors:blue-5')
+      createCommand('demo:colors:blue-0')
     ]);
     this._palette.add([
       {
@@ -84,31 +79,31 @@ class BlueHandler {
         text: 'Blue',
         items: [
           {
-            id: 'demo:colors:blue-1',
+            id: 'demo:colors:blue-0',
             title: 'Blue #1',
             caption: 'Blue number one',
             args: 'Blue number one'
           },
           {
-            id: 'demo:colors:blue-2',
+            id: 'demo:colors:blue-0',
             title: 'Blue #2',
             caption: 'Blue number two',
             args: 'Blue number two'
           },
           {
-            id: 'demo:colors:blue-3',
+            id: 'demo:colors:blue-0',
             title: 'Blue #3',
             caption: 'Blue number three',
             args: 'Blue number three'
           },
           {
-            id: 'demo:colors:blue-4',
+            id: 'demo:colors:blue-0',
             title: 'Blue #4',
             caption: 'Blue number four',
             args: 'Blue number four'
           },
           {
-            id: 'demo:colors:blue-5',
+            id: 'demo:colors:blue-0',
             title: 'Blue #5',
             caption: 'Blue number five',
             args: 'Blue number five'
