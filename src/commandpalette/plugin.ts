@@ -67,7 +67,7 @@ class CommandPaletteHandler {
   }
 
   run(): void {
-    this._shell.addToLeftArea(this._palette as CommandPalette, { rank: 40 });
+    this._shell.addToLeftArea(this._palette, { rank: 40 });
   }
 
   private _shell: IAppShell;

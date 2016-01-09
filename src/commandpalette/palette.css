@@ -6,63 +6,29 @@
 | The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
 .p-CommandPalette {
-  background: #f5f5f5;
-  min-width: 150px;
-  max-width: 250px;
-  min-height: 50px;
-  padding: 5px 3px;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.p-CommandPalette .p-search {
+  flex: 0 0 auto;
+}
+
+
+.p-CommandPalette .p-content {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
 }
 
-.p-CommandPalette .p-header {
-  color: #757575;
-  font-size: 11px;
-  font-weight: 500;
-  padding: 5px;
-}
-
-.p-CommandPalette .p-header hr {
-  border-width: 0;
-  margin: 3px -3px;
-  padding: 0;
-  color: #e0e0e0;
-  background-color: #e0e0e0;
-  height: 1px;
-  width: 100%;
-}
-
-.p-CommandPalette .p-search input {
-  border: 1px solid #e0e0e0;
-  border-radius: 5px;
-  padding: 4px 0;
-  width: calc(100% - 8px);
-}
 
 .p-CommandPalette .p-command {
-  color: #757575;
   display: block;
-  font-weight: 500;
-  font-size: 13px;
-  margin: 0 -3px;
-  padding: 3px;
   text-decoration: none;
 }
 
-.p-CommandPalette .p-command .p-description {
-  color: #9e9e9e;
-  font-weight: 400;
-  font-size: 10px;
-}
 
 .p-CommandPalette .p-command .p-shortcut {
   float: right;
-  margin-right: 15px;
-}
-
-.p-CommandPalette .p-command:focus,
-.p-CommandPalette .p-command:focus .p-description,
-.p-CommandPalette .p-command:focus .p-shortcut {
-  outline: 0;
-  background: #2196f3;
-  color: #fff;
 }
