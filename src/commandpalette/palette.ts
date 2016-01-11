@@ -114,20 +114,41 @@ interface ICommandPaletteSectionPrivate {
 export
 class CommandPalette extends Widget implements ICommandPalette {
 
+  static requires: Token<any>[] = [ICommandRegistry];
+
   static create(commandRegistry: ICommandRegistry): ICommandPalette {
     return new CommandPalette(commandRegistry);
   }
 
-  static requires: Token<any>[] = [ICommandRegistry];
+  /**
+   * Create the DOM node for a command palette.
+   */
+  static createNode(): HTMLElement {
+    let node = document.createElement('div');
+    let content = document.createElement('div');
+    let search = document.createElement('div');
+    let input = document.createElement('input');
+    let wrapper = document.createElement('div');
+    content.className = CONTENT_CLASS;
+    search.className = SEARCH_CLASS;
+    wrapper.className = INPUT_CLASS;
+    wrapper.appendChild(input);
+    search.appendChild(wrapper);
+    node.appendChild(search);
+    node.appendChild(content);
+    return node;
+  }
+
+  get contentNode(): HTMLElement {
+    return this.node.getElementsByClassName(CONTENT_CLASS)[0] as HTMLElement;
+  }
 
   constructor(commandRegistry: ICommandRegistry) {
     super();
-    commandRegistry.commandsAdded.connect(this._commandsUpdated, this);
-    commandRegistry.commandsRemoved.connect(this._commandsUpdated, this);
-    this._commandRegistry = commandRegistry;
     this.addClass(PALETTE_CLASS);
-    this._renderSearch();
-    this._renderList();
+    this._commandRegistry = commandRegistry;
+    this._commandRegistry.commandsAdded.connect(this._commandsUpdated, this);
+    this._commandRegistry.commandsRemoved.connect(this._commandsUpdated, this);
   }
 
   add(sections: ICommandPaletteSection[]): IDisposable {
@@ -242,10 +263,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _empty(): void {
-    let list = this._list;
-    while (list.firstChild) {
-      list.removeChild(list.firstChild);
-    }
+    this.contentNode.textContent = '';
   }
 
   private _evtClick(event: MouseEvent): void {
@@ -268,11 +286,11 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   private _evtKeyDown(event: KeyboardEvent): void {
     let { altKey, ctrlKey, metaKey, keyCode } = event;
-    let input = (this._search.querySelector('input') as HTMLInputElement);
+    let input = this.node.querySelector(`.${SEARCH_CLASS} input`);
     if (keyCode !== UP_ARROW && keyCode !== DOWN_ARROW) {
-      let oldValue = input.value;
+      let oldValue = (input as HTMLInputElement).value;
       requestAnimationFrame(() => {
-        let newValue = input.value;
+        let newValue = (input as HTMLInputElement).value;
         if (newValue === '') {
           this._renderAllItems();
           return;
@@ -384,6 +402,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     if (!priv.visible) {
       return;
     }
+    let content = this.contentNode;
     let command = document.createElement('a');
     let description = document.createElement('div');
     let shortcut = document.createElement('div');
@@ -404,35 +423,36 @@ class CommandPalette extends Widget implements ICommandPalette {
     command.appendChild(shortcut);
     command.appendChild(description);
     command.setAttribute(REGISTRATION_ID, registrationID);
-    this._list.appendChild(command);
+    content.appendChild(command);
   }
 
   private _renderHeading(heading: string): void {
+    let content = this.contentNode;
     let header = document.createElement('div');
     header.classList.add(HEADER_CLASS);
     header.appendChild(document.createTextNode(heading));
     header.appendChild(document.createElement('hr'));
-    this._list.appendChild(header);
+    content.appendChild(header);
   }
 
-  private _renderList(): void {
-    let content = document.createElement('div');
-    content.className = CONTENT_CLASS;
-    this._list = document.createElement('div');
-    content.appendChild(this._list);
-    this.node.appendChild(content);
-  }
+  // private _renderList(): void {
+  //   let content = document.createElement('div');
+  //   content.className = CONTENT_CLASS;
+  //   this._list = document.createElement('div');
+  //   content.appendChild(this._list);
+  //   this.node.appendChild(content);
+  // }
 
-  private _renderSearch(): void {
-    let input = document.createElement('input');
-    let wrapper = document.createElement('div');
-    wrapper.className = INPUT_CLASS;
-    wrapper.appendChild(input);
-    this._search = document.createElement('div');
-    this._search.classList.add(SEARCH_CLASS);
-    this._search.appendChild(wrapper);
-    this.node.appendChild(this._search);
-  }
+  // private _renderSearch(): void {
+  //   let input = document.createElement('input');
+  //   let wrapper = document.createElement('div');
+  //   wrapper.className = INPUT_CLASS;
+  //   wrapper.appendChild(input);
+  //   this._search = document.createElement('div');
+  //   this._search.classList.add(SEARCH_CLASS);
+  //   this._search.appendChild(wrapper);
+  //   this.node.appendChild(this._search);
+  // }
 
   private _renderSearchResults(items: ICommandMatchResult[]): void {
     let headings = this._sections.reduce((acc, section) => {
