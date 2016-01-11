@@ -232,10 +232,10 @@ class CommandPalette extends Widget implements ICommandPalette {
         Array.prototype.push.apply(registrations, ids);
       }
     }
-    this._renderAllItems();
+    this._bufferAllItems();
     return new DisposableDelegate(() => {
       registrations.forEach(id => { this._removeItem(id); });
-      this._renderAllItems();
+      this._bufferAllItems();
     });
 
   }
@@ -257,6 +257,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
   }
 
+  /**
+   * A message handler invoked on a `'after-attach'` message.
+   */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
     this.node.addEventListener('keydown', this);
@@ -264,11 +267,23 @@ class CommandPalette extends Widget implements ICommandPalette {
     this.node.addEventListener('mouseout', this);
   }
 
+  /**
+   * A message handler invoked on a `'before-detach'` message.
+   */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('keydown', this);
     this.node.removeEventListener('mouseover', this);
     this.node.removeEventListener('mouseout', this);
+  }
+
+  /**
+   * A handler invoked on an `'update-request'` message.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    this._empty();
+    this._refreshCommands();
+    this._buffer.forEach(section => this._renderSection(section));
   }
 
   private _addSection(section: ICommandPaletteSection): string[] {
@@ -310,6 +325,37 @@ class CommandPalette extends Widget implements ICommandPalette {
     return registrations;
   }
 
+  private _bufferAllItems(): void {
+    this._prune();
+    this._sort();
+    this._buffer = this._sections;
+    this.update();
+  }
+
+  private _bufferSearchResults(items: ICommandMatchResult[]): void {
+    let headings = this._sections.reduce((acc, section) => {
+      section.items.forEach(id => acc[id] = section.text);
+      return acc;
+    }, Object.create(null) as { [id: string]: string });
+    let sections = items.reduce((acc, val, idx) => {
+      let heading = headings[val.id];
+      if (!idx) {
+        acc.push({ text: heading, items: [val.id] });
+        return acc;
+      }
+      if (acc[acc.length - 1].text === heading) {
+        // Add to the last group.
+        acc[acc.length - 1].items.push(val.id);
+      } else {
+        // Create a new group.
+        acc.push({ text: heading, items: [val.id] });
+      }
+      return acc;
+    }, [] as ICommandPaletteSectionPrivate[]);
+    this._buffer = sections;
+    this.update();
+  }
+
   private _commandsUpdated(sender: ICommandRegistry, args: string[]): void {
     let added = args.reduce((acc, val) => {
       acc[val] = null;
@@ -319,7 +365,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       return this._registry[registrationID].item.id in added;
     });
     if (staleRegistry) {
-      this._renderBuffer();
+      this.update();
     }
   }
 
@@ -353,12 +399,12 @@ class CommandPalette extends Widget implements ICommandPalette {
       requestAnimationFrame(() => {
         let newValue = (input as HTMLInputElement).value;
         if (newValue === '') {
-          this._renderAllItems();
+          this._bufferAllItems();
           return;
         }
         if (newValue !== oldValue) {
           matcher.search(newValue, this._searchItems()).then(results => {
-            this._renderSearchResults(results);
+            this._bufferSearchResults(results);
           });
         }
       });
@@ -443,43 +489,6 @@ class CommandPalette extends Widget implements ICommandPalette {
         }
       }
     }
-  }
-
-  private _renderAllItems(): void {
-    this._prune();
-    this._sort();
-    this._buffer = this._sections;
-    this._renderBuffer();
-  }
-
-  private _renderBuffer(): void {
-    this._empty();
-    this._refreshCommands();
-    this._buffer.forEach(section => this._renderSection(section));
-  }
-
-  private _renderSearchResults(items: ICommandMatchResult[]): void {
-    let headings = this._sections.reduce((acc, section) => {
-      section.items.forEach(id => acc[id] = section.text);
-      return acc;
-    }, Object.create(null) as { [id: string]: string });
-    let sections = items.reduce((acc, val, idx) => {
-      let heading = headings[val.id];
-      if (!idx) {
-        acc.push({ text: heading, items: [val.id] });
-        return acc;
-      }
-      if (acc[acc.length - 1].text === heading) {
-        // Add to the last group.
-        acc[acc.length - 1].items.push(val.id);
-      } else {
-        // Create a new group.
-        acc.push({ text: heading, items: [val.id] });
-      }
-      return acc;
-    }, [] as ICommandPaletteSectionPrivate[]);
-    this._buffer = sections;
-    this._renderBuffer();
   }
 
   private _renderSection(section: ICommandPaletteSectionPrivate): void {
