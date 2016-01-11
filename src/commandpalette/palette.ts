@@ -114,20 +114,102 @@ interface ICommandPaletteSectionPrivate {
 export
 class CommandPalette extends Widget implements ICommandPalette {
 
+  static requires: Token<any>[] = [ICommandRegistry];
+
   static create(commandRegistry: ICommandRegistry): ICommandPalette {
     return new CommandPalette(commandRegistry);
   }
 
-  static requires: Token<any>[] = [ICommandRegistry];
+  /**
+   * Create the DOM node for a command palette.
+   */
+  static createNode(): HTMLElement {
+    let node = document.createElement('div');
+    let content = document.createElement('div');
+    let search = document.createElement('div');
+    let input = document.createElement('input');
+    let wrapper = document.createElement('div');
+    content.className = CONTENT_CLASS;
+    search.className = SEARCH_CLASS;
+    wrapper.className = INPUT_CLASS;
+    wrapper.appendChild(input);
+    search.appendChild(wrapper);
+    node.appendChild(search);
+    node.appendChild(content);
+    return node;
+  }
+
+  /**
+   * Create a new header node for a command palette section.
+   *
+   * @returns A new DOM node to use as a header in a command palette section.
+   *
+   * #### Notes
+   * This method may be reimplemented to create custom header.
+   */
+  static createHeaderNode(title: string): HTMLElement {
+    let node = document.createElement('div');
+    node.className = HEADER_CLASS;
+    node.appendChild(document.createTextNode(title));
+    node.appendChild(document.createElement('hr'));
+    return node;
+  }
+
+  /**
+   * Create a new item node for a command palette.
+   *
+   * @param item - The content for the palette item.
+   *
+   * @param disabled - A flag denoting whether a palette item is disabled.
+   *
+   * @returns A new DOM node to use as an item in a command palette.
+   *
+   * #### Notes
+   * This method may be reimplemented to create custom items.
+   */
+  static createItemNode(item: ICommandPaletteItem, disabled: boolean): HTMLElement {
+    let node = document.createElement('a');
+    let description = document.createElement('div');
+    let shortcut = document.createElement('div');
+    node.setAttribute('href', '#');
+    node.classList.add(COMMAND_CLASS);
+    if (disabled) {
+      node.classList.add(DISABLED_CLASS);
+    }
+    description.classList.add(DESCRIPTION_CLASS);
+    shortcut.classList.add(SHORTCUT_CLASS);
+    node.textContent = item.title;
+    if (item.caption) {
+      description.textContent = item.caption;
+    }
+    if (item.shortcut) {
+      shortcut.textContent = item.shortcut;
+    }
+    node.appendChild(shortcut);
+    node.appendChild(description);
+    return node;
+  }
+
+  /**
+   * Get the command palette content node.
+   *
+   * #### Notes
+   * This is the node which holds the command palette item nodes.
+   *
+   * Modifying this node directly can lead to undefined behavior.
+   *
+   * This is a read-only property.
+   */
+  get contentNode(): HTMLElement {
+    return this.node.getElementsByClassName(CONTENT_CLASS)[0] as HTMLElement;
+  }
 
   constructor(commandRegistry: ICommandRegistry) {
     super();
-    commandRegistry.commandsAdded.connect(this._commandsUpdated, this);
-    commandRegistry.commandsRemoved.connect(this._commandsUpdated, this);
-    this._commandRegistry = commandRegistry;
     this.addClass(PALETTE_CLASS);
-    this._renderSearch();
-    this._renderList();
+    this._commandRegistry = commandRegistry;
+    this._commandRegistry.commandsAdded.connect(this._commandsUpdated, this);
+    this._commandRegistry.commandsRemoved.connect(this._commandsUpdated, this);
   }
 
   add(sections: ICommandPaletteSection[]): IDisposable {
@@ -242,10 +324,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   private _empty(): void {
-    let list = this._list;
-    while (list.firstChild) {
-      list.removeChild(list.firstChild);
-    }
+    this.contentNode.textContent = '';
   }
 
   private _evtClick(event: MouseEvent): void {
@@ -268,11 +347,11 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   private _evtKeyDown(event: KeyboardEvent): void {
     let { altKey, ctrlKey, metaKey, keyCode } = event;
-    let input = (this._search.querySelector('input') as HTMLInputElement);
+    let input = this.node.querySelector(`.${SEARCH_CLASS} input`);
     if (keyCode !== UP_ARROW && keyCode !== DOWN_ARROW) {
-      let oldValue = input.value;
+      let oldValue = (input as HTMLInputElement).value;
       requestAnimationFrame(() => {
-        let newValue = input.value;
+        let newValue = (input as HTMLInputElement).value;
         if (newValue === '') {
           this._renderAllItems();
           return;
@@ -379,61 +458,6 @@ class CommandPalette extends Widget implements ICommandPalette {
     this._buffer.forEach(section => this._renderSection(section));
   }
 
-  private _renderCommandItem(registrationID: string): void {
-    let priv = this._registry[registrationID];
-    if (!priv.visible) {
-      return;
-    }
-    let command = document.createElement('a');
-    let description = document.createElement('div');
-    let shortcut = document.createElement('div');
-    command.setAttribute('href', '#');
-    command.classList.add(COMMAND_CLASS);
-    if (priv.disabled) {
-      command.classList.add(DISABLED_CLASS);
-    }
-    description.classList.add(DESCRIPTION_CLASS);
-    shortcut.classList.add(SHORTCUT_CLASS);
-    command.textContent = priv.item.title;
-    if (priv.item.caption) {
-      description.textContent = priv.item.caption;
-    }
-    if (priv.item.shortcut) {
-      shortcut.textContent = priv.item.shortcut;
-    }
-    command.appendChild(shortcut);
-    command.appendChild(description);
-    command.setAttribute(REGISTRATION_ID, registrationID);
-    this._list.appendChild(command);
-  }
-
-  private _renderHeading(heading: string): void {
-    let header = document.createElement('div');
-    header.classList.add(HEADER_CLASS);
-    header.appendChild(document.createTextNode(heading));
-    header.appendChild(document.createElement('hr'));
-    this._list.appendChild(header);
-  }
-
-  private _renderList(): void {
-    let content = document.createElement('div');
-    content.className = CONTENT_CLASS;
-    this._list = document.createElement('div');
-    content.appendChild(this._list);
-    this.node.appendChild(content);
-  }
-
-  private _renderSearch(): void {
-    let input = document.createElement('input');
-    let wrapper = document.createElement('div');
-    wrapper.className = INPUT_CLASS;
-    wrapper.appendChild(input);
-    this._search = document.createElement('div');
-    this._search.classList.add(SEARCH_CLASS);
-    this._search.appendChild(wrapper);
-    this.node.appendChild(this._search);
-  }
-
   private _renderSearchResults(items: ICommandMatchResult[]): void {
     let headings = this._sections.reduce((acc, section) => {
       section.items.forEach(id => acc[id] = section.text);
@@ -462,8 +486,18 @@ class CommandPalette extends Widget implements ICommandPalette {
     if (!section.items.some(id => this._registry[id].visible)) {
       return;
     }
-    this._renderHeading(section.text);
-    section.items.forEach(id => { this._renderCommandItem(id); });
+    let constructor = this.constructor as typeof CommandPalette;
+    let content = this.contentNode;
+    let header = constructor.createHeaderNode(section.text);
+    content.appendChild(header);
+    section.items.forEach(registrationID => {
+      let priv = this._registry[registrationID];
+      if (priv.visible) {
+        let node = constructor.createItemNode(priv.item, priv.disabled);
+        node.setAttribute(REGISTRATION_ID, registrationID);
+        content.appendChild(node);
+      }
+    });
   }
 
   private _searchItems(): ICommandSearchItem[] {
