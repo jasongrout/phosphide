@@ -33,10 +33,13 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(YellowHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(id: string): ICommandItem {
+function createCommand(id: string, disabled?: boolean): ICommandItem {
   let command = new DelegateCommand((message: string) => {
     console.log(`COMMAND: ${message}`);
   });
+  if (disabled) {
+    command.enabled = false;
+  }
   return { id, command };
 }
 
@@ -64,7 +67,7 @@ class YellowHandler {
       createCommand('demo:colors:yellow-0'),
       createCommand('demo:colors:yellow-1'),
       createCommand('demo:colors:yellow-2'),
-      createCommand('demo:colors:yellow-3'),
+      createCommand('demo:colors:yellow-3', true),
       createCommand('demo:colors:yellow-4'),
       createCommand('demo:colors:yellow-5')
     ]);
