@@ -386,6 +386,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
   }
 
+  /**
+   * Add a new section to the palette's registry and return registration IDs.
+   */
   private _addSection(section: ICommandPaletteSection): string[] {
     let registrations: string[] = [];
     let registrationID: string;
@@ -403,6 +406,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     return registrations;
   }
 
+  /**
+   * Amend a section in the palette's registry and return registration IDs.
+   */
   private _amendSection(items: ICommandPaletteItem[], sectionIndex: number): string[] {
     let registrations: string[] = [];
     let registrationID: string;
@@ -422,6 +428,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     return registrations;
   }
 
+  /**
+   * Deselect all palette items.
+   */
   private _blur(): void {
     let selector = `.${COMMAND_CLASS}.${FOCUS_CLASS}`;
     let nodes = this.node.querySelectorAll(selector);
@@ -430,6 +439,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
   }
 
+  /**
+   * Set the buffer to all registered items.
+   */
   private _bufferAllItems(): void {
     this._prune();
     this._sort();
@@ -437,6 +449,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     this.update();
   }
 
+  /**
+   * Set the buffer to search results.
+   */
   private _bufferSearchResults(items: ICommandMatchResult[]): void {
     let headings = this._sections.reduce((acc, section) => {
       section.items.forEach(id => acc[id] = section.text);
@@ -463,6 +478,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     this.update();
   }
 
+  /**
+   * A handler for command registry additions and removals.
+   */
   private _commandsUpdated(sender: ICommandRegistry, args: string[]): void {
     let added = args.reduce((acc, val) => {
       acc[val] = null;
@@ -474,6 +492,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     if (staleRegistry) this.update();
   }
 
+  /**
+   * Handle the `'click'` event for the command palette.
+   */
   private _evtClick(event: MouseEvent): void {
     let { altKey, ctrlKey, metaKey, shiftKey } = event;
     if (event.button !== 0 || altKey || ctrlKey || metaKey || shiftKey) return;
@@ -490,6 +511,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
   }
 
+  /**
+   * Handle the `'keydown'` event for the command palette.
+   */
   private _evtKeyDown(event: KeyboardEvent): void {
     let { altKey, ctrlKey, metaKey, keyCode } = event;
     let input = this.inputNode;
@@ -523,6 +547,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
   }
 
+  /**
+   * Handle the `'mouseover'` event for the command palette.
+   */
   private _evtMouseOver(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     while (!target.hasAttribute(REGISTRATION_ID)) {
@@ -533,16 +560,25 @@ class CommandPalette extends Widget implements ICommandPalette {
     if (!priv.disabled) this._focus(target);
   }
 
+  /**
+   * Handle the `'mouseout'` event for the command palette.
+   */
   private _evtMouseOut(event: MouseEvent): void {
     let focused = this._findFocus();
     if (focused) this._blur();
   }
 
+  /**
+   * Find the currently selected command.
+   */
   private _findFocus(): HTMLElement {
     let selector = `.${COMMAND_CLASS}.${FOCUS_CLASS}`;
     return this.node.querySelector(selector) as HTMLElement;
   }
 
+  /**
+   * Select a specific command and optionally scroll it into view.
+   */
   private _focus(target: HTMLElement, scroll?: boolean): void {
     let focused = this._findFocus();
     if (target === focused) return;
@@ -551,12 +587,18 @@ class CommandPalette extends Widget implements ICommandPalette {
     if (scroll) target.scrollIntoView();
   }
 
+  /**
+   * Select the first command.
+   */
   private _focusFirst(): void {
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     this.contentNode.scrollTop = 0;
     this._focus(this.node.querySelectorAll(selector)[0] as HTMLElement);
   }
 
+  /**
+   * Select the last command.
+   */
   private _focusLast(scroll?: boolean): void {
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     let nodes = this.node.querySelectorAll(selector);
@@ -564,6 +606,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     this._focus(nodes[last] as HTMLElement, scroll);
   }
 
+  /**
+   * Select the next command after the current selection.
+   */
   private _focusNext(): void {
     let focused = this._findFocus();
     if (!focused) return this._focusFirst();
@@ -581,6 +626,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     this._focus(target, scrollTest(this.contentNode, target));
   }
 
+  /**
+   * Select the previous command after the current selection.
+   */
   private _focusPrevious(): void {
     let focused = this._findFocus();
     if (!focused) return this._focusLast(true);
@@ -598,6 +646,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     this._focus(target, scrollTest(this.contentNode, target));
   }
 
+  /**
+   * Convert an `ICommandPaletteItem` to an `ICommandPaletteItemPrivate`.
+   */
   private _privatize(item: ICommandPaletteItem): ICommandPaletteItemPrivate {
     // By default, until the registry is checked, all added items work.
     let disabled = false;
@@ -605,10 +656,16 @@ class CommandPalette extends Widget implements ICommandPalette {
     return { disabled, item, visible };
   }
 
+  /**
+   * Filter out any sections that are empty.
+   */
   private _prune(): void {
     this._sections = this._sections.filter(section => !!section.items.length);
   }
 
+  /**
+   * Remove a registered item from the registry and from the sections.
+   */
   private _removeItem(registrationID: string): void {
     for (let section of this._sections) {
       for (let id of section.items) {
@@ -621,6 +678,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
   }
 
+  /**
+   * Render a section and its commands.
+   */
   private _renderSection(section: ICommandPaletteSectionPrivate): void {
     if (!section.items.some(id => this._registry[id].visible)) return;
     let constructor = this.constructor as typeof CommandPalette;
@@ -636,6 +696,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     });
   }
 
+  /**
+   * Return a list of searchable items for the matcher.
+   */
   private _searchItems(): ICommandSearchItem[] {
     return this._sections.reduce((acc, val) => {
       val.items.forEach(id => {
@@ -650,6 +713,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     }, [] as ICommandSearchItem[]);
   }
 
+  /**
+   * Sort the sections by title and their commands by title.
+   */
   private _sort(): void {
     this._sections.sort((a, b) => { return a.text.localeCompare(b.text); });
     this._sections.forEach(section => section.items.sort((a, b) => {
