@@ -70,6 +70,8 @@ const SHORTCUT_CLASS = 'p-CommandPalette-shortcut';
 
 const SEARCH_CLASS = 'p-CommandPalette-search';
 
+const ENTER = 13;
+
 const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
@@ -293,6 +295,13 @@ class CommandPalette extends Widget implements ICommandPalette {
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
+    // Focus on the first result if search result.
+    if (this._searchResult) {
+      // Reset the flag.
+      this._searchResult = false;
+      let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
+      this._focus(this.node.querySelectorAll(selector)[0] as HTMLElement);
+    }
   }
 
   private _addSection(section: ICommandPaletteSection): string[] {
@@ -368,6 +377,10 @@ class CommandPalette extends Widget implements ICommandPalette {
       }
       return acc;
     }, [] as ICommandPaletteSectionPrivate[]);
+    // If there are search results, set the search flag used for focusing
+    if (sections.length) {
+      this._searchResult = true;
+    }
     this._buffer = sections;
     this.update();
   }
@@ -408,7 +421,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _evtKeyDown(event: KeyboardEvent): void {
     let { altKey, ctrlKey, metaKey, keyCode } = event;
     let input = this.node.querySelector(`.${SEARCH_CLASS} input`);
-    if (keyCode !== UP_ARROW && keyCode !== DOWN_ARROW) {
+    if (keyCode !== UP_ARROW && keyCode !== DOWN_ARROW && keyCode !== ENTER) {
       let oldValue = (input as HTMLInputElement).value;
       requestAnimationFrame(() => {
         let newValue = (input as HTMLInputElement).value;
@@ -436,6 +449,15 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
     if (keyCode === DOWN_ARROW) {
       console.log('go down');
+      return;
+    }
+    if (keyCode === ENTER) {
+      let focused = this._findFocus();
+      if (focused) {
+        let priv = this._registry[focused.getAttribute(REGISTRATION_ID)];
+        this._commandRegistry.safeExecute(priv.item.id, priv.item.args);
+        this._blur();
+      }
       return;
     }
   }
@@ -544,6 +566,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _buffer: ICommandPaletteSectionPrivate[] = [];
   private _commandRegistry: ICommandRegistry = null;
   private _sections: ICommandPaletteSectionPrivate[] = [];
+  private _searchResult: boolean = false;
   private _registry: {
     [id: string]: ICommandPaletteItemPrivate;
   } = Object.create(null);
