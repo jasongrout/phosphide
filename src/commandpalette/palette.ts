@@ -70,9 +70,20 @@ const SHORTCUT_CLASS = 'p-CommandPalette-shortcut';
 
 const SEARCH_CLASS = 'p-CommandPalette-search';
 
+const ENTER = 13;
+
+const ESCAPE = 27;
+
 const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
+
+const FN_KEYS: { [key: string]: void } = {
+  [ENTER]: null,
+  [ESCAPE]: null,
+  [UP_ARROW]: null,
+  [DOWN_ARROW]: null
+};
 
 const matcher = new FuzzyMatcher('title', 'caption');
 
@@ -112,12 +123,30 @@ interface ICommandPaletteSectionPrivate {
   items: string[];
 };
 
+/**
+ * Test to see if a child node needs to be scrolled to within its parent node.
+ */
+function scrollTest(parentNode: HTMLElement, childNode: HTMLElement): boolean {
+  let parent = parentNode.getBoundingClientRect();
+  let child = childNode.getBoundingClientRect();
+  return child.top < parent.top || child.top + child.height > parent.bottom;
+}
 
+/**
+ * A widget which displays registered commands and allows them to be executed.
+ */
 export
 class CommandPalette extends Widget implements ICommandPalette {
-
+  /**
+   * The dependencies required by the command palette.
+   */
   static requires: Token<any>[] = [ICommandRegistry];
 
+  /**
+   * Create a new command palette instance.
+   *
+   * @param commandRegistry - A command registry instance
+   */
   static create(commandRegistry: ICommandRegistry): ICommandPalette {
     return new CommandPalette(commandRegistry);
   }
@@ -143,6 +172,8 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * Create a new header node for a command palette section.
+   *
+   * @param title - The palette section title
    *
    * @returns A new DOM node to use as a header in a command palette section.
    *
@@ -205,6 +236,23 @@ class CommandPalette extends Widget implements ICommandPalette {
     return this.node.getElementsByClassName(CONTENT_CLASS)[0] as HTMLElement;
   }
 
+  /**
+   * Get the command palette input node.
+   *
+   * #### Notes
+   * Modifying this node directly can lead to undefined behavior.
+   *
+   * This is a read-only property.
+   */
+  get inputNode(): HTMLInputElement {
+    return this.node.getElementsByTagName('input')[0] as HTMLInputElement;
+  }
+
+  /**
+   * Construct a new command palette.
+   *
+   * @param commandRegistry - A command registry instance
+   */
   constructor(commandRegistry: ICommandRegistry) {
     super();
     this.addClass(PALETTE_CLASS);
@@ -213,6 +261,26 @@ class CommandPalette extends Widget implements ICommandPalette {
     this._commandRegistry.commandsRemoved.connect(this._commandsUpdated, this);
   }
 
+  /**
+   * Dispose of the resources held by the command palette.
+   */
+  dispose(): void {
+    let commandRegistry = this._commandRegistry;
+    commandRegistry.commandsAdded.disconnect(this._commandsUpdated, this);
+    commandRegistry.commandsRemoved.disconnect(this._commandsUpdated, this);
+    this._sections.length = 0;
+    this._buffer.length = 0;
+    this._registry = null;
+    super.dispose();
+  }
+
+  /**
+   * Add new sections with heading titles and command items to the palette.
+   *
+   * @param sections - An array of sections to be added to the palette
+   *
+   * @returns An `IDisposable` to remove the added items from the palette
+   */
   add(sections: ICommandPaletteSection[]): IDisposable {
     let text: string;
     let sectionIndex: number;
@@ -241,6 +309,16 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   }
 
+  /**
+   * Handle the DOM events for the command palette.
+   *
+   * @param event - The DOM event sent to the command palette.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the side bar's DOM node. It should
+   * not be called directly by user code.
+   */
   handleEvent(event: Event): void {
     switch (event.type) {
     case 'click':
@@ -279,6 +357,13 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   /**
+   * A handler invoked on an `'after-show'` message.
+   */
+  protected onAfterShow(msg: Message): void {
+    this.inputNode.focus();
+  }
+
+  /**
    * A handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -293,8 +378,17 @@ class CommandPalette extends Widget implements ICommandPalette {
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
+    // Focus on the first result if search result.
+    if (this._searchResult) {
+      // Reset the flag.
+      this._searchResult = false;
+      this._focusFirst();
+    }
   }
 
+  /**
+   * Add a new section to the palette's registry and return registration IDs.
+   */
   private _addSection(section: ICommandPaletteSection): string[] {
     let registrations: string[] = [];
     let registrationID: string;
@@ -312,6 +406,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     return registrations;
   }
 
+  /**
+   * Amend a section in the palette's registry and return registration IDs.
+   */
   private _amendSection(items: ICommandPaletteItem[], sectionIndex: number): string[] {
     let registrations: string[] = [];
     let registrationID: string;
@@ -322,9 +419,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       itemIndex = arrays.findIndex(existingItems, registrationID => {
         return this._registry[registrationID].item === item;
       });
-      if (itemIndex !== -1) {
-        continue;
-      }
+      if (itemIndex !== -1) continue;
       registrationID = `palette-${++commandID}`;
       this._registry[registrationID] = this._privatize(item);
       existingItems.push(registrationID);
@@ -333,6 +428,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     return registrations;
   }
 
+  /**
+   * Deselect all palette items.
+   */
   private _blur(): void {
     let selector = `.${COMMAND_CLASS}.${FOCUS_CLASS}`;
     let nodes = this.node.querySelectorAll(selector);
@@ -341,6 +439,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
   }
 
+  /**
+   * Set the buffer to all registered items.
+   */
   private _bufferAllItems(): void {
     this._prune();
     this._sort();
@@ -348,6 +449,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     this.update();
   }
 
+  /**
+   * Set the buffer to search results.
+   */
   private _bufferSearchResults(items: ICommandMatchResult[]): void {
     let headings = this._sections.reduce((acc, section) => {
       section.items.forEach(id => acc[id] = section.text);
@@ -368,10 +472,15 @@ class CommandPalette extends Widget implements ICommandPalette {
       }
       return acc;
     }, [] as ICommandPaletteSectionPrivate[]);
+    // If there are search results, set the search flag used for focusing
+    if (sections.length) this._searchResult = true;
     this._buffer = sections;
     this.update();
   }
 
+  /**
+   * A handler for command registry additions and removals.
+   */
   private _commandsUpdated(sender: ICommandRegistry, args: string[]): void {
     let added = args.reduce((acc, val) => {
       acc[val] = null;
@@ -380,23 +489,20 @@ class CommandPalette extends Widget implements ICommandPalette {
     let staleRegistry = Object.keys(this._registry).some(registrationID => {
       return this._registry[registrationID].item.id in added;
     });
-    if (staleRegistry) {
-      this.update();
-    }
+    if (staleRegistry) this.update();
   }
 
+  /**
+   * Handle the `'click'` event for the command palette.
+   */
   private _evtClick(event: MouseEvent): void {
     let { altKey, ctrlKey, metaKey, shiftKey } = event;
-    if (event.button !== 0 || altKey || ctrlKey || metaKey || shiftKey) {
-      return;
-    }
+    if (event.button !== 0 || altKey || ctrlKey || metaKey || shiftKey) return;
     event.stopPropagation();
     event.preventDefault();
     let target = event.target as HTMLElement;
     while (!target.hasAttribute(REGISTRATION_ID)) {
-      if (target === this.node as HTMLElement) {
-        return;
-      }
+      if (target === this.node as HTMLElement) return;
       target = target.parentElement;
     }
     let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
@@ -405,17 +511,17 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
   }
 
+  /**
+   * Handle the `'keydown'` event for the command palette.
+   */
   private _evtKeyDown(event: KeyboardEvent): void {
     let { altKey, ctrlKey, metaKey, keyCode } = event;
-    let input = this.node.querySelector(`.${SEARCH_CLASS} input`);
-    if (keyCode !== UP_ARROW && keyCode !== DOWN_ARROW) {
-      let oldValue = (input as HTMLInputElement).value;
+    let input = this.inputNode;
+    if (!FN_KEYS.hasOwnProperty(`${keyCode}`)) {
+      let oldValue = input.value;
       requestAnimationFrame(() => {
-        let newValue = (input as HTMLInputElement).value;
-        if (newValue === '') {
-          this._bufferAllItems();
-          return;
-        }
+        let newValue = input.value;
+        if (newValue === '') return this._bufferAllItems();
         if (newValue !== oldValue) {
           matcher.search(newValue, this._searchItems()).then(results => {
             this._bufferSearchResults(results);
@@ -424,59 +530,125 @@ class CommandPalette extends Widget implements ICommandPalette {
       });
       return;
     }
-    // Ignore keyboard shortcuts that include up and down arrow.
-    if (altKey || ctrlKey || metaKey) {
-      return;
-    }
+    // Ignore system keyboard shortcuts.
+    if (altKey || ctrlKey || metaKey) return;
     event.preventDefault();
     event.stopPropagation();
-    if (keyCode === UP_ARROW) {
-      console.log('go up');
-      return;
-    }
-    if (keyCode === DOWN_ARROW) {
-      console.log('go down');
+    if (keyCode === ESCAPE) return this._blur();
+    if (keyCode === UP_ARROW) return this._focusPrevious();
+    if (keyCode === DOWN_ARROW) return this._focusNext();
+    if (keyCode === ENTER) {
+      let focused = this._findFocus();
+      if (!focused) return;
+      let priv = this._registry[focused.getAttribute(REGISTRATION_ID)];
+      this._commandRegistry.safeExecute(priv.item.id, priv.item.args);
+      this._blur();
       return;
     }
   }
 
+  /**
+   * Handle the `'mouseover'` event for the command palette.
+   */
   private _evtMouseOver(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     while (!target.hasAttribute(REGISTRATION_ID)) {
-      if (target === this.node as HTMLElement) {
-        return;
-      }
+      if (target === this.node as HTMLElement) return;
       target = target.parentElement;
     }
     let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
-    if (!priv.disabled) {
-      this._focus(target);
-    }
+    if (!priv.disabled) this._focus(target);
   }
 
+  /**
+   * Handle the `'mouseout'` event for the command palette.
+   */
   private _evtMouseOut(event: MouseEvent): void {
     let focused = this._findFocus();
-    if (focused) {
-      this._blur();
-    }
+    if (focused) this._blur();
   }
 
+  /**
+   * Find the currently selected command.
+   */
   private _findFocus(): HTMLElement {
     let selector = `.${COMMAND_CLASS}.${FOCUS_CLASS}`;
     return this.node.querySelector(selector) as HTMLElement;
   }
 
-  private _focus(target: HTMLElement): void {
+  /**
+   * Select a specific command and optionally scroll it into view.
+   */
+  private _focus(target: HTMLElement, scroll?: boolean): void {
     let focused = this._findFocus();
-    if (target === focused) {
-      return;
-    }
-    if (focused) {
-      this._blur();
-    }
+    if (target === focused) return;
+    if (focused) this._blur();
     target.classList.add(FOCUS_CLASS);
+    if (scroll) target.scrollIntoView();
   }
 
+  /**
+   * Select the first command.
+   */
+  private _focusFirst(): void {
+    let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
+    this.contentNode.scrollTop = 0;
+    this._focus(this.node.querySelectorAll(selector)[0] as HTMLElement);
+  }
+
+  /**
+   * Select the last command.
+   */
+  private _focusLast(scroll?: boolean): void {
+    let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
+    let nodes = this.node.querySelectorAll(selector);
+    let last = nodes.length - 1;
+    this._focus(nodes[last] as HTMLElement, scroll);
+  }
+
+  /**
+   * Select the next command after the current selection.
+   */
+  private _focusNext(): void {
+    let focused = this._findFocus();
+    if (!focused) return this._focusFirst();
+    let flat = this._buffer.map(section => section.items)
+      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
+    let current = flat.indexOf(focused.getAttribute(REGISTRATION_ID));
+    let next = current < flat.length - 1 ? current + 1 : 0;
+    while (next !== current) {
+      if (!this._registry[flat[next]].disabled) break;
+      next = next < flat.length - 1 ? next + 1 : 0;
+    }
+    if (next === 0) return this._focusFirst();
+    let selector = `[${REGISTRATION_ID}="${flat[next]}"]`;
+    let target = this.node.querySelector(selector) as HTMLElement;
+    this._focus(target, scrollTest(this.contentNode, target));
+  }
+
+  /**
+   * Select the previous command after the current selection.
+   */
+  private _focusPrevious(): void {
+    let focused = this._findFocus();
+    if (!focused) return this._focusLast(true);
+    let flat = this._buffer.map(section => section.items)
+      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
+    let current = flat.indexOf(focused.getAttribute(REGISTRATION_ID));
+    let previous = current > 0 ? current - 1 : flat.length - 1;
+    while (previous !== current) {
+      if (!this._registry[flat[previous]].disabled) break;
+      previous = previous > 0 ? previous - 1 : flat.length - 1;
+    }
+    if (previous === 0) return this._focusFirst();
+    let selector = `[${REGISTRATION_ID}="${flat[previous]}"]`;
+    let target = this.node.querySelector(selector) as HTMLElement;
+    this._focus(target, scrollTest(this.contentNode, target));
+  }
+
+  /**
+   * Convert an `ICommandPaletteItem` to an `ICommandPaletteItemPrivate`.
+   */
   private _privatize(item: ICommandPaletteItem): ICommandPaletteItemPrivate {
     // By default, until the registry is checked, all added items work.
     let disabled = false;
@@ -484,10 +656,16 @@ class CommandPalette extends Widget implements ICommandPalette {
     return { disabled, item, visible };
   }
 
+  /**
+   * Filter out any sections that are empty.
+   */
   private _prune(): void {
     this._sections = this._sections.filter(section => !!section.items.length);
   }
 
+  /**
+   * Remove a registered item from the registry and from the sections.
+   */
   private _removeItem(registrationID: string): void {
     for (let section of this._sections) {
       for (let id of section.items) {
@@ -500,24 +678,27 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
   }
 
+  /**
+   * Render a section and its commands.
+   */
   private _renderSection(section: ICommandPaletteSectionPrivate): void {
-    if (!section.items.some(id => this._registry[id].visible)) {
-      return;
-    }
+    if (!section.items.some(id => this._registry[id].visible)) return;
     let constructor = this.constructor as typeof CommandPalette;
     let content = this.contentNode;
     let header = constructor.createHeaderNode(section.text);
     content.appendChild(header);
     section.items.forEach(registrationID => {
       let priv = this._registry[registrationID];
-      if (priv.visible) {
-        let node = constructor.createItemNode(priv.item, priv.disabled);
-        node.setAttribute(REGISTRATION_ID, registrationID);
-        content.appendChild(node);
-      }
+      if (!priv.visible) return;
+      let node = constructor.createItemNode(priv.item, priv.disabled);
+      node.setAttribute(REGISTRATION_ID, registrationID);
+      content.appendChild(node);
     });
   }
 
+  /**
+   * Return a list of searchable items for the matcher.
+   */
   private _searchItems(): ICommandSearchItem[] {
     return this._sections.reduce((acc, val) => {
       val.items.forEach(id => {
@@ -532,6 +713,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     }, [] as ICommandSearchItem[]);
   }
 
+  /**
+   * Sort the sections by title and their commands by title.
+   */
   private _sort(): void {
     this._sections.sort((a, b) => { return a.text.localeCompare(b.text); });
     this._sections.forEach(section => section.items.sort((a, b) => {
@@ -544,6 +728,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _buffer: ICommandPaletteSectionPrivate[] = [];
   private _commandRegistry: ICommandRegistry = null;
   private _sections: ICommandPaletteSectionPrivate[] = [];
+  private _searchResult: boolean = false;
   private _registry: {
     [id: string]: ICommandPaletteItemPrivate;
   } = Object.create(null);
