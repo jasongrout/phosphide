@@ -72,9 +72,18 @@ const SEARCH_CLASS = 'p-CommandPalette-search';
 
 const ENTER = 13;
 
+const ESCAPE = 27;
+
 const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
+
+const FN_KEYS: { [key: string]: void } = {
+  [ENTER]: null,
+  [ESCAPE]: null,
+  [UP_ARROW]: null,
+  [DOWN_ARROW]: null
+};
 
 const matcher = new FuzzyMatcher('title', 'caption');
 
@@ -114,6 +123,14 @@ interface ICommandPaletteSectionPrivate {
   items: string[];
 };
 
+/**
+ * Test to see if a child node needs to be scrolled to within its parent node.
+ */
+function scrollTest(parentNode: HTMLElement, childNode: HTMLElement): boolean {
+  let parent = parentNode.getBoundingClientRect();
+  let child = childNode.getBoundingClientRect();
+  return child.top < parent.top || child.top + child.height > parent.bottom;
+}
 
 export
 class CommandPalette extends Widget implements ICommandPalette {
@@ -281,6 +298,13 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   /**
+   * A handler invoked on an `'after-show'` message.
+   */
+  protected onAfterShow(msg: Message): void {
+    this.node.getElementsByTagName('input')[0].focus();
+  }
+
+  /**
    * A handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
@@ -299,8 +323,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     if (this._searchResult) {
       // Reset the flag.
       this._searchResult = false;
-      let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
-      this._focus(this.node.querySelectorAll(selector)[0] as HTMLElement);
+      this._focusFirst();
     }
   }
 
@@ -421,7 +444,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _evtKeyDown(event: KeyboardEvent): void {
     let { altKey, ctrlKey, metaKey, keyCode } = event;
     let input = this.node.querySelector(`.${SEARCH_CLASS} input`);
-    if (keyCode !== UP_ARROW && keyCode !== DOWN_ARROW && keyCode !== ENTER) {
+    if (!FN_KEYS.hasOwnProperty(`${keyCode}`)) {
       let oldValue = (input as HTMLInputElement).value;
       requestAnimationFrame(() => {
         let newValue = (input as HTMLInputElement).value;
@@ -437,20 +460,13 @@ class CommandPalette extends Widget implements ICommandPalette {
       });
       return;
     }
-    // Ignore keyboard shortcuts that include up and down arrow.
-    if (altKey || ctrlKey || metaKey) {
-      return;
-    }
+    // Ignore system keyboard shortcuts.
+    if (altKey || ctrlKey || metaKey) return;
     event.preventDefault();
     event.stopPropagation();
-    if (keyCode === UP_ARROW) {
-      console.log('go up');
-      return;
-    }
-    if (keyCode === DOWN_ARROW) {
-      console.log('go down');
-      return;
-    }
+    if (keyCode === ESCAPE) return this._blur();
+    if (keyCode === UP_ARROW) return this._focusPrevious();
+    if (keyCode === DOWN_ARROW) return this._focusNext();
     if (keyCode === ENTER) {
       let focused = this._findFocus();
       if (focused) {
@@ -488,7 +504,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     return this.node.querySelector(selector) as HTMLElement;
   }
 
-  private _focus(target: HTMLElement): void {
+  private _focus(target: HTMLElement, scroll?: boolean): void {
     let focused = this._findFocus();
     if (target === focused) {
       return;
@@ -497,6 +513,54 @@ class CommandPalette extends Widget implements ICommandPalette {
       this._blur();
     }
     target.classList.add(FOCUS_CLASS);
+    if (scroll) target.scrollIntoView();
+  }
+
+  private _focusFirst(): void {
+    let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
+    this.contentNode.scrollTop = 0;
+    this._focus(this.node.querySelectorAll(selector)[0] as HTMLElement);
+  }
+
+  private _focusLast(scroll?: boolean): void {
+    let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
+    let nodes = this.node.querySelectorAll(selector);
+    let last = nodes.length - 1;
+    this._focus(nodes[last] as HTMLElement, scroll);
+  }
+
+  private _focusNext(): void {
+    let focused = this._findFocus();
+    if (!focused) return this._focusFirst();
+    let flat = this._buffer.map(section => section.items)
+      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
+    let current = flat.indexOf(focused.getAttribute(REGISTRATION_ID));
+    let next = current < flat.length - 1 ? current + 1 : 0;
+    while (next !== current) {
+      if (!this._registry[flat[next]].disabled) break;
+      next = next < flat.length - 1 ? next + 1 : 0;
+    }
+    if (next === 0) return this._focusFirst();
+    let selector = `[${REGISTRATION_ID}="${flat[next]}"]`;
+    let target = this.node.querySelector(selector) as HTMLElement;
+    this._focus(target, scrollTest(this.contentNode, target));
+  }
+
+  private _focusPrevious(): void {
+    let focused = this._findFocus();
+    if (!focused) return this._focusLast(true);
+    let flat = this._buffer.map(section => section.items)
+      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
+    let current = flat.indexOf(focused.getAttribute(REGISTRATION_ID));
+    let previous = current > 0 ? current - 1 : flat.length - 1;
+    while (previous !== current) {
+      if (!this._registry[flat[previous]].disabled) break;
+      previous = previous > 0 ? previous - 1 : flat.length - 1;
+    }
+    if (previous === 0) return this._focusFirst();
+    let selector = `[${REGISTRATION_ID}="${flat[previous]}"]`;
+    let target = this.node.querySelector(selector) as HTMLElement;
+    this._focus(target, scrollTest(this.contentNode, target));
   }
 
   private _privatize(item: ICommandPaletteItem): ICommandPaletteItemPrivate {
