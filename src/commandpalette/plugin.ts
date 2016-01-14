@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  Container, Token
+  Container, Token, IFactory
 } from 'phosphor-di';
 
 import {
@@ -24,6 +24,13 @@ import {
 } from '../commandregistry/index';
 
 
+const paletteFactory = {
+  requires: [ICommandRegistry] as Token<any>[],
+  create: (commandRegistry: ICommandRegistry): ICommandPalette => {
+    return new CommandPalette(commandRegistry);
+  }
+} as IFactory<ICommandPalette>;
+
 /**
  * Register the plugin contributions.
  *
@@ -34,21 +41,5 @@ import {
  */
 export
 function register(container: Container): void {
-  container.register(ICommandPalette, CommandPaletteWrapper);
-}
-
-class CommandPaletteWrapper {
-  /**
-   * The dependencies required by the command palette.
-   */
-  static requires: Token<any>[] = [ICommandRegistry];
-
-  /**
-   * Create a new command palette instance.
-   *
-   * @param commandRegistry - A command registry instance
-   */
-  static create(commandRegistry: ICommandRegistry): ICommandPalette {
-    return new CommandPalette(commandRegistry);
-  }
+  container.register(ICommandPalette, paletteFactory);
 }
