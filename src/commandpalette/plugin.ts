@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  Container, Token, IFactory, Lifetime
+  Container, Lifetime
 } from 'phosphor-di';
 
 import {
@@ -24,14 +24,6 @@ import {
 } from '../commandregistry/index';
 
 
-const paletteFactory: IFactory<ICommandPalette> = {
-  lifetime: Lifetime.Singleton,
-  requires: [ICommandRegistry],
-  create: (commandRegistry: ICommandRegistry): ICommandPalette => {
-    return new CommandPalette(commandRegistry);
-  }
-};
-
 /**
  * Register the plugin contributions.
  *
@@ -42,5 +34,11 @@ const paletteFactory: IFactory<ICommandPalette> = {
  */
 export
 function register(container: Container): void {
-  container.register(ICommandPalette, paletteFactory);
+  container.register(ICommandPalette, {
+    lifetime: Lifetime.Singleton,
+    requires: [ICommandRegistry],
+    create: (commandRegistry: ICommandRegistry): ICommandPalette => {
+      return new CommandPalette(commandRegistry);
+    }
+  });
 }
