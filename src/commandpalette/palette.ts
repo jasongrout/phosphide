@@ -56,7 +56,7 @@ const PALETTE_CLASS = 'p-CommandPalette';
 
 const HEADER_CLASS = 'p-CommandPalette-header';
 
-const INPUT_CLASS = 'p-CommandPalette-inputwrapper';
+const INPUT_CLASS = 'p-CommandPalette-inputWrapper';
 
 const DISABLED_CLASS = 'p-mod-disabled';
 
@@ -84,6 +84,20 @@ const FN_KEYS: { [key: string]: void } = {
   [UP_ARROW]: null,
   [DOWN_ARROW]: null
 };
+
+/**
+ * The scroll directions for changing command focus.
+ */
+const enum FocusDirection {
+  /**
+   * Move the focus up.
+   */
+  Up,
+  /**
+   * Move the focus down.
+   */
+  Down
+}
 
 const matcher = new FuzzyMatcher('title', 'caption');
 
@@ -257,8 +271,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     super();
     this.addClass(PALETTE_CLASS);
     this._commandRegistry = commandRegistry;
-    this._commandRegistry.commandsAdded.connect(this._commandsUpdated, this);
-    this._commandRegistry.commandsRemoved.connect(this._commandsUpdated, this);
+    commandRegistry.commandsAdded.connect(this._commandsUpdated, this);
+    commandRegistry.commandsRemoved.connect(this._commandsUpdated, this);
   }
 
   /**
@@ -334,6 +348,17 @@ class CommandPalette extends Widget implements ICommandPalette {
       this._evtMouseOut(event as MouseEvent);
       break;
     }
+  }
+
+  /**
+   * Search for a specific query string among command titles and captions.
+   *
+   * @param query - The query string
+   */
+  search(query: string): void {
+    matcher.search(query, this._searchItems()).then(results => {
+      this._bufferSearchResults(results);
+    });
   }
 
   /**
@@ -516,17 +541,13 @@ class CommandPalette extends Widget implements ICommandPalette {
    */
   private _evtKeyDown(event: KeyboardEvent): void {
     let { altKey, ctrlKey, metaKey, keyCode } = event;
-    let input = this.inputNode;
     if (!FN_KEYS.hasOwnProperty(`${keyCode}`)) {
+      let input = this.inputNode;
       let oldValue = input.value;
       requestAnimationFrame(() => {
         let newValue = input.value;
         if (newValue === '') return this._bufferAllItems();
-        if (newValue !== oldValue) {
-          matcher.search(newValue, this._searchItems()).then(results => {
-            this._bufferSearchResults(results);
-          });
-        }
+        if (newValue !== oldValue) return this.search(newValue);
       });
       return;
     }
@@ -535,8 +556,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     event.preventDefault();
     event.stopPropagation();
     if (keyCode === ESCAPE) return this._blur();
-    if (keyCode === UP_ARROW) return this._focusPrevious();
-    if (keyCode === DOWN_ARROW) return this._focusNext();
+    if (keyCode === UP_ARROW) return this._focus(FocusDirection.Up);
+    if (keyCode === DOWN_ARROW) return this._focus(FocusDirection.Down);
     if (keyCode === ENTER) {
       let focused = this._findFocus();
       if (!focused) return;
@@ -557,7 +578,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       target = target.parentElement;
     }
     let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
-    if (!priv.disabled) this._focus(target);
+    if (!priv.disabled) this._focusNode(target);
   }
 
   /**
@@ -577,14 +598,35 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   /**
-   * Select a specific command and optionally scroll it into view.
+   * Select the next command in the given direction.
    */
-  private _focus(target: HTMLElement, scroll?: boolean): void {
+  private _focus(direction: FocusDirection): void {
     let focused = this._findFocus();
-    if (target === focused) return;
-    if (focused) this._blur();
-    target.classList.add(FOCUS_CLASS);
-    if (scroll) target.scrollIntoView();
+    if (!focused) {
+      if (direction === FocusDirection.Down) return this._focusFirst();
+      if (direction === FocusDirection.Up) return this._focusLast(true);
+    }
+    let flat = this._buffer.map(section => section.items)
+      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
+    let current = flat.indexOf(focused.getAttribute(REGISTRATION_ID));
+    let newFocus: number;
+    if (direction === FocusDirection.Up) {
+      newFocus = current > 0 ? current - 1 : flat.length - 1;
+    } else {
+      newFocus = current < flat.length - 1 ? current + 1 : 0;
+    }
+    while (newFocus !== current) {
+      if (!this._registry[flat[newFocus]].disabled) break;
+      if (direction === FocusDirection.Up) {
+        newFocus = newFocus > 0 ? newFocus - 1 : flat.length - 1;
+      } else {
+        newFocus = newFocus < flat.length - 1 ? newFocus + 1 : 0;
+      }
+    }
+    if (newFocus === 0) return this._focusFirst();
+    let selector = `[${REGISTRATION_ID}="${flat[newFocus]}"]`;
+    let target = this.node.querySelector(selector) as HTMLElement;
+    this._focusNode(target, scrollTest(this.contentNode, target));
   }
 
   /**
@@ -593,7 +635,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _focusFirst(): void {
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     this.contentNode.scrollTop = 0;
-    this._focus(this.node.querySelectorAll(selector)[0] as HTMLElement);
+    this._focusNode(this.node.querySelectorAll(selector)[0] as HTMLElement);
   }
 
   /**
@@ -603,47 +645,18 @@ class CommandPalette extends Widget implements ICommandPalette {
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     let nodes = this.node.querySelectorAll(selector);
     let last = nodes.length - 1;
-    this._focus(nodes[last] as HTMLElement, scroll);
+    this._focusNode(nodes[last] as HTMLElement, scroll);
   }
 
   /**
-   * Select the next command after the current selection.
+   * Select a specific command and optionally scroll it into view.
    */
-  private _focusNext(): void {
+  private _focusNode(target: HTMLElement, scroll?: boolean): void {
     let focused = this._findFocus();
-    if (!focused) return this._focusFirst();
-    let flat = this._buffer.map(section => section.items)
-      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
-    let current = flat.indexOf(focused.getAttribute(REGISTRATION_ID));
-    let next = current < flat.length - 1 ? current + 1 : 0;
-    while (next !== current) {
-      if (!this._registry[flat[next]].disabled) break;
-      next = next < flat.length - 1 ? next + 1 : 0;
-    }
-    if (next === 0) return this._focusFirst();
-    let selector = `[${REGISTRATION_ID}="${flat[next]}"]`;
-    let target = this.node.querySelector(selector) as HTMLElement;
-    this._focus(target, scrollTest(this.contentNode, target));
-  }
-
-  /**
-   * Select the previous command after the current selection.
-   */
-  private _focusPrevious(): void {
-    let focused = this._findFocus();
-    if (!focused) return this._focusLast(true);
-    let flat = this._buffer.map(section => section.items)
-      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
-    let current = flat.indexOf(focused.getAttribute(REGISTRATION_ID));
-    let previous = current > 0 ? current - 1 : flat.length - 1;
-    while (previous !== current) {
-      if (!this._registry[flat[previous]].disabled) break;
-      previous = previous > 0 ? previous - 1 : flat.length - 1;
-    }
-    if (previous === 0) return this._focusFirst();
-    let selector = `[${REGISTRATION_ID}="${flat[previous]}"]`;
-    let target = this.node.querySelector(selector) as HTMLElement;
-    this._focus(target, scrollTest(this.contentNode, target));
+    if (target === focused) return;
+    if (focused) this._blur();
+    target.classList.add(FOCUS_CLASS);
+    if (scroll) target.scrollIntoView();
   }
 
   /**
