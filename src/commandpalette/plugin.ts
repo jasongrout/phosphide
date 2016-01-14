@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  Container, Token, IFactory
+  Container, Token, IFactory, Lifetime
 } from 'phosphor-di';
 
 import {
@@ -24,12 +24,13 @@ import {
 } from '../commandregistry/index';
 
 
-const paletteFactory = {
-  requires: [ICommandRegistry] as Token<any>[],
+const paletteFactory: IFactory<ICommandPalette> = {
+  lifetime: Lifetime.Singleton,
+  requires: [ICommandRegistry],
   create: (commandRegistry: ICommandRegistry): ICommandPalette => {
     return new CommandPalette(commandRegistry);
   }
-} as IFactory<ICommandPalette>;
+};
 
 /**
  * Register the plugin contributions.
