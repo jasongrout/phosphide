@@ -38,6 +38,23 @@ interface ICommandPaletteSection {
 
 
 /**
+ * A group of items that can added to a command palette with headings.
+ */
+export
+interface ICommandPaletteSectionState {
+  /**
+   * A list of run-time registration IDs for a command palette section's items.
+   */
+  registrationIDs: string[];
+
+  /**
+   * A list of run-time disabled status for a command palette section's items.
+   */
+  disableds: boolean[];
+}
+
+
+/**
  * An object which can be added to a command palette section.
  */
 export
