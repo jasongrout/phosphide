@@ -697,7 +697,6 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _renderSection(privSection: ICommandPaletteSectionPrivate): void {
     if (!privSection.items.some(id => this._registry[id].visible)) return;
     let constructor = this.constructor as typeof CommandPalette;
-    let content = this.contentNode;
     let section: ICommandPaletteSection = { text: privSection.text, items: [] };
     let registrationsIDs: string[] = [];
     let disableds: boolean[] = [];
@@ -710,11 +709,12 @@ class CommandPalette extends Widget implements ICommandPalette {
     });
     let fragment = constructor.createSectionFragment(section);
     let nodes = fragment.querySelectorAll(`.${COMMAND_CLASS}`);
+    // Update new command nodes with registrationID and disabled state.
     for (let i = 0; i < nodes.length; ++i) {
       nodes[i].setAttribute(REGISTRATION_ID, registrationsIDs[i]);
       if (disableds[i]) nodes[i].classList.add(DISABLED_CLASS);
     }
-    content.appendChild(fragment);
+    this.contentNode.appendChild(fragment);
   }
 
   /**
