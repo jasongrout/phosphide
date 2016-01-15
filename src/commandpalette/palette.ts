@@ -34,8 +34,7 @@ import {
 } from '../commandregistry/index';
 
 import {
-  ICommandPalette, ICommandPaletteItem,
-  ICommandPaletteSection, ICommandPaletteItemState
+  ICommandPalette, ICommandPaletteItem, ICommandPaletteSection
 } from './index';
 
 import {
@@ -190,29 +189,23 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param item - The content for the palette item.
    *
-   * @param state - The current runtime state information for an item
-   *
    * @returns A new DOM node to use as an item in a command palette.
    *
    * #### Notes
-   * This method may be reimplemented to create custom items. The
-   * `state.registrationID` *must* be set as the value for the node's data
-   * attribute: `data-registration-id`
+   * This method may be reimplemented to create custom items.
    */
-  static createItemNode(item: ICommandPaletteItem, state: ICommandPaletteItemState): HTMLElement {
+  static createItemNode(item: ICommandPaletteItem): HTMLElement {
     let node = document.createElement('li');
     let description = document.createElement('div');
     let shortcut = document.createElement('div');
     node.className = COMMAND_CLASS;
     description.className = DESCRIPTION_CLASS;
     shortcut.className = SHORTCUT_CLASS;
-    if (state.disabled) node.classList.add(DISABLED_CLASS);
     node.textContent = item.title;
     if (item.caption) description.textContent = item.caption;
     if (item.shortcut) shortcut.textContent = item.shortcut;
     node.appendChild(shortcut);
     node.appendChild(description);
-    node.setAttribute(REGISTRATION_ID, state.registrationID);
     return node;
   }
 
@@ -221,20 +214,16 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param section - The section content.
    *
-   * @param state - The registration IDs and disabled flags for a section.
-   *
    * @returns A `DocumentFragment` with the whole rendered section.
    *
    * #### Notes
-   * This method may be reimplemented to create custom sections. Instead of
-   * returning a DOM node, it returns a `DocumentFragment` in order to allow
-   * for both single nodes and lists of nodes being generated.
+   * This method may be reimplemented to create custom sections.
    */
-  static createSectionFragment(section: ICommandPaletteSection, state: ICommandPaletteItemState[]): DocumentFragment {
+  static createSectionFragment(section: ICommandPaletteSection): DocumentFragment {
     let fragment = document.createDocumentFragment();
     fragment.appendChild(this.createHeaderNode(section.text));
     section.items.forEach((item, index) => {
-      fragment.appendChild(this.createItemNode(item, state[index]));
+      fragment.appendChild(this.createItemNode(item));
     });
     return fragment;
   }
@@ -710,14 +699,22 @@ class CommandPalette extends Widget implements ICommandPalette {
     let constructor = this.constructor as typeof CommandPalette;
     let content = this.contentNode;
     let section: ICommandPaletteSection = { text: privSection.text, items: [] };
-    let state: ICommandPaletteItemState[] = [];
+    let registrationsIDs: string[] = [];
+    let disableds: boolean[] = [];
     privSection.items.forEach(registrationID => {
       let priv = this._registry[registrationID];
       if (!priv.visible) return;
       section.items.push(priv.item);
-      state.push({ disabled: priv.disabled, registrationID: registrationID });
+      disableds.push(priv.disabled);
+      registrationsIDs.push(registrationID);
     });
-    content.appendChild(constructor.createSectionFragment(section, state));
+    let fragment = constructor.createSectionFragment(section);
+    let nodes = fragment.querySelectorAll(`.${COMMAND_CLASS}`);
+    for (let i = 0; i < nodes.length; ++i) {
+      nodes[i].setAttribute(REGISTRATION_ID, registrationsIDs[i]);
+      if (disableds[i]) nodes[i].classList.add(DISABLED_CLASS);
+    }
+    content.appendChild(fragment);
   }
 
   /**

@@ -38,23 +38,6 @@ interface ICommandPaletteSection {
 
 
 /**
- * The current state of a command palette items.
- */
-export
-interface ICommandPaletteItemState {
-  /**
-   * The registration ID for a command palette item.
-   */
-  registrationID: string;
-
-  /**
-   * The run-time disabled status of a command palette item.
-   */
-  disabled: boolean;
-}
-
-
-/**
  * An object which can be added to a command palette section.
  */
 export
