@@ -222,7 +222,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   static createSectionFragment(section: ICommandPaletteSection): DocumentFragment {
     let fragment = document.createDocumentFragment();
     fragment.appendChild(this.createHeaderNode(section.text));
-    section.items.forEach((item, index) => {
+    section.items.forEach(item => {
       fragment.appendChild(this.createItemNode(item));
     });
     return fragment;
