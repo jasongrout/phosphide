@@ -222,7 +222,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   static createSectionFragment(section: ICommandPaletteSection): DocumentFragment {
     let fragment = document.createDocumentFragment();
     fragment.appendChild(this.createHeaderNode(section.text));
-    section.items.forEach((item, index) => {
+    section.items.forEach(item => {
       fragment.appendChild(this.createItemNode(item));
     });
     return fragment;
@@ -322,7 +322,7 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * #### Notes
    * This method implements the DOM `EventListener` interface and is
-   * called in response to events on the side bar's DOM node. It should
+   * called in response to events on the command palette's DOM node. It should
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
@@ -606,25 +606,25 @@ class CommandPalette extends Widget implements ICommandPalette {
       if (direction === FocusDirection.Down) return this._focusFirst();
       if (direction === FocusDirection.Up) return this._focusLast(true);
     }
-    let registrationIDs = this._buffer.map(section => section.items)
+    let registrations = this._buffer.map(section => section.items)
       .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
-    let current = registrationIDs.indexOf(focused.getAttribute(REGISTRATION_ID));
+    let current = registrations.indexOf(focused.getAttribute(REGISTRATION_ID));
     let newFocus: number;
     if (direction === FocusDirection.Up) {
-      newFocus = current > 0 ? current - 1 : registrationIDs.length - 1;
+      newFocus = current > 0 ? current - 1 : registrations.length - 1;
     } else {
-      newFocus = current < registrationIDs.length - 1 ? current + 1 : 0;
+      newFocus = current < registrations.length - 1 ? current + 1 : 0;
     }
     while (newFocus !== current) {
-      if (!this._registry[registrationIDs[newFocus]].disabled) break;
+      if (!this._registry[registrations[newFocus]].disabled) break;
       if (direction === FocusDirection.Up) {
-        newFocus = newFocus > 0 ? newFocus - 1 : registrationIDs.length - 1;
+        newFocus = newFocus > 0 ? newFocus - 1 : registrations.length - 1;
       } else {
-        newFocus = newFocus < registrationIDs.length - 1 ? newFocus + 1 : 0;
+        newFocus = newFocus < registrations.length - 1 ? newFocus + 1 : 0;
       }
     }
     if (newFocus === 0) return this._focusFirst();
-    let selector = `[${REGISTRATION_ID}="${registrationIDs[newFocus]}"]`;
+    let selector = `[${REGISTRATION_ID}="${registrations[newFocus]}"]`;
     let target = this.node.querySelector(selector) as HTMLElement;
     this._focusNode(target, scrollTest(this.contentNode, target));
   }
@@ -698,20 +698,20 @@ class CommandPalette extends Widget implements ICommandPalette {
     if (!privSection.items.some(id => this._registry[id].visible)) return;
     let constructor = this.constructor as typeof CommandPalette;
     let section: ICommandPaletteSection = { text: privSection.text, items: [] };
-    let registrationsIDs: string[] = [];
+    let registrations: string[] = [];
     let disableds: boolean[] = [];
     privSection.items.forEach(registrationID => {
       let priv = this._registry[registrationID];
       if (!priv.visible) return;
       section.items.push(priv.item);
       disableds.push(priv.disabled);
-      registrationsIDs.push(registrationID);
+      registrations.push(registrationID);
     });
     let fragment = constructor.createSectionFragment(section);
     let nodes = fragment.querySelectorAll(`.${COMMAND_CLASS}`);
     // Update new command nodes with registrationID and disabled state.
     for (let i = 0; i < nodes.length; ++i) {
-      nodes[i].setAttribute(REGISTRATION_ID, registrationsIDs[i]);
+      nodes[i].setAttribute(REGISTRATION_ID, registrations[i]);
       if (disableds[i]) nodes[i].classList.add(DISABLED_CLASS);
     }
     this.contentNode.appendChild(fragment);
