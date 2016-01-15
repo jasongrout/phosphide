@@ -35,7 +35,7 @@ import {
 
 import {
   ICommandPalette, ICommandPaletteItem,
-  ICommandPaletteSection, ICommandPaletteSectionState
+  ICommandPaletteSection, ICommandPaletteItemState
 } from './index';
 
 import {
@@ -190,30 +190,29 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param item - The content for the palette item.
    *
-   * @param registrationID - An item ID that *must* be set as the value for the
-   * data attribute: `data-registration-id`
-   *
-   * @param disabled - A flag denoting whether a palette item is disabled.
+   * @param state - The current runtime state information for an item
    *
    * @returns A new DOM node to use as an item in a command palette.
    *
    * #### Notes
-   * This method may be reimplemented to create custom items.
+   * This method may be reimplemented to create custom items. The
+   * `state.registrationID` *must* be set as the value for the node's data
+   * attribute: `data-registration-id`
    */
-  static createItemNode(item: ICommandPaletteItem, registrationID: string, disabled: boolean): HTMLElement {
+  static createItemNode(item: ICommandPaletteItem, state: ICommandPaletteItemState): HTMLElement {
     let node = document.createElement('li');
     let description = document.createElement('div');
     let shortcut = document.createElement('div');
     node.className = COMMAND_CLASS;
     description.className = DESCRIPTION_CLASS;
     shortcut.className = SHORTCUT_CLASS;
-    if (disabled) node.classList.add(DISABLED_CLASS);
+    if (state.disabled) node.classList.add(DISABLED_CLASS);
     node.textContent = item.title;
     if (item.caption) description.textContent = item.caption;
     if (item.shortcut) shortcut.textContent = item.shortcut;
     node.appendChild(shortcut);
     node.appendChild(description);
-    node.setAttribute(REGISTRATION_ID, registrationID);
+    node.setAttribute(REGISTRATION_ID, state.registrationID);
     return node;
   }
 
@@ -231,13 +230,11 @@ class CommandPalette extends Widget implements ICommandPalette {
    * returning a DOM node, it returns a `DocumentFragment` in order to allow
    * for both single nodes and lists of nodes being generated.
    */
-  static createSectionFragment(section: ICommandPaletteSection, state: ICommandPaletteSectionState): DocumentFragment {
+  static createSectionFragment(section: ICommandPaletteSection, state: ICommandPaletteItemState[]): DocumentFragment {
     let fragment = document.createDocumentFragment();
     fragment.appendChild(this.createHeaderNode(section.text));
     section.items.forEach((item, index) => {
-      let disabled = state.disableds[index]
-      let registrationID = state.registrationIDs[index];
-      fragment.appendChild(this.createItemNode(item, registrationID, disabled));
+      fragment.appendChild(this.createItemNode(item, state[index]));
     });
     return fragment;
   }
@@ -713,19 +710,14 @@ class CommandPalette extends Widget implements ICommandPalette {
     let constructor = this.constructor as typeof CommandPalette;
     let content = this.contentNode;
     let section: ICommandPaletteSection = { text: privSection.text, items: [] };
-    let sectionState: ICommandPaletteSectionState = {
-      disableds: [],
-      registrationIDs: []
-    };
+    let state: ICommandPaletteItemState[] = [];
     privSection.items.forEach(registrationID => {
       let priv = this._registry[registrationID];
       if (!priv.visible) return;
       section.items.push(priv.item);
-      sectionState.disableds.push(priv.disabled);
-      sectionState.registrationIDs.push(registrationID);
+      state.push({ disabled: priv.disabled, registrationID: registrationID });
     });
-    let fragment = constructor.createSectionFragment(section, sectionState);
-    content.appendChild(fragment);
+    content.appendChild(constructor.createSectionFragment(section, state));
   }
 
   /**
