@@ -15,7 +15,7 @@
     "typescript": "^1.6.2"
   },
   "scripts": {
-    "build": "tsc --project blue && tsc --project green && tsc --project red && tsc --project yellow && tsc --project editor",
+    "build": "tsc --project application && tsc --project blue && tsc --project green && tsc --project red && tsc --project yellow && tsc --project editor",
     "postinstall": "npm dedupe"
   },
   "system": {

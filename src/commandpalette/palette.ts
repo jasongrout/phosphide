@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
+| Copyright (c) 2014-2016, PhosphorJS Contributors
 |
 | Distributed under the terms of the BSD 3-Clause License.
 |
@@ -12,10 +12,6 @@ import * as arrays from 'phosphor-arrays';
 import {
   ICommand
 } from 'phosphor-command';
-
-import {
-  Token
-} from 'phosphor-di';
 
 import {
   IDisposable, DisposableDelegate
@@ -151,20 +147,6 @@ function scrollTest(parentNode: HTMLElement, childNode: HTMLElement): boolean {
  */
 export
 class CommandPalette extends Widget implements ICommandPalette {
-  /**
-   * The dependencies required by the command palette.
-   */
-  static requires: Token<any>[] = [ICommandRegistry];
-
-  /**
-   * Create a new command palette instance.
-   *
-   * @param commandRegistry - A command registry instance
-   */
-  static create(commandRegistry: ICommandRegistry): ICommandPalette {
-    return new CommandPalette(commandRegistry);
-  }
-
   /**
    * Create the DOM node for a command palette.
    */
@@ -606,25 +588,25 @@ class CommandPalette extends Widget implements ICommandPalette {
       if (direction === FocusDirection.Down) return this._focusFirst();
       if (direction === FocusDirection.Up) return this._focusLast(true);
     }
-    let flat = this._buffer.map(section => section.items)
+    let registrationIDs = this._buffer.map(section => section.items)
       .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
-    let current = flat.indexOf(focused.getAttribute(REGISTRATION_ID));
+    let current = registrationIDs.indexOf(focused.getAttribute(REGISTRATION_ID));
     let newFocus: number;
     if (direction === FocusDirection.Up) {
-      newFocus = current > 0 ? current - 1 : flat.length - 1;
+      newFocus = current > 0 ? current - 1 : registrationIDs.length - 1;
     } else {
-      newFocus = current < flat.length - 1 ? current + 1 : 0;
+      newFocus = current < registrationIDs.length - 1 ? current + 1 : 0;
     }
     while (newFocus !== current) {
-      if (!this._registry[flat[newFocus]].disabled) break;
+      if (!this._registry[registrationIDs[newFocus]].disabled) break;
       if (direction === FocusDirection.Up) {
-        newFocus = newFocus > 0 ? newFocus - 1 : flat.length - 1;
+        newFocus = newFocus > 0 ? newFocus - 1 : registrationIDs.length - 1;
       } else {
-        newFocus = newFocus < flat.length - 1 ? newFocus + 1 : 0;
+        newFocus = newFocus < registrationIDs.length - 1 ? newFocus + 1 : 0;
       }
     }
     if (newFocus === 0) return this._focusFirst();
-    let selector = `[${REGISTRATION_ID}="${flat[newFocus]}"]`;
+    let selector = `[${REGISTRATION_ID}="${registrationIDs[newFocus]}"]`;
     let target = this.node.querySelector(selector) as HTMLElement;
     this._focusNode(target, scrollTest(this.contentNode, target));
   }

@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
+| Copyright (c) 2014-2016, PhosphorJS Contributors
 |
 | Distributed under the terms of the BSD 3-Clause License.
 |
@@ -88,11 +88,7 @@ class AppShell extends Widget implements IAppShell {
    * Create a new application shell instance.
    */
   static create(): IAppShell {
-    let shell = new AppShell();
-    let update = () => { shell.update(); };
-    window.addEventListener('resize', update);
-    shell.attach(document.body);
-    return shell;
+    return new AppShell();
   }
 
   /**

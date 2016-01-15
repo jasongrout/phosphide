@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
+| Copyright (c) 2014-2016, PhosphorJS Contributors
 |
 | Distributed under the terms of the BSD 3-Clause License.
 |
@@ -15,6 +15,7 @@ phosphide.loadPlugins(new di.Container(), [
   require('phosphide/lib/appshell/plugin'),
   require('phosphide/lib/commandregistry/plugin'),
   require('phosphide/lib/commandpalette/plugin'),
+  require('application/index'),
   require('red/index'),
   require('blue/index'),
   require('green/index'),
