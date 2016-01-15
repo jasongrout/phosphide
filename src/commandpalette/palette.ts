@@ -189,33 +189,43 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param item - The content for the palette item.
    *
-   * @param disabled - A flag denoting whether a palette item is disabled.
-   *
    * @returns A new DOM node to use as an item in a command palette.
    *
    * #### Notes
    * This method may be reimplemented to create custom items.
    */
-  static createItemNode(item: ICommandPaletteItem, disabled: boolean): HTMLElement {
+  static createItemNode(item: ICommandPaletteItem): HTMLElement {
     let node = document.createElement('li');
     let description = document.createElement('div');
     let shortcut = document.createElement('div');
-    node.classList.add(COMMAND_CLASS);
-    if (disabled) {
-      node.classList.add(DISABLED_CLASS);
-    }
-    description.classList.add(DESCRIPTION_CLASS);
-    shortcut.classList.add(SHORTCUT_CLASS);
+    node.className = COMMAND_CLASS;
+    description.className = DESCRIPTION_CLASS;
+    shortcut.className = SHORTCUT_CLASS;
     node.textContent = item.title;
-    if (item.caption) {
-      description.textContent = item.caption;
-    }
-    if (item.shortcut) {
-      shortcut.textContent = item.shortcut;
-    }
+    if (item.caption) description.textContent = item.caption;
+    if (item.shortcut) shortcut.textContent = item.shortcut;
     node.appendChild(shortcut);
     node.appendChild(description);
     return node;
+  }
+
+  /**
+   * Create a new section document fragment for a command palette.
+   *
+   * @param section - The section content.
+   *
+   * @returns A `DocumentFragment` with the whole rendered section.
+   *
+   * #### Notes
+   * This method may be reimplemented to create custom sections.
+   */
+  static createSectionFragment(section: ICommandPaletteSection): DocumentFragment {
+    let fragment = document.createDocumentFragment();
+    fragment.appendChild(this.createHeaderNode(section.text));
+    section.items.forEach((item, index) => {
+      fragment.appendChild(this.createItemNode(item));
+    });
+    return fragment;
   }
 
   /**
@@ -338,7 +348,15 @@ class CommandPalette extends Widget implements ICommandPalette {
    * @param query - The query string
    */
   search(query: string): void {
-    matcher.search(query, this._searchItems()).then(results => {
+    let searchableItems = this._sections.reduce((acc, val) => {
+      val.items.forEach(id => {
+        let title = this._registry[id].item.title;
+        let caption = this._registry[id].item.caption;
+        acc.push({ id, title, caption });
+      });
+      return acc;
+    }, [] as ICommandSearchItem[]);
+    matcher.search(query, searchableItems).then(results => {
       this._bufferSearchResults(results);
     });
   }
@@ -676,36 +694,27 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Render a section and its commands.
    */
-  private _renderSection(section: ICommandPaletteSectionPrivate): void {
-    if (!section.items.some(id => this._registry[id].visible)) return;
+  private _renderSection(privSection: ICommandPaletteSectionPrivate): void {
+    if (!privSection.items.some(id => this._registry[id].visible)) return;
     let constructor = this.constructor as typeof CommandPalette;
-    let content = this.contentNode;
-    let header = constructor.createHeaderNode(section.text);
-    content.appendChild(header);
-    section.items.forEach(registrationID => {
+    let section: ICommandPaletteSection = { text: privSection.text, items: [] };
+    let registrationsIDs: string[] = [];
+    let disableds: boolean[] = [];
+    privSection.items.forEach(registrationID => {
       let priv = this._registry[registrationID];
       if (!priv.visible) return;
-      let node = constructor.createItemNode(priv.item, priv.disabled);
-      node.setAttribute(REGISTRATION_ID, registrationID);
-      content.appendChild(node);
+      section.items.push(priv.item);
+      disableds.push(priv.disabled);
+      registrationsIDs.push(registrationID);
     });
-  }
-
-  /**
-   * Return a list of searchable items for the matcher.
-   */
-  private _searchItems(): ICommandSearchItem[] {
-    return this._sections.reduce((acc, val) => {
-      val.items.forEach(id => {
-        let priv = this._registry[id];
-        acc.push({
-          id: id,
-          title: priv.item.title,
-          caption: priv.item.caption
-        });
-      });
-      return acc;
-    }, [] as ICommandSearchItem[]);
+    let fragment = constructor.createSectionFragment(section);
+    let nodes = fragment.querySelectorAll(`.${COMMAND_CLASS}`);
+    // Update new command nodes with registrationID and disabled state.
+    for (let i = 0; i < nodes.length; ++i) {
+      nodes[i].setAttribute(REGISTRATION_ID, registrationsIDs[i]);
+      if (disableds[i]) nodes[i].classList.add(DISABLED_CLASS);
+    }
+    this.contentNode.appendChild(fragment);
   }
 
   /**
