@@ -79,6 +79,11 @@ class BlueHandler {
         text: 'Blue',
         items: [
           {
+            id: 'demo:colors:blue-foo',
+            title: 'Blue #0',
+            caption: 'Unregistered blue'
+          },
+          {
             id: 'demo:colors:blue-0',
             title: 'Blue #1',
             caption: 'Blue number one',
