@@ -463,7 +463,8 @@ class CommandPalette extends Widget implements ICommandPalette {
    * Set the buffer to all registered items.
    */
   private _bufferAllItems(): void {
-    this._prune();
+    // Filter out any sections that are empty.
+    this._sections = this._sections.filter(section => !!section.items.length);
     this._sort();
     this._buffer = this._sections;
     this.update();
@@ -667,13 +668,6 @@ class CommandPalette extends Widget implements ICommandPalette {
     // By default, until the registry is checked, all added items work.
     let disabled = false;
     return { disabled, item };
-  }
-
-  /**
-   * Filter out any sections that are empty.
-   */
-  private _prune(): void {
-    this._sections = this._sections.filter(section => !!section.items.length);
   }
 
   /**
