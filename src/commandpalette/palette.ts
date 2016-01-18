@@ -105,10 +105,6 @@ var commandID = 0;
  */
 interface ICommandPaletteItemPrivate {
   /**
-   * Flag denoting whether the item is visible.
-   */
-  visible: boolean;
-  /**
    * Flag denoting whether the item is disabled.
    */
   disabled: boolean;
@@ -398,8 +394,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     Object.keys(this._registry).forEach(registrationID => {
       let priv = this._registry[registrationID];
       let command = this._commandRegistry.get(priv.item.id);
-      priv.visible = !!command;
-      priv.disabled = priv.visible && !command.isEnabled();
+      priv.disabled = !command || !command.isEnabled();
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
@@ -468,7 +463,8 @@ class CommandPalette extends Widget implements ICommandPalette {
    * Set the buffer to all registered items.
    */
   private _bufferAllItems(): void {
-    this._prune();
+    // Filter out any sections that are empty.
+    this._sections = this._sections.filter(section => !!section.items.length);
     this._sort();
     this._buffer = this._sections;
     this.update();
@@ -553,9 +549,15 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
     // Ignore system keyboard shortcuts.
     if (altKey || ctrlKey || metaKey) return;
+    // If escape key is pressed and nothing is focused, allow propagation.
+    if (keyCode === ESCAPE) {
+      if (!this._findFocus()) return;
+      event.preventDefault();
+      event.stopPropagation();
+      return this._blur();
+    }
     event.preventDefault();
     event.stopPropagation();
-    if (keyCode === ESCAPE) return this._blur();
     if (keyCode === UP_ARROW) return this._focus(FocusDirection.Up);
     if (keyCode === DOWN_ARROW) return this._focus(FocusDirection.Down);
     if (keyCode === ENTER) {
@@ -665,15 +667,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _privatize(item: ICommandPaletteItem): ICommandPaletteItemPrivate {
     // By default, until the registry is checked, all added items work.
     let disabled = false;
-    let visible = true;
-    return { disabled, item, visible };
-  }
-
-  /**
-   * Filter out any sections that are empty.
-   */
-  private _prune(): void {
-    this._sections = this._sections.filter(section => !!section.items.length);
+    return { disabled, item };
   }
 
   /**
@@ -695,14 +689,12 @@ class CommandPalette extends Widget implements ICommandPalette {
    * Render a section and its commands.
    */
   private _renderSection(privSection: ICommandPaletteSectionPrivate): void {
-    if (!privSection.items.some(id => this._registry[id].visible)) return;
     let constructor = this.constructor as typeof CommandPalette;
     let section: ICommandPaletteSection = { text: privSection.text, items: [] };
     let registrations: string[] = [];
     let disableds: boolean[] = [];
     privSection.items.forEach(registrationID => {
       let priv = this._registry[registrationID];
-      if (!priv.visible) return;
       section.items.push(priv.item);
       disableds.push(priv.disabled);
       registrations.push(registrationID);
