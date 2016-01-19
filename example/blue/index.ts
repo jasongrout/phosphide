@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
+| Copyright (c) 2014-2016, PhosphorJS Contributors
 |
 | Distributed under the terms of the BSD 3-Clause License.
 |
@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry, ICommandItem
+  IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
 
 import {
@@ -33,11 +33,10 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(BlueHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(id: string): ICommandItem {
-  let command = new DelegateCommand((message: string) => {
+function createCommand(): (args: any) => void {
+  return (message: string) => {
     console.log(`COMMAND: ${message}`);
-  });
-  return { id, command };
+  };
 }
 
 
@@ -60,9 +59,8 @@ class BlueHandler {
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
-    this._commandDisposable = this._registry.add([
-      createCommand('demo:colors:blue-0')
-    ]);
+    let commandId = 'demo:colors:blue-0';
+    this._registry.add(commandId, createCommand());
     this._palette.add([
       {
         text: 'All colors',
@@ -78,6 +76,11 @@ class BlueHandler {
       {
         text: 'Blue',
         items: [
+          {
+            id: 'demo:colors:blue-foo',
+            title: 'Blue #0',
+            caption: 'Unregistered blue'
+          },
           {
             id: 'demo:colors:blue-0',
             title: 'Blue #1',

@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
+| Copyright (c) 2014-2016, PhosphorJS Contributors
 |
 | Distributed under the terms of the BSD 3-Clause License.
 |
@@ -8,12 +8,8 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry, ICommandItem
+  IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
-
-import {
-  DelegateCommand
-} from 'phosphor-command';
 
 import {
   Container
@@ -33,11 +29,10 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(GreenHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(id: string): ICommandItem {
-  let command = new DelegateCommand((message: string) => {
+function createCommand(): (args: any) => void {
+  return (message: string) => {
     console.log(`COMMAND: ${message}`);
-  });
-  return { id, command };
+  };
 }
 
 
@@ -60,14 +55,13 @@ class GreenHandler {
     widget.addClass('green-content');
     widget.title.text = 'Green';
     this._shell.addToRightArea(widget, { rank: 40 });
-    this._commandDisposable = this._registry.add([
-      createCommand('demo:colors:green-0'),
-      createCommand('demo:colors:green-1'),
-      createCommand('demo:colors:green-2'),
-      createCommand('demo:colors:green-3'),
-      createCommand('demo:colors:green-4'),
-      createCommand('demo:colors:green-5')
-    ]);
+    this._registry.add('demo:colors:green-0', createCommand());
+    this._registry.add('demo:colors:green-1', createCommand());
+    this._registry.add('demo:colors:green-2', createCommand());
+    this._registry.add('demo:colors:green-3', createCommand());
+    this._registry.add('demo:colors:green-4', createCommand());
+    this._registry.add('demo:colors:green-5', createCommand());
+
     this._palette.add([
       {
         text: 'All colors',

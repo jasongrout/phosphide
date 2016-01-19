@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
+| Copyright (c) 2014-2016, PhosphorJS Contributors
 |
 | Distributed under the terms of the BSD 3-Clause License.
 |
@@ -11,24 +11,29 @@
 }
 
 
-.p-CommandPalette .p-search {
+.p-CommandPalette-search {
   flex: 0 0 auto;
 }
 
 
-.p-CommandPalette .p-content {
+.p-CommandPalette-content {
   flex: 1 1 auto;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
   min-height: 0;
   overflow: auto;
 }
 
+.p-CommandPalette-header {
+  display: block;
+}
 
-.p-CommandPalette .p-command {
+.p-CommandPalette-command {
   display: block;
   text-decoration: none;
 }
 
-
-.p-CommandPalette .p-command .p-shortcut {
+.p-CommandPalette-shortcut {
   float: right;
 }

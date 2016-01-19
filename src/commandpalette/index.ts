@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2015, PhosphorJS Contributors
+| Copyright (c) 2014-2016, PhosphorJS Contributors
 |
 | Distributed under the terms of the BSD 3-Clause License.
 |
@@ -75,9 +75,19 @@ interface ICommandPaletteItem {
 export
 interface ICommandPalette extends Widget {
   /**
-   * Add new items to the command palette.
+   * Add new sections with heading titles and command items to the palette.
+   *
+   * @param sections - An array of sections to be added to the palette
+   *
+   * @returns An `IDisposable` to remove the added items from the palette
    */
   add(sections: ICommandPaletteSection[]): IDisposable;
+  /**
+   * Search for a specific query string among command titles and captions.
+   *
+   * @param query - The query string
+   */
+  search(query: string): void;
 }
 
 
