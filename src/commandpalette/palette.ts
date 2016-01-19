@@ -56,6 +56,8 @@ const FOCUS_CLASS = 'p-mod-focus';
 
 const COMMAND_CLASS = 'p-CommandPalette-command';
 
+const COMMAND_BODY_CLASS = 'p-CommandPalette-commandBody';
+
 const DESCRIPTION_CLASS = 'p-CommandPalette-description';
 
 const SHORTCUT_CLASS = 'p-CommandPalette-shortcut';
@@ -188,16 +190,20 @@ class CommandPalette extends Widget implements ICommandPalette {
    */
   static createItemNode(item: ICommandPaletteItem): HTMLElement {
     let node = document.createElement('li');
+    let body = document.createElement('div');
     let description = document.createElement('div');
     let shortcut = document.createElement('div');
     node.className = COMMAND_CLASS;
+    body.className = COMMAND_BODY_CLASS;
     description.className = DESCRIPTION_CLASS;
     shortcut.className = SHORTCUT_CLASS;
-    node.textContent = item.title;
+    body.textContent = item.title;
     if (item.caption) description.textContent = item.caption;
     if (item.shortcut) shortcut.textContent = item.shortcut;
+    body.appendChild(description);
+    node.appendChild(body);
     node.appendChild(shortcut);
-    node.appendChild(description);
+    node.setAttribute('title', item.title);
     return node;
   }
 

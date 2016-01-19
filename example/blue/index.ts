@@ -95,7 +95,7 @@ class BlueHandler {
           },
           {
             id: 'demo:colors:blue-0',
-            title: 'Blue #3',
+            title: 'Blue three is a very very very long title',
             caption: 'Blue number three',
             args: 'Blue number three'
           },
