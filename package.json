@@ -18,7 +18,6 @@
     "phosphor-signaling": "^1.2.0",
     "phosphor-splitpanel": "^1.0.0-rc.1",
     "phosphor-stackedpanel": "^1.0.0-rc.0",
-    "phosphor-topsort": "^0.9.1",
     "phosphor-widget": "^1.0.0-rc.0"
   },
   "devDependencies": {
