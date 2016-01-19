@@ -81,7 +81,7 @@ interface IPlugin {
 export
 function loadPlugins(container: Container, plugins: IPlugin[]): Promise<void> {
   // Lookup the plugin set for the container.
-  let pluginSet = PluginPrivate.pluginSetProperty.get(container);
+  let pluginSet = PluginsPrivate.pluginSetProperty.get(container);
 
   // Filter for the new plugins.
   let newPlugins: IPlugin[] = [];
@@ -116,7 +116,7 @@ function loadPlugins(container: Container, plugins: IPlugin[]): Promise<void> {
 /**
  * The namespace for the plugin private data.
  */
-namespace PluginPrivate {
+namespace PluginsPrivate {
   /**
    * The property descriptor for a container's plugin set.
    */
