@@ -389,7 +389,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Ask the command registry about each palette commmand.
     Object.keys(this._registry).forEach(registrationID => {
       let priv = this._registry[registrationID];
-      priv.disabled = this._commandRegistry.isDisabled(priv.item.id);
+      priv.disabled = !this._commandRegistry.has(priv.item.id) ||
+        this._commandRegistry.isDisabled(priv.item.id);
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
