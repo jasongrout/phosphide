@@ -13,6 +13,7 @@
     "../typings/es6-collections/es6-collections.d.ts",
     "../typings/es6-promise/es6-promise.d.ts",
     "../typings/fuzzysearch-js/fuzzysearch-js.d.ts",
+    "core.ts",
     "index.ts",
     "appshell/index.ts",
     "appshell/plugin.ts",
@@ -20,7 +21,6 @@
     "commandregistry/index.ts",
     "commandregistry/plugin.ts",
     "commandpalette/index.ts",
-    "commandpalette/plugin.ts",
-    "plugin/index.ts"
+    "commandpalette/plugin.ts"
   ]
 }
