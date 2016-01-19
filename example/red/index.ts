@@ -8,12 +8,8 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry, ICommandItem
+  IAppShell, ICommandPalette, ICommandRegistry
 } from 'phosphide';
-
-import {
-  DelegateCommand
-} from 'phosphor-command';
 
 import {
   Container
@@ -33,11 +29,10 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(RedHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(id: string): ICommandItem {
-  let command = new DelegateCommand((message: string) => {
+function createCommand(): (args: any) => void {
+  return (message: string) => {
     console.log(`COMMAND: ${message}`);
-  });
-  return { id, command };
+  };
 }
 
 
@@ -60,14 +55,13 @@ class RedHandler {
     widget.addClass('red-content');
     widget.title.text = 'Red';
     this._shell.addToRightArea(widget, { rank: 30 });
-    this._commandDisposable = this._registry.add([
-      createCommand('demo:colors:red-0'),
-      createCommand('demo:colors:red-1'),
-      createCommand('demo:colors:red-2'),
-      createCommand('demo:colors:red-3'),
-      createCommand('demo:colors:red-4'),
-      createCommand('demo:colors:red-5')
-    ]);
+    this._registry.add('demo:colors:red-0', createCommand());
+    this._registry.add('demo:colors:red-1', createCommand());
+    this._registry.add('demo:colors:red-2', createCommand());
+    this._registry.add('demo:colors:red-3', createCommand());
+    this._registry.add('demo:colors:red-4', createCommand());
+    this._registry.add('demo:colors:red-5', createCommand());
+
     this._palette.add([
       {
         text: 'All colors',

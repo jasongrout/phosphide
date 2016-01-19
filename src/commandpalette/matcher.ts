@@ -8,11 +8,7 @@
 'use strict';
 
 import {
-  ICommand
-} from 'phosphor-command';
-
-import {
-  ICommandItem
+  ICommandRecord
 } from '../commandregistry/index';
 
 import FuzzySearch = require('fuzzysearch-js');
