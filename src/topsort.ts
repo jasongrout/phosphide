@@ -18,7 +18,9 @@
  *   the graph, the return value will be approximately sorted.
  *
  * #### Notes
- * The
+ * The order of the edges in the input array is irrelevant. Their
+ * order will be normalized before sorting to ensure a repeatable
+ * solution.
  */
 export
 function topSort(edges: Array<[string, string]>): string[] {
