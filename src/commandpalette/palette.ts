@@ -257,6 +257,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     this._commandRegistry = commandRegistry;
     commandRegistry.commandAdded.connect(this._commandUpdated, this);
     commandRegistry.commandRemoved.connect(this._commandUpdated, this);
+    commandRegistry.commandChanged.connect(this._commandUpdated, this);
   }
 
   /**
@@ -266,6 +267,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     let commandRegistry = this._commandRegistry;
     commandRegistry.commandAdded.disconnect(this._commandUpdated, this);
     commandRegistry.commandRemoved.disconnect(this._commandUpdated, this);
+    commandRegistry.commandChanged.disconnect(this._commandUpdated, this);
     this._sections.length = 0;
     this._buffer.length = 0;
     this._registry = null;
@@ -389,7 +391,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Ask the command registry about each palette commmand.
     Object.keys(this._registry).forEach(registrationID => {
       let priv = this._registry[registrationID];
-      priv.disabled = this._commandRegistry.isDisabled(priv.item.id);
+      let exists = this._commandRegistry.has(priv.item.id);
+      priv.disabled = !exists || this._commandRegistry.isDisabled(priv.item.id);
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
@@ -497,9 +500,9 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * A handler for command registry additions and removals.
    */
-  private _commandUpdated(sender: ICommandRegistry, args: string): void {
+  private _commandUpdated(sender: ICommandRegistry, id: string): void {
     let staleRegistry = Object.keys(this._registry).some(registrationID => {
-      return this._registry[registrationID].item.id === args;
+      return this._registry[registrationID].item.id === id;
     });
     if (staleRegistry) this.update();
   }

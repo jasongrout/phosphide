@@ -59,7 +59,8 @@ class YellowHandler {
     this._registry.add('demo:colors:yellow-1', createCommand());
     this._registry.add('demo:colors:yellow-2', createCommand());
     this._registry.add('demo:colors:yellow-3', createCommand());
-    this._registry.add('demo:colors:yellow-4', createCommand());
+    let record = this._registry.add('demo:colors:yellow-4', createCommand());
+    record.disabled = true;
     this._registry.add('demo:colors:yellow-5', createCommand());
 
     this._palette.add([
