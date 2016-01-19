@@ -10,10 +10,6 @@
 import * as arrays from 'phosphor-arrays';
 
 import {
-  ICommand
-} from 'phosphor-command';
-
-import {
   IDisposable, DisposableDelegate
 } from 'phosphor-disposable';
 
@@ -30,7 +26,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ICommandItem, ICommandRegistry
+  ICommandRecord, ICommandRegistry
 } from '../commandregistry/index';
 
 import {
@@ -259,8 +255,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     super();
     this.addClass(PALETTE_CLASS);
     this._commandRegistry = commandRegistry;
-    commandRegistry.commandsAdded.connect(this._commandsUpdated, this);
-    commandRegistry.commandsRemoved.connect(this._commandsUpdated, this);
+    commandRegistry.commandAdded.connect(this._commandUpdated, this);
+    commandRegistry.commandRemoved.connect(this._commandUpdated, this);
   }
 
   /**
@@ -268,8 +264,8 @@ class CommandPalette extends Widget implements ICommandPalette {
    */
   dispose(): void {
     let commandRegistry = this._commandRegistry;
-    commandRegistry.commandsAdded.disconnect(this._commandsUpdated, this);
-    commandRegistry.commandsRemoved.disconnect(this._commandsUpdated, this);
+    commandRegistry.commandAdded.disconnect(this._commandUpdated, this);
+    commandRegistry.commandRemoved.disconnect(this._commandUpdated, this);
     this._sections.length = 0;
     this._buffer.length = 0;
     this._registry = null;
@@ -393,8 +389,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Ask the command registry about each palette commmand.
     Object.keys(this._registry).forEach(registrationID => {
       let priv = this._registry[registrationID];
-      let command = this._commandRegistry.get(priv.item.id);
-      priv.disabled = !command || !command.isEnabled();
+      priv.disabled = this._commandRegistry.isDisabled(priv.item.id);
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
@@ -502,13 +497,9 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * A handler for command registry additions and removals.
    */
-  private _commandsUpdated(sender: ICommandRegistry, args: string[]): void {
-    let added = args.reduce((acc, val) => {
-      acc[val] = null;
-      return acc;
-    }, Object.create(null) as { [id: string]: void });
+  private _commandUpdated(sender: ICommandRegistry, args: string): void {
     let staleRegistry = Object.keys(this._registry).some(registrationID => {
-      return this._registry[registrationID].item.id in added;
+      return this._registry[registrationID].item.id === args;
     });
     if (staleRegistry) this.update();
   }
@@ -528,7 +519,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
     let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
     if (!priv.disabled) {
-      this._commandRegistry.safeExecute(priv.item.id, priv.item.args);
+      this._commandRegistry.execute(priv.item.id, priv.item.args);
     }
   }
 
@@ -564,7 +555,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       let focused = this._findFocus();
       if (!focused) return;
       let priv = this._registry[focused.getAttribute(REGISTRATION_ID)];
-      this._commandRegistry.safeExecute(priv.item.id, priv.item.args);
+      this._commandRegistry.execute(priv.item.id, priv.item.args);
       this._blur();
       return;
     }
