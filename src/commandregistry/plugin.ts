@@ -99,6 +99,20 @@ class CommandRegistry implements ICommandRegistry {
   }
 
   /**
+   * Get a handler from the registry, given an id.
+   *
+   * @param id - The unique id for the command.
+   *
+   * @returns The registered handler for the id, or `undefined`.
+   */
+  get(id: string): () => boolean {
+    let state = this._stateMap[id];
+    if (state) {
+      return state.handler;
+    }
+  }
+
+  /**
    * Test whether a command is checked.
    *
    * @param id - The id of the command of interest.

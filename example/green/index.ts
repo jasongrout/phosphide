@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry
+  IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
 } from 'phosphide';
 
 import {
@@ -29,7 +29,7 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(GreenHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(): (args: any) => void {
+function createHandler(): (args: any) => void {
   return (message: string) => {
     console.log(`COMMAND: ${message}`);
   };
@@ -38,16 +38,17 @@ function createCommand(): (args: any) => void {
 
 class GreenHandler {
 
-  static requires = [IAppShell, ICommandPalette, ICommandRegistry];
+  static requires = [IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager];
 
-  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): GreenHandler {
-    return new GreenHandler(shell, palette, registry);
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): GreenHandler {
+    return new GreenHandler(shell, palette, registry, shortcuts);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager) {
     this._shell = shell;
     this._palette = palette;
     this._registry = registry;
+    this._shortcuts = shortcuts;
   }
 
   run(): void {
@@ -55,13 +56,19 @@ class GreenHandler {
     widget.addClass('green-content');
     widget.title.text = 'Green';
     this._shell.addToRightArea(widget, { rank: 40 });
-    this._registry.add('demo:colors:green-0', createCommand());
-    this._registry.add('demo:colors:green-1', createCommand());
-    this._registry.add('demo:colors:green-2', createCommand());
-    this._registry.add('demo:colors:green-3', createCommand());
-    this._registry.add('demo:colors:green-4', createCommand());
-    this._registry.add('demo:colors:green-5', createCommand());
+    let handler = createHandler();
+    this._registry.add('demo:colors:green-0', handler);
+    this._registry.add('demo:colors:green-1', createHandler());
+    this._registry.add('demo:colors:green-2', createHandler());
+    this._registry.add('demo:colors:green-3', createHandler());
+    this._registry.add('demo:colors:green-4', createHandler());
+    this._registry.add('demo:colors:green-5', createHandler());
 
+    this._shortcuts.add({
+      sequence: ['Ctrl G'],
+      selector: '*',
+      handler: handler
+    });
     this._palette.add([
       {
         text: 'All colors',
@@ -116,4 +123,5 @@ class GreenHandler {
   private _shell: IAppShell;
   private _palette: ICommandPalette;
   private _registry: ICommandRegistry;
+  private _shortcuts: IShortcutManager;
 }

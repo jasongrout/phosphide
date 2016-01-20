@@ -117,6 +117,15 @@ interface ICommandRegistry {
    * will be thrown.
    */
   add(id: string, handler: (args: any) => void): ICommandRecord;
+
+  /**
+   * Get a handler from the registry, given an id.
+   *
+   * @param id - The unique id for the command.
+   *
+   * @returns The registered handler for the id.
+   */
+  get(id: string): (args: any) => void;
 }
 
 

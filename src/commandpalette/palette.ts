@@ -30,6 +30,10 @@ import {
 } from '../commandregistry/index';
 
 import {
+  IShortcutManager
+} from '../shortcutmanager/index';
+
+import {
   ICommandPalette, ICommandPaletteItem, ICommandPaletteSection
 } from './index';
 
@@ -251,10 +255,11 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param commandRegistry - A command registry instance
    */
-  constructor(commandRegistry: ICommandRegistry) {
+  constructor(commandRegistry: ICommandRegistry, shortcuts: IShortcutManager) {
     super();
     this.addClass(PALETTE_CLASS);
     this._commandRegistry = commandRegistry;
+    this._shortcutManager = shortcuts;
     commandRegistry.commandAdded.connect(this._commandUpdated, this);
     commandRegistry.commandRemoved.connect(this._commandUpdated, this);
     commandRegistry.commandChanged.connect(this._commandUpdated, this);
@@ -660,6 +665,14 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _privatize(item: ICommandPaletteItem): ICommandPaletteItemPrivate {
     // By default, until the registry is checked, all added items work.
     let disabled = false;
+    let shortcut = '';
+    if (this._commandRegistry.get(item.id)) {
+      let sequences = this._shortcutManager.getSequencesForId(item.id);
+      if (sequences.length >= 1) {
+        shortcut = sequences[0].map(s => s.replace(/\s/g, '-')).join(' ');
+      }
+    }
+    item.shortcut = shortcut;
     return { disabled, item };
   }
 
@@ -716,6 +729,7 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   private _buffer: ICommandPaletteSectionPrivate[] = [];
   private _commandRegistry: ICommandRegistry = null;
+  private _shortcutManager: IShortcutManager = null;
   private _sections: ICommandPaletteSectionPrivate[] = [];
   private _searchResult: boolean = false;
   private _registry: {
