@@ -336,8 +336,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     case 'keydown':
       this._evtKeyDown(event as KeyboardEvent);
       break;
-    case 'mouseover':
-      this._evtMouseOver(event as MouseEvent);
+    case 'mousemove':
+      this._evtMouseMove(event as MouseEvent);
       break;
     case 'mouseout':
       this._evtMouseOut(event as MouseEvent);
@@ -370,7 +370,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
     this.node.addEventListener('keydown', this);
-    this.node.addEventListener('mouseover', this);
+    this.node.addEventListener('mousemove', this);
     this.node.addEventListener('mouseout', this);
   }
 
@@ -380,7 +380,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('keydown', this);
-    this.node.removeEventListener('mouseover', this);
+    this.node.removeEventListener('mousemove', this);
     this.node.removeEventListener('mouseout', this);
   }
 
@@ -626,9 +626,9 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   /**
-   * Handle the `'mouseover'` event for the command palette.
+   * Handle the `'mousemove'` event for the command palette.
    */
-  private _evtMouseOver(event: MouseEvent): void {
+  private _evtMouseMove(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     while (!target.hasAttribute(REGISTRATION_ID)) {
       if (target === this.node as HTMLElement) return;
