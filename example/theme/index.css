@@ -277,7 +277,7 @@ body {
 
 .p-CommandPalette {
   background: #white;
-  min-width: 150px;
+  min-width: 250px;
   min-height: 50px;
   padding: 4px 4px 0px 4px;
 }
@@ -323,27 +323,33 @@ body {
   padding: 3px 0 3px 2px;
 }
 
-.p-CommandPalette-command.p-mod-disabled {
+.p-CommandPalette-title {
+  padding-right: 5px;
+}
+
+.p-CommandPalette-command.p-mod-disabled,
+.p-CommandPalette-command.p-mod-disabled .p-CommandPalette-caption {
   color: #d5d5d5;
 }
 
-.p-CommandPalette-description {
+.p-CommandPalette-caption {
   color: #9e9e9e;
   font-weight: 400;
   font-size: 10px;
-}
-
-.p-CommandPalette-command.p-mod-disabled .p-CommandPalette-description {
-  color: #d5d5d5;
+  padding-right: 5px;
 }
 
 .p-CommandPalette-shortcut {
-  margin-right: 15px;
+  padding-right: 5px;
 }
 
-.p-CommandPalette-command.p-mod-focus,
-.p-CommandPalette-command.p-mod-focus .p-CommandPalette-description,
-.p-CommandPalette-command.p-mod-focus .p-CommandPalette-shortcut {
+.p-CommandPalette-shortcut:empty {
+  padding-right: 0;
+}
+
+.p-CommandPalette-command.p-mod-active,
+.p-CommandPalette-command.p-mod-active .p-CommandPalette-caption,
+.p-CommandPalette-command.p-mod-active .p-CommandPalette-shortcut {
   background: #2196f3;
   color: #fff;
 }
