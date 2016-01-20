@@ -269,26 +269,24 @@ class CommandPalette extends Widget implements ICommandPalette {
     let top = document.createElement('div');
     let bottom = document.createElement('div');
     let title = document.createElement('span');
+    let shortcut = document.createElement('span');
+    let caption = document.createElement('span');
     node.className = COMMAND_CLASS;
     top.className = COMMAND_TOP_CLASS;
     bottom.className = COMMAND_BOTTOM_CLASS;
     title.className = TITLE_CLASS;
     title.textContent = item.title;
     title.setAttribute('title', item.title);
-    top.appendChild(title);
-    if (item.shortcut) {
-      let shortcut = document.createElement('span');
-      shortcut.className = SHORTCUT_CLASS;
-      shortcut.textContent = item.shortcut;
-      top.appendChild(shortcut);
-    }
+    shortcut.className = SHORTCUT_CLASS;
+    caption.className = CAPTION_CLASS;
+    if (item.shortcut) shortcut.textContent = item.shortcut;
     if (item.caption) {
-      let caption = document.createElement('span');
-      caption.className = CAPTION_CLASS;
       caption.textContent = item.caption;
       caption.setAttribute('title', item.caption);
-      bottom.appendChild(caption);
     }
+    top.appendChild(title);
+    top.appendChild(shortcut);
+    bottom.appendChild(caption);
     node.appendChild(top);
     node.appendChild(bottom);
     return node;

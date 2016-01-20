@@ -340,8 +340,11 @@ body {
 }
 
 .p-CommandPalette-shortcut {
-  text-align: right;
   padding-right: 5px;
+}
+
+.p-CommandPalette-shortcut:empty {
+  padding-right: 0;
 }
 
 .p-CommandPalette-command.p-mod-active,
