@@ -130,8 +130,7 @@ class CommandRegistry implements ICommandRegistry {
    * @returns `true` if the command can execute, `false` otherwise.
    *
    * #### Notes
-   * A command is typically considered executable if it is registered
-   * and is not disabled.
+   * A command can execute if it is registered and is not disabled.
    */
   canExecute(id: string): boolean {
     let state = this._stateMap[id];
