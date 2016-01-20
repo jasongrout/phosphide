@@ -94,7 +94,7 @@ class CommandRegistry implements ICommandRegistry {
    *
    * @returns `true` if the command is registered, `false` otherwise.
    */
-  has(id: string): boolean {
+  isRegistered(id: string): boolean {
     return id in this._stateMap;
   }
 

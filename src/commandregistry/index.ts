@@ -54,7 +54,7 @@ interface ICommandRegistry {
    *
    * @returns `true` if the command is registered, `false` otherwise.
    */
-  has(id: string): boolean;
+  isRegistered(id: string): boolean;
 
   /**
    * Test whether a command is checked.
