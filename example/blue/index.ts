@@ -96,9 +96,9 @@ class BlueHandler {
           {
             id: 'demo:colors:blue-0',
             title: 'Blue three is a very very very long title',
-            caption: 'Blue number three has an extra long caption, too.',
-            args: 'Blue number three',
-            shortcut: 'CTRL+B'
+            caption: 'Blue number three has an extra long, long, long' +
+              ' caption, too.',
+            args: 'Blue number three'
           },
           {
             id: 'demo:colors:blue-0',
