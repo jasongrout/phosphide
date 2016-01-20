@@ -149,14 +149,6 @@ interface ICommandRecord extends IDisposable {
   id: string;
 
   /**
-   * The handler function for the command.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  handler: (args: any) => void;
-
-  /**
    * The checked state of the command.
    *
    * #### Notes
