@@ -45,7 +45,7 @@ interface ICommandRegistry {
    *
    * @returns A new array of the registered command ids.
    */
-  list(): string[];
+  listCommands(): string[];
 
   /**
    * Test whether a command is registered.

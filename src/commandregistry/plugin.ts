@@ -83,7 +83,7 @@ class CommandRegistry implements ICommandRegistry {
    *
    * @returns A new array of the registered command ids.
    */
-  list(): string[] {
+  listCommands(): string[] {
     return Object.keys(this._stateMap);
   }
 
