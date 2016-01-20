@@ -87,7 +87,7 @@ var commandID = 0;
 /**
  * The scroll directions for changing the active command.
  */
-const enum ActiveDirection {
+const enum ScrollDirection {
   /**
    * Move the active selection up.
    */
@@ -415,24 +415,24 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Activate the next command in the given direction.
    */
-  private _activate(direction: ActiveDirection): void {
+  private _activate(direction: ScrollDirection): void {
     let active = this._findActive();
     if (!active) {
-      if (direction === ActiveDirection.Down) return this._activateFirst();
-      if (direction === ActiveDirection.Up) return this._activateLast();
+      if (direction === ScrollDirection.Down) return this._activateFirst();
+      if (direction === ScrollDirection.Up) return this._activateLast();
     }
     let registrations = this._buffer.map(section => section.items)
       .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
     let current = registrations.indexOf(active.getAttribute(REGISTRATION_ID));
     let newActive: number;
-    if (direction === ActiveDirection.Up) {
+    if (direction === ScrollDirection.Up) {
       newActive = current > 0 ? current - 1 : registrations.length - 1;
     } else {
       newActive = current < registrations.length - 1 ? current + 1 : 0;
     }
     while (newActive !== current) {
       if (!this._registry[registrations[newActive]].disabled) break;
-      if (direction === ActiveDirection.Up) {
+      if (direction === ScrollDirection.Up) {
         newActive = newActive > 0 ? newActive - 1 : registrations.length - 1;
       } else {
         newActive = newActive < registrations.length - 1 ? newActive + 1 : 0;
@@ -442,7 +442,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     let selector = `[${REGISTRATION_ID}="${registrations[newActive]}"]`;
     let target = this.node.querySelector(selector) as HTMLElement;
     let scrollIntoView = scrollTest(this.contentNode, target);
-    let alignToTop = direction === ActiveDirection.Up;
+    let alignToTop = direction === ScrollDirection.Up;
     this._activateNode(target, scrollIntoView, alignToTop);
   }
 
@@ -613,8 +613,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
     event.preventDefault();
     event.stopPropagation();
-    if (keyCode === UP_ARROW) return this._activate(ActiveDirection.Up);
-    if (keyCode === DOWN_ARROW) return this._activate(ActiveDirection.Down);
+    if (keyCode === UP_ARROW) return this._activate(ScrollDirection.Up);
+    if (keyCode === DOWN_ARROW) return this._activate(ScrollDirection.Down);
     if (keyCode === ENTER) {
       let active = this._findActive();
       if (!active) return;
