@@ -52,7 +52,7 @@ const INPUT_CLASS = 'p-CommandPalette-inputWrapper';
 
 const DISABLED_CLASS = 'p-mod-disabled';
 
-const FOCUS_CLASS = 'p-mod-focus';
+const ACTIVE_CLASS = 'p-mod-active';
 
 const COMMAND_CLASS = 'p-CommandPalette-command';
 
@@ -85,15 +85,15 @@ var commandID = 0;
 
 
 /**
- * The scroll directions for changing command focus.
+ * The scroll directions for changing the active command.
  */
-const enum FocusDirection {
+const enum ActiveDirection {
   /**
-   * Move the focus up.
+   * Move the active selection up.
    */
   Up,
   /**
-   * Move the focus down.
+   * Move the active selection down.
    */
   Down
 }
@@ -264,9 +264,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     super();
     this.addClass(PALETTE_CLASS);
     this._commandRegistry = commandRegistry;
-    commandRegistry.commandAdded.connect(this._commandUpdated, this);
-    commandRegistry.commandRemoved.connect(this._commandUpdated, this);
-    commandRegistry.commandChanged.connect(this._commandUpdated, this);
+    commandRegistry.commandAdded.connect(this._onCommandUpdate, this);
+    commandRegistry.commandRemoved.connect(this._onCommandUpdate, this);
+    commandRegistry.commandChanged.connect(this._onCommandUpdate, this);
   }
 
   /**
@@ -274,9 +274,9 @@ class CommandPalette extends Widget implements ICommandPalette {
    */
   dispose(): void {
     let commandRegistry = this._commandRegistry;
-    commandRegistry.commandAdded.disconnect(this._commandUpdated, this);
-    commandRegistry.commandRemoved.disconnect(this._commandUpdated, this);
-    commandRegistry.commandChanged.disconnect(this._commandUpdated, this);
+    commandRegistry.commandAdded.disconnect(this._onCommandUpdate, this);
+    commandRegistry.commandRemoved.disconnect(this._onCommandUpdate, this);
+    commandRegistry.commandChanged.disconnect(this._onCommandUpdate, this);
     this._sections.length = 0;
     this._buffer.length = 0;
     this._registry = null;
@@ -404,12 +404,75 @@ class CommandPalette extends Widget implements ICommandPalette {
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
-    // Focus on the first result if search result.
+    // Activate the first result if search result.
     if (this._searchResult) {
       // Reset the flag.
       this._searchResult = false;
-      this._focusFirst();
+      this._activateFirst();
     }
+  }
+
+  /**
+   * Activate the next command in the given direction.
+   */
+  private _activate(direction: ActiveDirection): void {
+    let active = this._findActive();
+    if (!active) {
+      if (direction === ActiveDirection.Down) return this._activateFirst();
+      if (direction === ActiveDirection.Up) return this._activateLast();
+    }
+    let registrations = this._buffer.map(section => section.items)
+      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
+    let current = registrations.indexOf(active.getAttribute(REGISTRATION_ID));
+    let newActive: number;
+    if (direction === ActiveDirection.Up) {
+      newActive = current > 0 ? current - 1 : registrations.length - 1;
+    } else {
+      newActive = current < registrations.length - 1 ? current + 1 : 0;
+    }
+    while (newActive !== current) {
+      if (!this._registry[registrations[newActive]].disabled) break;
+      if (direction === ActiveDirection.Up) {
+        newActive = newActive > 0 ? newActive - 1 : registrations.length - 1;
+      } else {
+        newActive = newActive < registrations.length - 1 ? newActive + 1 : 0;
+      }
+    }
+    if (newActive === 0) return this._activateFirst();
+    let selector = `[${REGISTRATION_ID}="${registrations[newActive]}"]`;
+    let target = this.node.querySelector(selector) as HTMLElement;
+    let scrollIntoView = scrollTest(this.contentNode, target);
+    let alignToTop = direction === ActiveDirection.Up;
+    this._activateNode(target, scrollIntoView, alignToTop);
+  }
+
+  /**
+   * Activate the first command.
+   */
+  private _activateFirst(): void {
+    let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
+    this.contentNode.scrollTop = 0;
+    this._activateNode(this.node.querySelectorAll(selector)[0] as HTMLElement);
+  }
+
+  /**
+   * Activate the last command.
+   */
+  private _activateLast(): void {
+    let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
+    let nodes = this.node.querySelectorAll(selector);
+    this._activateNode(nodes[nodes.length - 1] as HTMLElement, true, false);
+  }
+
+  /**
+   * Activate a specific command and optionally scroll it into view.
+   */
+  private _activateNode(target: HTMLElement, scrollIntoView?: boolean, alignToTop?: boolean): void {
+    let active = this._findActive();
+    if (target === active) return;
+    if (active) this._deactivate();
+    target.classList.add(ACTIVE_CLASS);
+    if (scrollIntoView) target.scrollIntoView(alignToTop);
   }
 
   /**
@@ -455,17 +518,6 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   /**
-   * Deselect all palette items.
-   */
-  private _blur(): void {
-    let selector = `.${COMMAND_CLASS}.${FOCUS_CLASS}`;
-    let nodes = this.node.querySelectorAll(selector);
-    for (let i = 0; i < nodes.length; ++i) {
-      nodes[i].classList.remove(FOCUS_CLASS);
-    }
-  }
-
-  /**
    * Set the buffer to all registered items.
    */
   private _bufferAllItems(): void {
@@ -499,20 +551,21 @@ class CommandPalette extends Widget implements ICommandPalette {
       }
       return acc;
     }, [] as ICommandPaletteSectionPrivate[]);
-    // If there are search results, set the search flag used for focusing
+    // If there are search results, set the search flag used for activation.
     if (sections.length) this._searchResult = true;
     this._buffer = sections;
     this.update();
   }
 
   /**
-   * A handler for command registry additions and removals.
+   * Deactivate (i.e. deselect) all palette item.
    */
-  private _commandUpdated(sender: ICommandRegistry, id: string): void {
-    let staleRegistry = Object.keys(this._registry).some(registrationID => {
-      return this._registry[registrationID].item.id === id;
-    });
-    if (staleRegistry) this.update();
+  private _deactivate(): void {
+    let selector = `.${COMMAND_CLASS}.${ACTIVE_CLASS}`;
+    let nodes = this.node.querySelectorAll(selector);
+    for (let i = 0; i < nodes.length; ++i) {
+      nodes[i].classList.remove(ACTIVE_CLASS);
+    }
   }
 
   /**
@@ -551,23 +604,23 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
     // Ignore system keyboard shortcuts.
     if (altKey || ctrlKey || metaKey) return;
-    // If escape key is pressed and nothing is focused, allow propagation.
+    // If escape key is pressed and nothing is active, allow propagation.
     if (keyCode === ESCAPE) {
-      if (!this._findFocus()) return;
+      if (!this._findActive()) return;
       event.preventDefault();
       event.stopPropagation();
-      return this._blur();
+      return this._deactivate();
     }
     event.preventDefault();
     event.stopPropagation();
-    if (keyCode === UP_ARROW) return this._focus(FocusDirection.Up);
-    if (keyCode === DOWN_ARROW) return this._focus(FocusDirection.Down);
+    if (keyCode === UP_ARROW) return this._activate(ActiveDirection.Up);
+    if (keyCode === DOWN_ARROW) return this._activate(ActiveDirection.Down);
     if (keyCode === ENTER) {
-      let focused = this._findFocus();
-      if (!focused) return;
-      let priv = this._registry[focused.getAttribute(REGISTRATION_ID)];
+      let active = this._findActive();
+      if (!active) return;
+      let priv = this._registry[active.getAttribute(REGISTRATION_ID)];
       this._commandRegistry.execute(priv.item.id, priv.item.args);
-      this._blur();
+      this._deactivate();
       return;
     }
   }
@@ -582,87 +635,33 @@ class CommandPalette extends Widget implements ICommandPalette {
       target = target.parentElement;
     }
     let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
-    if (!priv.disabled) this._focusNode(target);
+    if (!priv.disabled) this._activateNode(target);
   }
 
   /**
    * Handle the `'mouseout'` event for the command palette.
    */
   private _evtMouseOut(event: MouseEvent): void {
-    let focused = this._findFocus();
-    if (focused) this._blur();
+    let active = this._findActive();
+    if (active) this._deactivate();
   }
 
   /**
    * Find the currently selected command.
    */
-  private _findFocus(): HTMLElement {
-    let selector = `.${COMMAND_CLASS}.${FOCUS_CLASS}`;
+  private _findActive(): HTMLElement {
+    let selector = `.${COMMAND_CLASS}.${ACTIVE_CLASS}`;
     return this.node.querySelector(selector) as HTMLElement;
   }
 
   /**
-   * Select the next command in the given direction.
+   * A handler for command registry additions and removals.
    */
-  private _focus(direction: FocusDirection): void {
-    let focused = this._findFocus();
-    if (!focused) {
-      if (direction === FocusDirection.Down) return this._focusFirst();
-      if (direction === FocusDirection.Up) return this._focusLast();
-    }
-    let registrations = this._buffer.map(section => section.items)
-      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
-    let current = registrations.indexOf(focused.getAttribute(REGISTRATION_ID));
-    let newFocus: number;
-    if (direction === FocusDirection.Up) {
-      newFocus = current > 0 ? current - 1 : registrations.length - 1;
-    } else {
-      newFocus = current < registrations.length - 1 ? current + 1 : 0;
-    }
-    while (newFocus !== current) {
-      if (!this._registry[registrations[newFocus]].disabled) break;
-      if (direction === FocusDirection.Up) {
-        newFocus = newFocus > 0 ? newFocus - 1 : registrations.length - 1;
-      } else {
-        newFocus = newFocus < registrations.length - 1 ? newFocus + 1 : 0;
-      }
-    }
-    if (newFocus === 0) return this._focusFirst();
-    let selector = `[${REGISTRATION_ID}="${registrations[newFocus]}"]`;
-    let target = this.node.querySelector(selector) as HTMLElement;
-    let scroll = scrollTest(this.contentNode, target);
-    let alignToTop = direction === FocusDirection.Up;
-    this._focusNode(target, scroll, alignToTop);
-  }
-
-  /**
-   * Select the first command.
-   */
-  private _focusFirst(): void {
-    let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
-    this.contentNode.scrollTop = 0;
-    this._focusNode(this.node.querySelectorAll(selector)[0] as HTMLElement);
-  }
-
-  /**
-   * Select the last command.
-   */
-  private _focusLast(): void {
-    let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
-    let nodes = this.node.querySelectorAll(selector);
-    let last = nodes.length - 1;
-    this._focusNode(nodes[last] as HTMLElement, true, false);
-  }
-
-  /**
-   * Select a specific command and optionally scroll it into view.
-   */
-  private _focusNode(target: HTMLElement, scroll?: boolean, alignToTop?: boolean): void {
-    let focused = this._findFocus();
-    if (target === focused) return;
-    if (focused) this._blur();
-    target.classList.add(FOCUS_CLASS);
-    if (scroll) target.scrollIntoView(alignToTop);
+  private _onCommandUpdate(sender: ICommandRegistry, id: string): void {
+    let staleRegistry = Object.keys(this._registry).some(registrationID => {
+      return this._registry[registrationID].item.id === id;
+    });
+    if (staleRegistry) this.update();
   }
 
   /**

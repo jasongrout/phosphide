@@ -344,9 +344,9 @@ body {
   padding: 3px 5px 0 0;
 }
 
-.p-CommandPalette-command.p-mod-focus,
-.p-CommandPalette-command.p-mod-focus .p-CommandPalette-description,
-.p-CommandPalette-command.p-mod-focus .p-CommandPalette-shortcut {
+.p-CommandPalette-command.p-mod-active,
+.p-CommandPalette-command.p-mod-active .p-CommandPalette-description,
+.p-CommandPalette-command.p-mod-active .p-CommandPalette-shortcut {
   background: #2196f3;
   color: #fff;
 }
