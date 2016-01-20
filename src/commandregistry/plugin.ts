@@ -83,7 +83,7 @@ class CommandRegistry implements ICommandRegistry {
    *
    * @returns A new array of the registered command ids.
    */
-  list(): string[] {
+  listCommands(): string[] {
     return Object.keys(this._stateMap);
   }
 
@@ -94,7 +94,7 @@ class CommandRegistry implements ICommandRegistry {
    *
    * @returns `true` if the command is registered, `false` otherwise.
    */
-  has(id: string): boolean {
+  isRegistered(id: string): boolean {
     return id in this._stateMap;
   }
 
@@ -130,8 +130,7 @@ class CommandRegistry implements ICommandRegistry {
    * @returns `true` if the command can execute, `false` otherwise.
    *
    * #### Notes
-   * A command is typically considered executable if it is registered
-   * and is not disabled.
+   * A command can execute if it is registered and is not disabled.
    */
   canExecute(id: string): boolean {
     let state = this._stateMap[id];
@@ -195,14 +194,17 @@ class CommandRegistry implements ICommandRegistry {
   }
 
   /**
-   * Get the handler function for the given command id.
+   * Remove the command with the given id.
    *
    * #### Notes
    * This is an `internal` method.
    */
-  _getHandler(id: string): (args: any) => void {
-    let state = this._stateMap[id];
-    return state ? state.handler : null;
+  _remove(id: string): void {
+    if (!(id in this._stateMap)) {
+      return;
+    }
+    delete this._stateMap[id];
+    this.commandRemoved.emit(id);
   }
 
   /**
@@ -235,21 +237,7 @@ class CommandRegistry implements ICommandRegistry {
     this.commandChanged.emit(id);
   }
 
-  /**
-   * Remove the command with the given id.
-   *
-   * #### Notes
-   * This is an `internal` method.
-   */
-  _remove(id: string): void {
-    if (!(id in this._stateMap)) {
-      return;
-    }
-    delete this._stateMap[id];
-    this.commandRemoved.emit(id);
-  }
-
-  private _stateMap: CommandStateMap;
+  private _stateMap: { [id: string]: ICommandState };
 }
 
 
@@ -272,12 +260,6 @@ interface ICommandState {
    */
   disabled: boolean;
 }
-
-
-/**
- * A type alias for a mapping of command id to command state.
- */
-type CommandStateMap = { [id: string]: ICommandState };
 
 
 /**
@@ -331,14 +313,6 @@ class CommandRecord implements ICommandRecord {
   get id(): string {
     if (this.isDisposed) throw new Error('object is disposed');
     return this._id;
-  }
-
-  /**
-   * Get the handler function for the command.
-   */
-  get handler(): (args: any) => void {
-    if (this.isDisposed) throw new Error('object is disposed');
-    return this._registry._getHandler(this._id);
   }
 
   /**
