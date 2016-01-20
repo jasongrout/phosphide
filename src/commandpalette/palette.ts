@@ -40,42 +40,99 @@ import {
 import './palette.css';
 
 
-const REGISTRATION_ID = 'data-registration-id';
-
-const CONTENT_CLASS = 'p-CommandPalette-content';
-
+/**
+ * The class name added to `CommandPalette` instances.
+ */
 const PALETTE_CLASS = 'p-CommandPalette';
 
-const HEADER_CLASS = 'p-CommandPalette-header';
+/**
+ * The data attribute name for command palette item registrations.
+ */
+const REGISTRATION_ID = 'data-registration-id';
 
-const INPUT_CLASS = 'p-CommandPalette-inputWrapper';
+/**
+ * The class name added to the content section of the palette.
+ */
+const CONTENT_CLASS = 'p-CommandPalette-content';
 
-const DISABLED_CLASS = 'p-mod-disabled';
-
-const ACTIVE_CLASS = 'p-mod-active';
-
-const COMMAND_CLASS = 'p-CommandPalette-command';
-
-const COMMAND_BOTTOM_CLASS = 'p-CommandPalette-commandBottom';
-
-const COMMAND_TOP_CLASS = 'p-CommandPalette-commandTop';
-
-const CAPTION_CLASS = 'p-CommandPalette-caption';
-
-const SHORTCUT_CLASS = 'p-CommandPalette-shortcut';
-
-const TITLE_CLASS = 'p-CommandPalette-title';
-
+/**
+ * The class name added to the search section of the palette.
+ */
 const SEARCH_CLASS = 'p-CommandPalette-search';
 
+/**
+ * The class name added to palette section headers.
+ */
+const HEADER_CLASS = 'p-CommandPalette-header';
+
+/**
+ * The class name added to the input wrapper in the search section.
+ */
+const INPUT_CLASS = 'p-CommandPalette-inputWrapper';
+
+/**
+ * The class name added to disabled palette items.
+ */
+const DISABLED_CLASS = 'p-mod-disabled';
+
+/**
+ * The class name added to the currently active palette item.
+ */
+const ACTIVE_CLASS = 'p-mod-active';
+
+/**
+ * The class name added to each palette item.
+ */
+const COMMAND_CLASS = 'p-CommandPalette-command';
+
+/**
+ * The class name added to the first line of a palette item.
+ */
+const COMMAND_TOP_CLASS = 'p-CommandPalette-commandTop';
+
+/**
+ * The class name added to the second line of a palette item.
+ */
+const COMMAND_BOTTOM_CLASS = 'p-CommandPalette-commandBottom';
+
+/**
+ * The class name added to an item caption.
+ */
+const CAPTION_CLASS = 'p-CommandPalette-caption';
+
+/**
+ * The class name added to an item shortcut.
+ */
+const SHORTCUT_CLASS = 'p-CommandPalette-shortcut';
+
+/**
+ * The class name added to an item title.
+ */
+const TITLE_CLASS = 'p-CommandPalette-title';
+
+/**
+ * The `keyCode` value for the enter key.
+ */
 const ENTER = 13;
 
+/**
+ * The `keyCode` value for the escape key.
+ */
 const ESCAPE = 27;
 
+/**
+ * The `keyCode` value for the up arrow key.
+ */
 const UP_ARROW = 38;
 
+/**
+ * The `keyCode` value for the down arrow key.
+ */
 const DOWN_ARROW = 40;
 
+/**
+ * A map of the special `keyCode` values a command palette uses for navigation.
+ */
 const FN_KEYS: { [key: string]: void } = {
   [ENTER]: null,
   [ESCAPE]: null,
@@ -83,8 +140,14 @@ const FN_KEYS: { [key: string]: void } = {
   [DOWN_ARROW]: null
 };
 
+/**
+ * A singleton instance of the fuzzy matcher used for search results.
+ */
 const matcher = new FuzzyMatcher('title', 'caption');
 
+/**
+ * The seed value for registration IDs that are generated for palette items.
+ */
 var commandID = 0;
 
 
