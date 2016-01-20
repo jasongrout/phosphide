@@ -556,6 +556,12 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * Activate a specific command and optionally scroll it into view.
+   *
+   * @param target - The node that is being activated.
+   *
+   * @param scrollIntoView - A flag indicating whether to scroll to the node.
+   *
+   * @param alignToTop - A flag indicating whether to align scroll to top.
    */
   private _activateNode(target: HTMLElement, scrollIntoView?: boolean, alignToTop?: boolean): void {
     let active = this._findActive();
@@ -567,6 +573,8 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * Add a new section to the palette's registry and return registration IDs.
+   *
+   * @param section - The section being added to the command palette.
    */
   private _addSection(section: ICommandPaletteSection): string[] {
     let registrations: string[] = [];
@@ -587,6 +595,10 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * Amend a section in the palette's registry and return registration IDs.
+   *
+   * @param section - The section being folded into the command palette.
+   *
+   * @param sectionIndex - The index of the existing section being merged.
    */
   private _amendSection(items: ICommandPaletteItem[], sectionIndex: number): string[] {
     let registrations: string[] = [];
@@ -620,6 +632,8 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * Set the buffer to search results.
+   *
+   * @param items - The search results to be buffered.
    */
   private _bufferSearchResults(items: ICommandMatchResult[]): void {
     let headings = this._sections.reduce((acc, section) => {
@@ -749,6 +763,10 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * A handler for command registry additions and removals.
+   *
+   * @param sender - The command registry instance that signaled a change.
+   *
+   * @param id - The command ID that was changed.
    */
   private _onCommandUpdate(sender: ICommandRegistry, id: string): void {
     let staleRegistry = Object.keys(this._registry).some(registrationID => {
@@ -759,6 +777,10 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * Convert an `ICommandPaletteItem` to an `ICommandPaletteItemPrivate`.
+   *
+   * @param item - The item being converted.
+   *
+   * @returns an `ICommandPaletteItemPrivate`
    */
   private _privatize(item: ICommandPaletteItem): ICommandPaletteItemPrivate {
     // By default, until the registry is checked, all added items work.
@@ -768,6 +790,8 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * Remove a registered item from the registry and from the sections.
+   *
+   * @param registrationID - The internal ID of the item being removed.
    */
   private _removeItem(registrationID: string): void {
     for (let section of this._sections) {
@@ -783,6 +807,8 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * Render a section and its commands.
+   *
+   * @param privSection - The palette section being rendered.
    */
   private _renderSection(privSection: ICommandPaletteSectionPrivate): void {
     let constructor = this.constructor as typeof CommandPalette;
