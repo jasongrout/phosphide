@@ -57,21 +57,24 @@ class YellowHandler {
     widget.title.text = 'Yellow';
 
     let handler = () => { console.log('Yellow invoked.'); };
+    let commandId = 'demo:colors:yellow-0';
     this._shell.addToLeftArea(widget, { rank: 20 });
-    this._registry.add('demo:colors:yellow-0', handler);
+    this._registry.add(commandId, handler);
     this._registry.add('demo:colors:yellow-1', createCommand());
     this._registry.add('demo:colors:yellow-2', createCommand());
     this._registry.add('demo:colors:yellow-3', createCommand());
     let record = this._registry.add('demo:colors:yellow-4', createCommand());
     record.disabled = true;
     this._registry.add('demo:colors:yellow-5', createCommand());
-    this._shortcuts.add([
+    this._shortcuts.add(
+      commandId,
+      void 0,
       {
         sequence: ['Ctrl Y'],
         selector: '*',
         handler: handler
       }
-    ]);
+    );
     this._palette.add([
       {
         text: 'All colors',

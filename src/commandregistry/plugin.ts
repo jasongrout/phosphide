@@ -105,7 +105,7 @@ class CommandRegistry implements ICommandRegistry {
    *
    * @returns The registered handler for the id, or `undefined`.
    */
-  get(id: string): () => boolean {
+  get(id: string): (args: any) => void {
     let state = this._stateMap[id];
     if (state) {
       return state.handler;

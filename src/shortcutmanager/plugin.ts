@@ -21,7 +21,7 @@ import {
 } from 'phosphor-keymap';
 
 import {
-  IShortcutManager
+  IShortcutManager, IKeyCommand
 } from './index';
 
 import {
@@ -73,8 +73,29 @@ export class ShortcutManager {
    *
    * @returns A disposable which removes the added key bindings.
    */
-  add(bindings: IKeyBinding[]): IDisposable {
-    return this._keymap.add(bindings);
+  add(id: string, args: any, bindings: IKeyCommand): IDisposable {
+    if (!(id in this._commandShortcutMap)) {
+      this._commandShortcutMap[id] = [];
+    }
+    let arr = this._commandShortcutMap[id];
+    let exists = false;
+    for (let i = 0; i < arr.length; ++i) {
+      if (this._deepEqual(arr[i].args, args)) {
+        console.log('Shortcut already set: over-riding - ' + bindings.sequence);
+        arr[i].sequence = bindings.sequence;
+        exists = true;
+      }
+    }
+    if (!exists) {
+      arr.push({args: args, sequence: bindings.sequence});
+    }
+
+    let keyBindings: IKeyBinding = {
+      sequence: bindings.sequence,
+      selector: bindings.selector,
+      handler: this._commandToKeyHandler(id, args, bindings.handler)
+    };
+    return this._keymap.add([keyBindings]);
   }
 
   /**
@@ -85,21 +106,51 @@ export class ShortcutManager {
    * @returns `true` if the id is registered, `false` otherwise.
    */
   hasCommand(id: string): boolean {
-    let handler = this._commandRegistry.get(id);
-    return this._keymap.hasHandler(handler);
+    return id in this._commandShortcutMap
   }
 
   /**
    * Lookup a handler with a specific id.
    *
-   * @param id - THe id of the handler of interest.
+   * @param id - The id of the handler of interest.
    *
-   * @returns The keybinding for the specified id, or `undefined`.
+   * @returns The keybindings for the specified id, or `undefined`.
    */
   getSequencesForId(id: string): string[][] {
-    return this._keymap.getSequencesForId(id);
+    let result: string[][] = [];
+    let arr = this._commandShortcutMap[id];
+    if (arr) {
+      for (let i = 0; i < arr.length; ++i) {
+        result.push(arr[i].sequence);
+      }
+      return result;
+    }
+  }
+
+  private _deepEqual(x: any, y: any): boolean {
+    return (x && y && typeof x === 'object' && typeof y === 'object') ?
+      (Object.keys(x).length === Object.keys(y).length) &&
+        Object.keys(x).reduce(function(isEqual, key) {
+          return isEqual && this._deepEqual(x[key], y[key]);
+        }, true) : (x === y);
+  }
+
+  private _commandToKeyHandler(id: string, args: any, handler: (args: any) => void): () => boolean {
+    let registry = this._commandRegistry;
+    let keyHandler = () => {
+      if (registry.canExecute(id)) {
+        registry.execute(id, args);
+        return true;
+      }
+      return false;
+    };
+    return keyHandler;
   }
 
   private _keymap: KeymapManager = null;
   private _commandRegistry: ICommandRegistry = null;
+  private _commandShortcutMap: CommandShortcutMap = {};
 }
+
+
+type CommandShortcutMap = { [id: string]: Array<{args: any, sequence: string[]}> };

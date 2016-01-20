@@ -20,6 +20,14 @@ import {
 } from 'phosphor-keymap';
 
 
+export
+interface IKeyCommand {
+  sequence: string[];
+  selector: string;
+  handler: (args: any) => void;
+}
+
+
 /**
  * An object which manages a collection of shortcuts.
  */
@@ -32,7 +40,7 @@ export interface IShortcutManager {
    *
    * @returns A disposable which removes the added key bindings.
    */
-  add(bindings: IKeyBinding[]): IDisposable;
+  add(id: string, args: any, bindings: IKeyCommand): IDisposable;
 
   /**
    * Test whether a handler with a specific id is registered.

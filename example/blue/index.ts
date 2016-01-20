@@ -59,13 +59,15 @@ class BlueHandler {
     let commandId = 'demo:colors:blue-0';
     let handler: (args: any) => void = () => { console.log('Blue invoked.'); };
     this._registry.add(commandId, handler);
-    this._shortcuts.add([
+    this._shortcuts.add(
+      commandId,
+      void 0,
       {
         sequence: ['Ctrl B'],
         selector: '*',
         handler: handler
       }
-    ]);
+    );
     this._palette.add([
       {
         text: 'All colors',

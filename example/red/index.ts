@@ -55,22 +55,25 @@ class RedHandler {
     let widget = new Widget();
     widget.addClass('red-content');
     widget.title.text = 'Red';
+    let commandId = 'demo:colors:red-0';
     let handler = () => { console.log('Red invoked.'); }
     this._shell.addToRightArea(widget, { rank: 30 });
-    this._registry.add('demo:colors:red-0', handler);
+    this._registry.add(commandId, handler);
     this._registry.add('demo:colors:red-1', createCommand());
     this._registry.add('demo:colors:red-2', createCommand());
     this._registry.add('demo:colors:red-3', createCommand());
     this._registry.add('demo:colors:red-4', createCommand());
     this._registry.add('demo:colors:red-5', createCommand());
 
-    this._shortcuts.add([
+    this._shortcuts.add(
+      commandId,
+      void 0,
       {
         sequence: ['Ctrl R'],
         selector: '*',
         handler: handler
       }
-    ]);
+    );
     this._palette.add([
       {
         text: 'All colors',

@@ -56,19 +56,24 @@ class GreenHandler {
     widget.addClass('green-content');
     widget.title.text = 'Green';
     this._shell.addToRightArea(widget, { rank: 40 });
+    let commandId = 'demo:colors:green-0';
     let handler = createHandler();
-    this._registry.add('demo:colors:green-0', handler);
+    this._registry.add(commandId, handler);
     this._registry.add('demo:colors:green-1', createHandler());
     this._registry.add('demo:colors:green-2', createHandler());
     this._registry.add('demo:colors:green-3', createHandler());
     this._registry.add('demo:colors:green-4', createHandler());
     this._registry.add('demo:colors:green-5', createHandler());
 
-    this._shortcuts.add({
-      sequence: ['Ctrl G'],
-      selector: '*',
-      handler: handler
-    });
+    this._shortcuts.add(
+      commandId,
+      void 0,
+      {
+        sequence: ['Ctrl G'],
+        selector: '*',
+        handler: handler
+      }
+    );
     this._palette.add([
       {
         text: 'All colors',
