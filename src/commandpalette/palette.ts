@@ -79,6 +79,11 @@ const FN_KEYS: { [key: string]: void } = {
   [DOWN_ARROW]: null
 };
 
+const matcher = new FuzzyMatcher('title', 'caption');
+
+var commandID = 0;
+
+
 /**
  * The scroll directions for changing command focus.
  */
@@ -92,10 +97,6 @@ const enum FocusDirection {
    */
   Down
 }
-
-const matcher = new FuzzyMatcher('title', 'caption');
-
-var commandID = 0;
 
 
 /**
@@ -127,6 +128,7 @@ interface ICommandPaletteSectionPrivate {
   items: string[];
 };
 
+
 /**
  * Test to see if a child node needs to be scrolled to within its parent node.
  */
@@ -135,6 +137,7 @@ function scrollTest(parentNode: HTMLElement, childNode: HTMLElement): boolean {
   let child = childNode.getBoundingClientRect();
   return child.top < parent.top || child.top + child.height > parent.bottom;
 }
+
 
 /**
  * A widget which displays registered commands and allows them to be executed.
@@ -605,7 +608,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     let focused = this._findFocus();
     if (!focused) {
       if (direction === FocusDirection.Down) return this._focusFirst();
-      if (direction === FocusDirection.Up) return this._focusLast(true);
+      if (direction === FocusDirection.Up) return this._focusLast();
     }
     let registrations = this._buffer.map(section => section.items)
       .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
@@ -627,7 +630,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     if (newFocus === 0) return this._focusFirst();
     let selector = `[${REGISTRATION_ID}="${registrations[newFocus]}"]`;
     let target = this.node.querySelector(selector) as HTMLElement;
-    this._focusNode(target, scrollTest(this.contentNode, target));
+    let scroll = scrollTest(this.contentNode, target);
+    let alignToTop = direction === FocusDirection.Up;
+    this._focusNode(target, scroll, alignToTop);
   }
 
   /**
@@ -642,22 +647,22 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Select the last command.
    */
-  private _focusLast(scroll?: boolean): void {
+  private _focusLast(): void {
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     let nodes = this.node.querySelectorAll(selector);
     let last = nodes.length - 1;
-    this._focusNode(nodes[last] as HTMLElement, scroll);
+    this._focusNode(nodes[last] as HTMLElement, true, false);
   }
 
   /**
    * Select a specific command and optionally scroll it into view.
    */
-  private _focusNode(target: HTMLElement, scroll?: boolean): void {
+  private _focusNode(target: HTMLElement, scroll?: boolean, alignToTop?: boolean): void {
     let focused = this._findFocus();
     if (target === focused) return;
     if (focused) this._blur();
     target.classList.add(FOCUS_CLASS);
-    if (scroll) target.scrollIntoView();
+    if (scroll) target.scrollIntoView(alignToTop);
   }
 
   /**
