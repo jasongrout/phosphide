@@ -198,6 +198,12 @@ interface ICommandPaletteSectionPrivate {
 
 /**
  * Test to see if a child node needs to be scrolled to within its parent node.
+ *
+ * @param parentNode - The element containing the child being checked.
+ *
+ * @param childNode - The child element whose visibility is being checked.
+ *
+ * @returns true if the parent node needs to be scrolled to reveal the child.
  */
 function scrollTest(parentNode: HTMLElement, childNode: HTMLElement): boolean {
   let parent = parentNode.getBoundingClientRect();
@@ -376,9 +382,11 @@ class CommandPalette extends Widget implements ICommandPalette {
         return s.text === text;
       });
       if (sectionIndex === -1) {
+        // If a section with this header does not exist, add a new section.
         let ids = this._addSection(section);
         Array.prototype.push.apply(registrations, ids);
       } else {
+        // If a section exists with this header, amend it.
         let ids = this._amendSection(section.items, sectionIndex);
         Array.prototype.push.apply(registrations, ids);
       }
@@ -412,8 +420,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     case 'mousemove':
       this._evtMouseMove(event as MouseEvent);
       break;
-    case 'mouseout':
-      this._evtMouseOut(event as MouseEvent);
+    case 'mouseleave':
+      this._evtMouseLeave(event as MouseEvent);
       break;
     }
   }
@@ -444,7 +452,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     this.node.addEventListener('click', this);
     this.node.addEventListener('keydown', this);
     this.node.addEventListener('mousemove', this);
-    this.node.addEventListener('mouseout', this);
+    this.contentNode.addEventListener('mouseleave', this);
   }
 
   /**
@@ -454,7 +462,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     this.node.removeEventListener('click', this);
     this.node.removeEventListener('keydown', this);
     this.node.removeEventListener('mousemove', this);
-    this.node.removeEventListener('mouseout', this);
+    this.contentNode.removeEventListener('mouseleave', this);
   }
 
   /**
@@ -487,6 +495,8 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   /**
    * Activate the next command in the given direction.
+   *
+   * @param direction - The scroll direction.
    */
   private _activate(direction: ScrollDirection): void {
     let active = this._findActive();
@@ -523,6 +533,7 @@ class CommandPalette extends Widget implements ICommandPalette {
    * Activate the first command.
    */
   private _activateFirst(): void {
+    // Query the DOM for items that are not disabled.
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     this.contentNode.scrollTop = 0;
     this._activateNode(this.node.querySelectorAll(selector)[0] as HTMLElement);
@@ -532,6 +543,7 @@ class CommandPalette extends Widget implements ICommandPalette {
    * Activate the last command.
    */
   private _activateLast(): void {
+    // Query the DOM for items that are not disabled.
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     let nodes = this.node.querySelectorAll(selector);
     this._activateNode(nodes[nodes.length - 1] as HTMLElement, true, false);
@@ -699,24 +711,27 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   /**
+   * Handle the `'mouseleave'` event for the command palette.
+   */
+  private _evtMouseLeave(event: MouseEvent): void {
+    this._deactivate();
+  }
+
+  /**
    * Handle the `'mousemove'` event for the command palette.
    */
   private _evtMouseMove(event: MouseEvent): void {
     let target = event.target as HTMLElement;
     while (!target.hasAttribute(REGISTRATION_ID)) {
-      if (target === this.node as HTMLElement) return;
+      if (target === this.node as HTMLElement) return this._deactivate();
       target = target.parentElement;
     }
     let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
-    if (!priv.disabled) this._activateNode(target);
-  }
-
-  /**
-   * Handle the `'mouseout'` event for the command palette.
-   */
-  private _evtMouseOut(event: MouseEvent): void {
-    let active = this._findActive();
-    if (active) this._deactivate();
+    if (priv.disabled) {
+      this._deactivate();
+    } else {
+      this._activateNode(target);
+    }
   }
 
   /**
