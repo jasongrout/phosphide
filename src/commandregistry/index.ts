@@ -45,7 +45,7 @@ interface ICommandRegistry {
    *
    * @returns A new array of the registered command ids.
    */
-  list(): string[];
+  listCommands(): string[];
 
   /**
    * Test whether a command is registered.
@@ -54,7 +54,7 @@ interface ICommandRegistry {
    *
    * @returns `true` if the command is registered, `false` otherwise.
    */
-  has(id: string): boolean;
+  isRegistered(id: string): boolean;
 
   /**
    * Test whether a command is checked.
@@ -147,14 +147,6 @@ interface ICommandRecord extends IDisposable {
    * This is a read-only property.
    */
   id: string;
-
-  /**
-   * The handler function for the command.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  handler: (args: any) => void;
 
   /**
    * The checked state of the command.

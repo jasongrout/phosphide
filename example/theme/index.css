@@ -318,7 +318,6 @@ body {
 
 .p-CommandPalette-command {
   color: #757575;
-  cursor: pointer;
   font-weight: 500;
   font-size: 13px;
   padding: 3px 0 3px 2px;
@@ -326,7 +325,6 @@ body {
 
 .p-CommandPalette-command.p-mod-disabled {
   color: #d5d5d5;
-  cursor: not-allowed;
 }
 
 .p-CommandPalette-description {
