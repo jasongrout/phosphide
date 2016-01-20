@@ -56,11 +56,15 @@ const ACTIVE_CLASS = 'p-mod-active';
 
 const COMMAND_CLASS = 'p-CommandPalette-command';
 
-const COMMAND_BODY_CLASS = 'p-CommandPalette-commandBody';
+const COMMAND_BOTTOM_CLASS = 'p-CommandPalette-commandBottom';
 
-const DESCRIPTION_CLASS = 'p-CommandPalette-description';
+const COMMAND_TOP_CLASS = 'p-CommandPalette-commandTop';
+
+const CAPTION_CLASS = 'p-CommandPalette-caption';
 
 const SHORTCUT_CLASS = 'p-CommandPalette-shortcut';
+
+const TITLE_CLASS = 'p-CommandPalette-title';
 
 const SEARCH_CLASS = 'p-CommandPalette-search';
 
@@ -193,19 +197,25 @@ class CommandPalette extends Widget implements ICommandPalette {
    */
   static createItemNode(item: ICommandPaletteItem): HTMLElement {
     let node = document.createElement('li');
-    let body = document.createElement('div');
-    let description = document.createElement('div');
-    let shortcut = document.createElement('div');
+    let top = document.createElement('div');
+    let bottom = document.createElement('div');
+    let title = document.createElement('span');
+    let caption = document.createElement('span');
+    let shortcut = document.createElement('span');
     node.className = COMMAND_CLASS;
-    body.className = COMMAND_BODY_CLASS;
-    description.className = DESCRIPTION_CLASS;
+    top.className = COMMAND_TOP_CLASS;
+    bottom.className = COMMAND_BOTTOM_CLASS;
+    title.className = TITLE_CLASS;
+    caption.className = CAPTION_CLASS;
     shortcut.className = SHORTCUT_CLASS;
-    body.textContent = item.title;
-    if (item.caption) description.textContent = item.caption;
+    title.textContent = item.title;
+    if (item.caption) caption.textContent = item.caption;
     if (item.shortcut) shortcut.textContent = item.shortcut;
-    body.appendChild(description);
-    node.appendChild(body);
-    node.appendChild(shortcut);
+    top.appendChild(title);
+    top.appendChild(shortcut);
+    bottom.appendChild(caption);
+    node.appendChild(top);
+    node.appendChild(bottom);
     node.setAttribute('title', item.title);
     return node;
   }
