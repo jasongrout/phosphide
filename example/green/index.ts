@@ -12,6 +12,10 @@ import {
 } from 'phosphide';
 
 import {
+  SimpleCommand
+} from 'phosphor-command';
+
+import {
   Container
 } from 'phosphor-di';
 
@@ -29,10 +33,10 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(GreenHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(): (args: any) => void {
-  return (message: string) => {
-    console.log(`COMMAND: ${message}`);
-  };
+function createCommand(): SimpleCommand {
+  return new SimpleCommand({
+    handler: (message: string) => { console.log(`COMMAND: ${message}`); }
+  });
 }
 
 
@@ -55,12 +59,14 @@ class GreenHandler {
     widget.addClass('green-content');
     widget.title.text = 'Green';
     this._shell.addToRightArea(widget, { rank: 40 });
-    this._registry.add('demo:colors:green-0', createCommand());
-    this._registry.add('demo:colors:green-1', createCommand());
-    this._registry.add('demo:colors:green-2', createCommand());
-    this._registry.add('demo:colors:green-3', createCommand());
-    this._registry.add('demo:colors:green-4', createCommand());
-    this._registry.add('demo:colors:green-5', createCommand());
+    this._registry.add([
+      { id: 'demo:colors:green-0', command: createCommand() },
+      { id: 'demo:colors:green-1', command: createCommand() },
+      { id: 'demo:colors:green-2', command: createCommand() },
+      { id: 'demo:colors:green-3', command: createCommand() },
+      { id: 'demo:colors:green-4', command: createCommand() },
+      { id: 'demo:colors:green-5', command: createCommand() }
+    ]);
 
     this._palette.add([
       {
