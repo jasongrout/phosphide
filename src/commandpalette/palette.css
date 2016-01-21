@@ -57,3 +57,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+.p-CommandPalette-caption:empty:before {
+  content: '\00a0';
+}
