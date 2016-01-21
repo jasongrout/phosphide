@@ -538,8 +538,11 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _activateFirst(): void {
     // Query the DOM for items that are not disabled.
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
+    let nodes = this.node.querySelectorAll(selector);
     this.contentNode.scrollTop = 0;
-    this._activateNode(this.node.querySelectorAll(selector)[0] as HTMLElement);
+    // If the palette is empty or only contains disabled items, return.
+    if (!nodes.length) return;
+    this._activateNode(nodes[0] as HTMLElement);
   }
 
   /**
@@ -549,6 +552,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Query the DOM for items that are not disabled.
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     let nodes = this.node.querySelectorAll(selector);
+    // If the palette is empty or only contains disabled items, return.
+    if (!nodes.length) return;
     this._activateNode(nodes[nodes.length - 1] as HTMLElement, true, false);
   }
 
