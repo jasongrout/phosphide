@@ -84,7 +84,6 @@ class BlueHandler {
           {
             id: 'demo:colors:blue-0',
             title: 'Blue #1',
-            caption: 'Blue number one',
             args: 'Blue number one'
           },
           {

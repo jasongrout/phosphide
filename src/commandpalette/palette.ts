@@ -538,8 +538,17 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _activateFirst(): void {
     // Query the DOM for items that are not disabled.
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
-    this.contentNode.scrollTop = 0;
-    this._activateNode(this.node.querySelectorAll(selector)[0] as HTMLElement);
+    let nodes = this.node.querySelectorAll(selector);
+    // If the palette contains enabled items, activate the first.
+    if (nodes.length) {
+      // Scroll all the way to the top of the content node.
+      this.contentNode.scrollTop = 0;
+      let target = nodes[0] as HTMLElement;
+      // Test if the first enabled item is visible.
+      let scrollIntoView = scrollTest(this.contentNode, target);
+      let alignToTop = true;
+      this._activateNode(target, scrollIntoView, alignToTop);
+    }
   }
 
   /**
@@ -549,7 +558,13 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Query the DOM for items that are not disabled.
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     let nodes = this.node.querySelectorAll(selector);
-    this._activateNode(nodes[nodes.length - 1] as HTMLElement, true, false);
+    // If the palette contains enabled items, activate the last.
+    if (nodes.length) {
+      let target = nodes[nodes.length - 1] as HTMLElement;
+      let scrollIntoView = scrollTest(this.contentNode, target);
+      let alignToTop = false;
+      this._activateNode(target, scrollIntoView, alignToTop);
+    }
   }
 
   /**
