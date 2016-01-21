@@ -12,6 +12,10 @@ import {
 } from 'phosphor-di';
 
 import {
+  Command
+} from 'phosphor-command';
+
+import {
   IDisposable
 } from 'phosphor-disposable';
 
@@ -21,102 +25,65 @@ import {
 
 
 /**
+ * An object which can be added to a command registry.
+ */
+export
+interface ICommandItem {
+  /**
+   * The unique id for the command.
+   */
+  id: string;
+
+  /**
+   * The command to add to the registry.
+   */
+  command: Command;
+}
+
+
+/**
  * An object which manages a collection of commands.
  */
 export
 interface ICommandRegistry {
   /**
-   * A signal emitted when a command is added to the registry.
+   * A signal emitted when commands are added to the registry.
    */
-  commandAdded: ISignal<ICommandRegistry, string>;
+  commandsAdded: ISignal<ICommandRegistry, string[]>;
 
   /**
-   * A signal emitted when a command is removed from the registry.
+   * A signal emitted when commands are removed from the registry.
    */
-  commandRemoved: ISignal<ICommandRegistry, string>;
-
-  /**
-   * A signal emitted when the state of a command is changed.
-   */
-  commandChanged: ISignal<ICommandRegistry, string>;
+  commandsRemoved: ISignal<ICommandRegistry, string[]>;
 
   /**
    * List the currently registered commands.
    *
    * @returns A new array of the registered command ids.
    */
-  listCommands(): string[];
+  list(): string[];
 
   /**
-   * Test whether a command is registered.
+   * Lookup a command with a specific id.
    *
    * @param id - The id of the command of interest.
    *
-   * @returns `true` if the command is registered, `false` otherwise.
+   * @returns The command with the specified id, or `undefined`.
    */
-  isRegistered(id: string): boolean;
+  get(id: string): Command;
 
   /**
-   * Test whether a command is checked.
+   * Add commands to the registry.
    *
-   * @param id - The id of the command of interest.
+   * @param items - The command items to add to the registry.
    *
-   * @returns `true` if the command is checked, `false` otherwise.
-   */
-  isChecked(id: string): boolean;
-
-  /**
-   * Test whether a command is disabled.
-   *
-   * @param id - The id of the command of interest.
-   *
-   * @returns `true` if the command is disabled, `false` otherwise.
-   */
-  isDisabled(id: string): boolean;
-
-  /**
-   * Test whether a command can execute in its current state.
-   *
-   * @param id - The id of the command of interest.
-   *
-   * @returns `true` if the command can execute, `false` otherwise.
+   * @returns A disposable which will remove the added commands.
    *
    * #### Notes
-   * A command can execute if it is registered and is not disabled.
+   * If the `id` for a command is already registered, a warning will be
+   * logged to the console and that specific command will be ignored.
    */
-  canExecute(id: string): boolean;
-
-  /**
-   * Execute a registered command.
-   *
-   * @param id - The id of the command to execute.
-   *
-   * @param args - The arguments object to pass to the command. This
-   *   may be `null` if the command does not require arguments.
-   *
-   * #### Notes
-   * If the command is not registered or is disabled, a warning will be
-   * logged to the console. If the command throws an exception, it will
-   * be caught and logged to the console.
-   */
-  execute(id: string, args: any): void;
-
-  /**
-   * Add a command to the registry.
-   *
-   * @param id - The unique id for the command.
-   *
-   * @param handler - The handler function for the command.
-   *
-   * @returns A command record which can be used to modify the state
-   *   of the command. Disposing the record will remove the command
-   *   from the registry.
-   *
-   * #### Notes
-   * If the given command `id` is already registered, an exception
-   * will be thrown.
-   */
-  add(id: string, handler: (args: any) => void): ICommandRecord;
+  add(items: ICommandItem[]): IDisposable;
 }
 
 
@@ -125,42 +92,3 @@ interface ICommandRegistry {
  */
 export
 const ICommandRegistry = new Token<ICommandRegistry>('phosphide.ICommandRegistry');
-
-
-/**
- * A registration record for a command.
- */
-export
-interface ICommandRecord extends IDisposable {
-  /**
-   * The command registry which owns the command.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  registry: ICommandRegistry;
-
-  /**
-   * The id of the registered command.
-   *
-   * #### Notes
-   * This is a read-only property.
-   */
-  id: string;
-
-  /**
-   * The checked state of the command.
-   *
-   * #### Notes
-   * This is a read-write property.
-   */
-  checked: boolean;
-
-  /**
-   * The disabled state of the command.
-   *
-   * #### Notes
-   * This is a read-write property.
-   */
-  disabled: boolean;
-}
