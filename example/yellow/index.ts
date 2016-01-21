@@ -12,6 +12,10 @@ import {
 } from 'phosphide';
 
 import {
+  SimpleCommand
+} from 'phosphor-command';
+
+import {
   Container
 } from 'phosphor-di';
 
@@ -29,10 +33,10 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(YellowHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(): (args: any) => void {
-  return (message: string) => {
-    console.log(`COMMAND: ${message}`);
-  };
+function createCommand(): SimpleCommand {
+  return new SimpleCommand({
+    handler: (message: string) => { console.log(`COMMAND: ${message}`); }
+  });
 }
 
 
@@ -55,14 +59,16 @@ class YellowHandler {
     widget.addClass('yellow-content');
     widget.title.text = 'Yellow';
     this._shell.addToLeftArea(widget, { rank: 20 });
-    this._registry.add('demo:colors:yellow-0', createCommand());
-    this._registry.add('demo:colors:yellow-1', createCommand());
-    this._registry.add('demo:colors:yellow-2', createCommand());
-    this._registry.add('demo:colors:yellow-3', createCommand());
-    let record = this._registry.add('demo:colors:yellow-4', createCommand());
-    record.disabled = true;
-    this._registry.add('demo:colors:yellow-5', createCommand());
-
+    let five = { id: 'demo:colors:yellow-5', command: createCommand() };
+    five.command.setEnabled(false);
+    this._registry.add([
+      { id: 'demo:colors:yellow-0', command: createCommand() },
+      { id: 'demo:colors:yellow-1', command: createCommand() },
+      { id: 'demo:colors:yellow-2', command: createCommand() },
+      { id: 'demo:colors:yellow-3', command: createCommand() },
+      { id: 'demo:colors:yellow-4', command: createCommand() },
+      five
+    ]);
     this._palette.add([
       {
         text: 'All colors',

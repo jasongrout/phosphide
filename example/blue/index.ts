@@ -12,7 +12,7 @@ import {
 } from 'phosphide';
 
 import {
-  DelegateCommand
+  SimpleCommand
 } from 'phosphor-command';
 
 import {
@@ -31,12 +31,6 @@ import {
 export
 function resolve(container: Container): Promise<void> {
   return container.resolve(BlueHandler).then(handler => { handler.run(); });
-}
-
-function createCommand(): (args: any) => void {
-  return (message: string) => {
-    console.log(`COMMAND: ${message}`);
-  };
 }
 
 
@@ -59,8 +53,11 @@ class BlueHandler {
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
-    let commandId = 'demo:colors:blue-0';
-    this._registry.add(commandId, createCommand());
+    let id = 'demo:colors:blue-0';
+    let command = new SimpleCommand({
+      handler: (message: string) => { console.log(`COMMAND: ${message}`); }
+    });
+    this._registry.add([{ id, command }]);
     this._palette.add([
       {
         text: 'All colors',

@@ -10,6 +10,10 @@
 import * as arrays from 'phosphor-arrays';
 
 import {
+  safeExecute
+} from 'phosphor-command';
+
+import {
   IDisposable, DisposableDelegate
 } from 'phosphor-disposable';
 
@@ -26,7 +30,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ICommandRecord, ICommandRegistry
+  ICommandRegistry
 } from '../commandregistry/index';
 
 import {
@@ -352,9 +356,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     super();
     this.addClass(PALETTE_CLASS);
     this._commandRegistry = commandRegistry;
-    commandRegistry.commandAdded.connect(this._onCommandUpdate, this);
-    commandRegistry.commandRemoved.connect(this._onCommandUpdate, this);
-    commandRegistry.commandChanged.connect(this._onCommandUpdate, this);
+    commandRegistry.commandsAdded.connect(this._onCommandsUpdated, this);
+    commandRegistry.commandsRemoved.connect(this._onCommandsUpdated, this);
   }
 
   /**
@@ -362,9 +365,8 @@ class CommandPalette extends Widget implements ICommandPalette {
    */
   dispose(): void {
     let commandRegistry = this._commandRegistry;
-    commandRegistry.commandAdded.disconnect(this._onCommandUpdate, this);
-    commandRegistry.commandRemoved.disconnect(this._onCommandUpdate, this);
-    commandRegistry.commandChanged.disconnect(this._onCommandUpdate, this);
+    commandRegistry.commandsAdded.disconnect(this._onCommandsUpdated, this);
+    commandRegistry.commandsRemoved.disconnect(this._onCommandsUpdated, this);
     this._sections.length = 0;
     this._buffer.length = 0;
     this._registry = null;
@@ -490,7 +492,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Ask the command registry about each palette commmand.
     Object.keys(this._registry).forEach(registrationID => {
       let priv = this._registry[registrationID];
-      priv.disabled = !this._commandRegistry.canExecute(priv.item.id);
+      let command = this._commandRegistry.get(priv.item.id);
+      priv.disabled = !command || !command.isEnabled(priv.item.args);
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
@@ -705,9 +708,8 @@ class CommandPalette extends Widget implements ICommandPalette {
       target = target.parentElement;
     }
     let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
-    if (!priv.disabled) {
-      this._commandRegistry.execute(priv.item.id, priv.item.args);
-    }
+    if (priv.disabled) return;
+    safeExecute(this._commandRegistry.get(priv.item.id), priv.item.args);
   }
 
   /**
@@ -742,7 +744,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       let active = this._findActive();
       if (!active) return;
       let priv = this._registry[active.getAttribute(REGISTRATION_ID)];
-      this._commandRegistry.execute(priv.item.id, priv.item.args);
+      safeExecute(this._commandRegistry.get(priv.item.id), priv.item.args);
       this._deactivate();
       return;
     }
@@ -785,11 +787,15 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param sender - The command registry instance that signaled a change.
    *
-   * @param id - The command ID that was changed.
+   * @param ids - The command IDs that were added/removed.
    */
-  private _onCommandUpdate(sender: ICommandRegistry, id: string): void {
+  private _onCommandsUpdated(sender: ICommandRegistry, ids: string[]): void {
+    let commandIDs = ids.reduce((acc, val) => {
+      acc[val] = null;
+      return acc;
+    }, Object.create(null) as { [id: string]: void });
     let staleRegistry = Object.keys(this._registry).some(registrationID => {
-      return this._registry[registrationID].item.id === id;
+      return this._registry[registrationID].item.id in commandIDs;
     });
     if (staleRegistry) this.update();
   }
