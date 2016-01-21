@@ -219,6 +219,9 @@ export
 class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Create the DOM node for a command palette.
+   *
+   * #### Notes
+   * This method may be reimplemented to create a custom root node.
    */
   static createNode(): HTMLElement {
     let node = document.createElement('div');
@@ -244,13 +247,16 @@ class CommandPalette extends Widget implements ICommandPalette {
    * @returns A new DOM node to use as a header in a command palette section.
    *
    * #### Notes
-   * This method may be reimplemented to create custom header.
+   * This method may be reimplemented to create custom headers.
    */
   static createHeaderNode(title: string): HTMLElement {
     let node = document.createElement('li');
+    let span = document.createElement('span');
+    let hr = document.createElement('hr');
     node.className = HEADER_CLASS;
-    node.appendChild(document.createTextNode(title));
-    node.appendChild(document.createElement('hr'));
+    span.textContent = title;
+    node.appendChild(span);
+    node.appendChild(hr);
     return node;
   }
 
@@ -598,7 +604,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     } as ICommandPaletteSectionPrivate;
     for (let item of section.items) {
       registrationID = `palette-${++commandID}`;
-      this._registry[registrationID] = this._privatize(item);
+      this._registry[registrationID] = { disabled: false, item: item };
       registrations.push(registrationID);
       privSection.items.push(registrationID);
     }
@@ -625,7 +631,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       });
       if (itemIndex !== -1) continue;
       registrationID = `palette-${++commandID}`;
-      this._registry[registrationID] = this._privatize(item);
+      this._registry[registrationID] = { disabled: false, item: item };
       existingItems.push(registrationID);
       registrations.push(registrationID);
     }
@@ -786,19 +792,6 @@ class CommandPalette extends Widget implements ICommandPalette {
       return this._registry[registrationID].item.id === id;
     });
     if (staleRegistry) this.update();
-  }
-
-  /**
-   * Convert an `ICommandPaletteItem` to an `ICommandPaletteItemPrivate`.
-   *
-   * @param item - The item being converted.
-   *
-   * @returns an `ICommandPaletteItemPrivate`
-   */
-  private _privatize(item: ICommandPaletteItem): ICommandPaletteItemPrivate {
-    // By default, until the registry is checked, all added items work.
-    let disabled = false;
-    return { disabled, item };
   }
 
   /**
