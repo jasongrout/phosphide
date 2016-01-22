@@ -34,6 +34,13 @@ function resolve(container: Container): Promise<void> {
 }
 
 
+function createCommand(): SimpleCommand {
+  return new SimpleCommand({
+    handler: (message: string) => { console.log(`COMMAND: ${message}`); }
+  });
+}
+
+
 class BlueHandler {
 
   static requires = [IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager];
@@ -54,75 +61,80 @@ class BlueHandler {
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
-
-    let id = 'demo:colors:blue-0';
-    let command = new SimpleCommand({
-      handler: (message: string) => { console.log(`COMMAND: ${message}`); }
-    });
-    this._registry.add([{ id, command }]);
-
-    this._shortcuts.add([
+    let registryItems = [
       {
-        sequence: ['Ctrl B'],
-        selector: '*',
-        command: id,
-        args: 'Blue is best!'
-      }
-    ]);
-
-    this._palette.add([
-      {
-        text: 'All colors',
-        items: [
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue',
-            caption: 'Blue is best!',
-            args: 'Blue is best!'
-          }
-        ]
+        id: `demo:colors:${widget.title.text.toLowerCase()}-0`,
+        command: createCommand()
       },
       {
-        text: 'Blue',
-        items: [
-          {
-            id: 'demo:colors:blue-foo',
-            title: 'Blue #0',
-            caption: 'Unregistered blue'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue #1',
-            args: 'Blue number one'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue #2',
-            caption: 'Blue number two',
-            args: 'Blue number two'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue three is a very very very long title',
-            caption: 'Blue number three has an extra long, long, long' +
-              ' caption, too.',
-            args: 'Blue number three'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue #4',
-            caption: 'Blue number four',
-            args: 'Blue number four'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue #5',
-            caption: 'Blue number five',
-            args: 'Blue number five'
-          }
-        ]
+        id: `demo:colors:${widget.title.text.toLowerCase()}-1`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-2`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-3`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-4`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-5`,
+        command: createCommand()
       }
-    ]);
+    ];
+    let paletteItems = [
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-0`,
+        args: `${widget.title.text} is best!`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-1`,
+        args: `${widget.title.text} number one`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-2`,
+        args: `${widget.title.text} number two`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-3`,
+        args: `${widget.title.text} number three`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-4`,
+        args: `${widget.title.text} number four`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-5`,
+        args: `${widget.title.text} number five`
+      }
+    ];
+    let shortcutItems = [
+      {
+        sequence: [`Ctrl ${widget.title.text[0]}`],
+        selector: '*',
+        command: paletteItems[0].id,
+        args: paletteItems[0].args
+      }
+    ];
+    registryItems.forEach((item, idx) => {
+      let title = `${widget.title.text} ${idx}`;
+      item.command.setCategory(widget.title.text);
+      item.command.setText(title);
+      item.command.setCaption(paletteItems[idx].args);
+    });
+    registryItems[0].command.setText(`${widget.title.text} main`);
+    registryItems[0].command.setCategory('All colors');
+    // Add commands to registry.
+    this._registry.add(registryItems);
+    // Add shortcuts to shortcut manager.
+    this._shortcuts.add(shortcutItems);
+    // Add commands to palette.
+    this._palette.add(paletteItems);
   }
 
   private _commandDisposable: IDisposable;

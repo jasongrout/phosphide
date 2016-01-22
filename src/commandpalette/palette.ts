@@ -10,7 +10,7 @@
 import * as arrays from 'phosphor-arrays';
 
 import {
-  safeExecute
+  Command, safeExecute
 } from 'phosphor-command';
 
 import {
@@ -38,7 +38,7 @@ import {
 } from '../shortcutmanager/index';
 
 import {
-  ICommandPalette, ICommandPaletteItem, ICommandPaletteSection
+  ICommandPalette
 } from './index';
 
 import {
@@ -156,7 +156,7 @@ const matcher = new FuzzyMatcher('title', 'caption');
 /**
  * The seed value for registration IDs that are generated for palette items.
  */
-var commandID = 0;
+var registrationSeed = 0;
 
 
 /**
@@ -175,36 +175,6 @@ const enum ScrollDirection {
 
 
 /**
- * Private version of command palette item that holds registration ID.
- */
-interface ICommandPaletteItemPrivate {
-  /**
-   * Flag denoting whether the item is disabled.
-   */
-  disabled: boolean;
-  /**
-   * The command palette item.
-   */
-  item: ICommandPaletteItem;
-}
-
-
-/**
- * A group of items that the command palette actually renders.
- */
-interface ICommandPaletteSectionPrivate {
-  /**
-   * The heading for the command section.
-   */
-  text: string;
-  /**
-   * The internal registration IDs of the comman palette items.
-   */
-  items: string[];
-};
-
-
-/**
  * Test to see if a child node needs to be scrolled to within its parent node.
  *
  * @param parentNode - The element containing the child being checked.
@@ -218,6 +188,68 @@ function scrollTest(parentNode: HTMLElement, childNode: HTMLElement): boolean {
   let child = childNode.getBoundingClientRect();
   return child.top < parent.top || child.top + child.height > parent.bottom;
 }
+
+
+/**
+ * A command object which can be rendered inside a command palette section.
+ */
+export
+interface ICommandPaletteItem {
+  /**
+   * The arguments the command will be called with.
+   */
+  args?: any;
+
+  /**
+   * A descriptive caption for the command.
+   */
+  caption?: string;
+
+  /**
+   * The section heading a command item appears under.
+   */
+  category: string;
+
+  /**
+   * The unique id for the command.
+   */
+  command: string;
+
+  /**
+   * A flag indicating whether the command is disabled.
+   */
+  disabled: boolean;
+
+  /**
+   * The palette instance ID for an item.
+   */
+  id: string;
+
+  /**
+   * The shortcut for the command.
+   */
+  shortcut?: string;
+
+  /**
+   * The title of the command.
+   */
+  title: string;
+}
+
+
+/**
+ * A group of items that the command palette can render.
+ */
+interface ICommandPaletteSection {
+  /**
+   * The heading for the command section.
+   */
+  title: string;
+  /**
+   * The internal registration IDs of the command palette items.
+   */
+  registrations: string[];
+};
 
 
 /**
@@ -285,19 +317,24 @@ class CommandPalette extends Widget implements ICommandPalette {
     let title = document.createElement('span');
     let shortcut = document.createElement('span');
     let caption = document.createElement('span');
+    // Set the styles for each element.
     node.className = COMMAND_CLASS;
+    if (item.disabled) node.classList.add(DISABLED_CLASS);
     top.className = COMMAND_TOP_CLASS;
     bottom.className = COMMAND_BOTTOM_CLASS;
     title.className = TITLE_CLASS;
-    title.textContent = item.title;
-    title.setAttribute('title', item.title);
     shortcut.className = SHORTCUT_CLASS;
     caption.className = CAPTION_CLASS;
+    // Populate the content and attributes for each element.
+    node.setAttribute(REGISTRATION_ID, item.id);
+    title.textContent = item.title;
+    title.setAttribute('title', item.title);
     if (item.shortcut) shortcut.textContent = item.shortcut;
     if (item.caption) {
       caption.textContent = item.caption;
       caption.setAttribute('title', item.caption);
     }
+    // Compose the node.
     top.appendChild(title);
     top.appendChild(shortcut);
     bottom.appendChild(caption);
@@ -309,17 +346,19 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Create a new section document fragment for a command palette.
    *
-   * @param section - The section content.
+   * @param title - The section heading.
+   *
+   * @param items - The command items in a section.
    *
    * @returns A `DocumentFragment` with the whole rendered section.
    *
    * #### Notes
    * This method may be reimplemented to create custom sections.
    */
-  static createSectionFragment(section: ICommandPaletteSection): DocumentFragment {
+  static createSectionFragment(title: string, items: ICommandPaletteItem[]): DocumentFragment {
     let fragment = document.createDocumentFragment();
-    fragment.appendChild(this.createHeaderNode(section.text));
-    section.items.forEach(item => {
+    fragment.appendChild(this.createHeaderNode(title));
+    items.forEach(item => {
       fragment.appendChild(this.createItemNode(item));
     });
     return fragment;
@@ -356,15 +395,12 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param commandRegistry - A command registry instance
    */
-  constructor(commandRegistry: ICommandRegistry, shortcuts: IShortcutManager) {
+  constructor(commandRegistry: ICommandRegistry, shortcutManager: IShortcutManager) {
     super();
     this.addClass(PALETTE_CLASS);
     this._commandRegistry = commandRegistry;
-    this._shortcutManager = shortcuts;
-
-    commandRegistry.commandsAdded.connect(this._onCommandsUpdated, this);
-    commandRegistry.commandsRemoved.connect(this._onCommandsUpdated, this);
-
+    commandRegistry.commandsRemoved.connect(this._onCommandsRemoved, this);
+    this._shortcutManager = shortcutManager;
   }
 
   /**
@@ -372,8 +408,7 @@ class CommandPalette extends Widget implements ICommandPalette {
    */
   dispose(): void {
     let commandRegistry = this._commandRegistry;
-    commandRegistry.commandsAdded.disconnect(this._onCommandsUpdated, this);
-    commandRegistry.commandsRemoved.disconnect(this._onCommandsUpdated, this);
+    commandRegistry.commandsRemoved.disconnect(this._onCommandsRemoved, this);
     this._sections.length = 0;
     this._buffer.length = 0;
     this._registry = null;
@@ -381,37 +416,46 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   /**
-   * Add new sections with heading titles and command items to the palette.
+   * Add new command items to the palette.
    *
-   * @param sections - An array of sections to be added to the palette
+   * @param commands - An array of command IDs and arguments
    *
-   * @returns An `IDisposable` to remove the added items from the palette
+   * @returns An `IDisposable` to remove the added commands from the palette
    */
-  add(sections: ICommandPaletteSection[]): IDisposable {
-    let text: string;
-    let sectionIndex: number;
-    let itemIndex: number;
-    let registrationID: string;
+  add(commands: { id: string, args: any }[]): IDisposable {
     let registrations: string[] = [];
-    let item: ICommandPaletteItem;
-    for (let section of sections) {
-      text = section.text;
-      sectionIndex = arrays.findIndex(this._sections, s => {
-        return s.text === text;
+    commands.forEach(spec => {
+      let command = this._commandRegistry.get(spec.id);
+      if (!command) return;
+      let item: ICommandPaletteItem = {
+        args: spec.args,
+        caption: command.caption(spec.args),
+        category: command.category(spec.args),
+        command: spec.id,
+        disabled: !command.isEnabled(spec.args),
+        id: `palette-${++registrationSeed}`,
+        shortcut: this._shortcutForItem(spec.id, spec.args),
+        title: command.text(spec.args) || spec.id
+      };
+      // Add the item to the private registry.
+      this._registry[item.id] = item;
+      // Add the item to the list of registrations to dispose later.
+      registrations.push(item.id);
+      // Discover whether a section with this category already exists.
+      let sectionIndex = arrays.findIndex(this._sections, section => {
+        return section.title === item.category;
       });
       if (sectionIndex === -1) {
         // If a section with this header does not exist, add a new section.
-        let ids = this._addSection(section);
-        Array.prototype.push.apply(registrations, ids);
+        this._sections.push({ title: item.category, registrations: [item.id] });
       } else {
-        // If a section exists with this header, amend it.
-        let ids = this._amendSection(section.items, sectionIndex);
-        Array.prototype.push.apply(registrations, ids);
+        // If a section exists with this header, add to it.
+        this._sections[sectionIndex].registrations.push(item.id);
       }
-    }
+    });
     this._bufferAllItems();
     return new DisposableDelegate(() => {
-      registrations.forEach(id => { this._removeItem(id); });
+      registrations.forEach(id => { this._removeItem(id, true); });
       this._bufferAllItems();
     });
 
@@ -450,10 +494,11 @@ class CommandPalette extends Widget implements ICommandPalette {
    * @param query - The query string
    */
   search(query: string): void {
-    let searchableItems = this._sections.reduce((acc, val) => {
-      val.items.forEach(id => {
-        let title = this._registry[id].item.title;
-        let caption = this._registry[id].item.caption;
+    let searchableItems = this._sections.reduce((acc, section) => {
+      section.registrations.forEach(id => {
+        let item = this._registry[id];
+        let title = item.title;
+        let caption = item.caption;
         acc.push({ id, title, caption });
       });
       return acc;
@@ -497,10 +542,15 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Clear the node.
     this.contentNode.textContent = '';
     // Ask the command registry about each palette commmand.
-    Object.keys(this._registry).forEach(registrationID => {
-      let priv = this._registry[registrationID];
-      let command = this._commandRegistry.get(priv.item.id);
-      priv.disabled = !command || !command.isEnabled(priv.item.args);
+    Object.keys(this._registry).forEach(id => {
+      let item = this._registry[id];
+      let command = this._commandRegistry.get(item.command);
+      // If a command doesn't exist any more, it needs to be removed.
+      if (!command) {
+        this._removeItem(id, true);
+      } else {
+        this._updateCommandItem(id, command)
+      }
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
@@ -523,8 +573,8 @@ class CommandPalette extends Widget implements ICommandPalette {
       if (direction === ScrollDirection.Down) return this._activateFirst();
       if (direction === ScrollDirection.Up) return this._activateLast();
     }
-    let registrations = this._buffer.map(section => section.items)
-      .reduce((acc, val) => { return acc.concat(val); }, [] as string[]);
+    let registrations = this._buffer.map(section => section.registrations)
+      .reduce((acc, ids) => { return acc.concat(ids); }, [] as string[]);
     let current = registrations.indexOf(active.getAttribute(REGISTRATION_ID));
     let newActive: number;
     if (direction === ScrollDirection.Up) {
@@ -555,7 +605,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Query the DOM for items that are not disabled.
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     let nodes = this.node.querySelectorAll(selector);
-    // If the palette contains enabled items, activate the first.
+    // If the palette contains any enabled items, activate the first one.
     if (nodes.length) {
       // Scroll all the way to the top of the content node.
       this.contentNode.scrollTop = 0;
@@ -574,9 +624,12 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Query the DOM for items that are not disabled.
     let selector = `.${COMMAND_CLASS}:not(.${DISABLED_CLASS})`;
     let nodes = this.node.querySelectorAll(selector);
-    // If the palette contains enabled items, activate the last.
+    // If the palette contains any enabled items, activate the last one.
     if (nodes.length) {
+      // Scroll all the way to the bottom of the content node.
+      this.contentNode.scrollTop = this.contentNode.scrollHeight;
       let target = nodes[nodes.length - 1] as HTMLElement;
+      // Test if the last enabled item is visible.
       let scrollIntoView = scrollTest(this.contentNode, target);
       let alignToTop = false;
       this._activateNode(target, scrollIntoView, alignToTop);
@@ -601,59 +654,11 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   /**
-   * Add a new section to the palette's registry and return registration IDs.
-   *
-   * @param section - The section being added to the command palette.
-   */
-  private _addSection(section: ICommandPaletteSection): string[] {
-    let registrations: string[] = [];
-    let registrationID: string;
-    let privSection = {
-      text: section.text,
-      items: []
-    } as ICommandPaletteSectionPrivate;
-    for (let item of section.items) {
-      registrationID = `palette-${++commandID}`;
-      this._registry[registrationID] = { disabled: false, item: item };
-      registrations.push(registrationID);
-      privSection.items.push(registrationID);
-    }
-    this._sections.push(privSection);
-    return registrations;
-  }
-
-  /**
-   * Amend a section in the palette's registry and return registration IDs.
-   *
-   * @param section - The section being folded into the command palette.
-   *
-   * @param sectionIndex - The index of the existing section being merged.
-   */
-  private _amendSection(items: ICommandPaletteItem[], sectionIndex: number): string[] {
-    let registrations: string[] = [];
-    let registrationID: string;
-    let item: ICommandPaletteItem;
-    let itemIndex: number;
-    for (item of items) {
-      let existingItems = this._sections[sectionIndex].items;
-      itemIndex = arrays.findIndex(existingItems, registrationID => {
-        return this._registry[registrationID].item === item;
-      });
-      if (itemIndex !== -1) continue;
-      registrationID = `palette-${++commandID}`;
-      this._registry[registrationID] = { disabled: false, item: item };
-      existingItems.push(registrationID);
-      registrations.push(registrationID);
-    }
-    return registrations;
-  }
-
-  /**
    * Set the buffer to all registered items.
    */
   private _bufferAllItems(): void {
     // Filter out any sections that are empty.
-    this._sections = this._sections.filter(section => !!section.items.length);
+    this._sections = this._sections.filter(s => !!s.registrations.length);
     this._sort();
     this._buffer = this._sections;
     this.update();
@@ -666,24 +671,24 @@ class CommandPalette extends Widget implements ICommandPalette {
    */
   private _bufferSearchResults(items: ICommandMatchResult[]): void {
     let headings = this._sections.reduce((acc, section) => {
-      section.items.forEach(id => acc[id] = section.text);
+      section.registrations.forEach(id => acc[id] = section.title);
       return acc;
     }, Object.create(null) as { [id: string]: string });
     let sections = items.reduce((acc, val, idx) => {
       let heading = headings[val.id];
       if (!idx) {
-        acc.push({ text: heading, items: [val.id] });
+        acc.push({ title: heading, registrations: [val.id] });
         return acc;
       }
-      if (acc[acc.length - 1].text === heading) {
+      if (acc[acc.length - 1].title === heading) {
         // Add to the last group.
-        acc[acc.length - 1].items.push(val.id);
+        acc[acc.length - 1].registrations.push(val.id);
       } else {
         // Create a new group.
-        acc.push({ text: heading, items: [val.id] });
+        acc.push({ title: heading, registrations: [val.id] });
       }
       return acc;
-    }, [] as ICommandPaletteSectionPrivate[]);
+    }, [] as ICommandPaletteSection[]);
     // If there are search results, set the search flag used for activation.
     if (sections.length) this._searchResult = true;
     this._buffer = sections;
@@ -714,9 +719,9 @@ class CommandPalette extends Widget implements ICommandPalette {
       if (target === this.node as HTMLElement) return;
       target = target.parentElement;
     }
-    let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
-    if (priv.disabled) return;
-    safeExecute(this._commandRegistry.get(priv.item.id), priv.item.args);
+    let item = this._registry[target.getAttribute(REGISTRATION_ID)];
+    if (item.disabled) return;
+    safeExecute(this._commandRegistry.get(item.command), item.args);
   }
 
   /**
@@ -750,8 +755,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     if (keyCode === ENTER) {
       let active = this._findActive();
       if (!active) return;
-      let priv = this._registry[active.getAttribute(REGISTRATION_ID)];
-      safeExecute(this._commandRegistry.get(priv.item.id), priv.item.args);
+      let item = this._registry[active.getAttribute(REGISTRATION_ID)];
+      safeExecute(this._commandRegistry.get(item.command), item.args);
       this._deactivate();
       return;
     }
@@ -790,19 +795,19 @@ class CommandPalette extends Widget implements ICommandPalette {
   }
 
   /**
-   * A handler for command registry additions and removals.
+   * A handler for command registry removals.
    *
    * @param sender - The command registry instance that signaled a change.
    *
-   * @param ids - The command IDs that were added/removed.
+   * @param ids - The command IDs that were removed.
    */
-  private _onCommandsUpdated(sender: ICommandRegistry, ids: string[]): void {
-    let commandIDs = ids.reduce((acc, val) => {
+  private _onCommandsRemoved(sender: ICommandRegistry, ids: string[]): void {
+    let commands = ids.reduce((acc, val) => {
       acc[val] = null;
       return acc;
     }, Object.create(null) as { [id: string]: void });
-    let staleRegistry = Object.keys(this._registry).some(registrationID => {
-      return this._registry[registrationID].item.id in commandIDs;
+    let staleRegistry = Object.keys(this._registry).some(id => {
+      return this._registry[id].command in commands;
     });
     if (staleRegistry) this.update();
   }
@@ -810,14 +815,16 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Remove a registered item from the registry and from the sections.
    *
-   * @param registrationID - The internal ID of the item being removed.
+   * @param id - The palette ID of the item being removed.
+   *
+   * @param deregister - A flag to delete the internal registration of the item.
    */
-  private _removeItem(registrationID: string): void {
+  private _removeItem(id: string, deregister?: boolean): void {
     for (let section of this._sections) {
-      for (let id of section.items) {
-        if (id === registrationID) {
-          delete this._registry[id];
-          arrays.remove(section.items, id);
+      for (let registered of section.registrations) {
+        if (id === registered) {
+          arrays.remove(section.registrations, id);
+          if (deregister) delete this._registry[id];
           return;
         }
       }
@@ -827,40 +834,25 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Render a section and its commands.
    *
-   * @param privSection - The palette section being rendered.
+   * @param section - The palette section being rendered.
    */
-  private _renderSection(privSection: ICommandPaletteSectionPrivate): void {
+  private _renderSection(section: ICommandPaletteSection): void {
     let constructor = this.constructor as typeof CommandPalette;
-    let section: ICommandPaletteSection = { text: privSection.text, items: [] };
-    let registrations: string[] = [];
-    let disableds: boolean[] = [];
-    privSection.items.forEach(registrationID => {
-      let priv = this._registry[registrationID];
-      priv.item.shortcut = this._shortcutForItem(priv.item.id, priv.item.args);
-      section.items.push(priv.item);
-      disableds.push(priv.disabled);
-      registrations.push(registrationID);
-    });
-    let fragment = constructor.createSectionFragment(section);
-    let nodes = fragment.querySelectorAll(`.${COMMAND_CLASS}`);
-    // Update new command nodes with registrationID and disabled state.
-    for (let i = 0; i < nodes.length; ++i) {
-      nodes[i].setAttribute(REGISTRATION_ID, registrations[i]);
-      if (disableds[i]) nodes[i].classList.add(DISABLED_CLASS);
-    }
+    let items = section.registrations.map(id => this._registry[id]);
+    let fragment = constructor.createSectionFragment(section.title, items);
     this.contentNode.appendChild(fragment);
   }
 
   /**
    * Get the shortcut for an item.
    *
-   * @param id - The command id.
+   * @param command - The command id.
    *
    * @param args - The command arguments.
    */
-  private _shortcutForItem(id: string, args: any): string {
+  private _shortcutForItem(command: string, args: any): string {
     let shortcut = '';
-    let sequences = this._shortcutManager.getSequences(id, args);
+    let sequences = this._shortcutManager.getSequences(command, args);
     if (sequences && sequences.length > 0) {
       shortcut = sequences[0].map(s => s.replace(/\s/g, '-')).join(' ');
     }
@@ -871,20 +863,44 @@ class CommandPalette extends Widget implements ICommandPalette {
    * Sort the sections by title and their commands by title.
    */
   private _sort(): void {
-    this._sections.sort((a, b) => { return a.text.localeCompare(b.text); });
-    this._sections.forEach(section => section.items.sort((a, b) => {
-      let titleA = this._registry[a].item.title;
-      let titleB = this._registry[b].item.title;
+    this._sections.sort((a, b) => { return a.title.localeCompare(b.title); });
+    this._sections.forEach(section => section.registrations.sort((a, b) => {
+      let titleA = this._registry[a].title;
+      let titleB = this._registry[b].title;
       return titleA.localeCompare(titleB);
     }));
   }
 
-  private _buffer: ICommandPaletteSectionPrivate[] = [];
+  private _updateCommandItem(id: string, command: Command): void {
+    let item = this._registry[id];
+    let newCategory = command.category(item.args);
+    item.caption = command.caption(item.args)
+    item.disabled = !command.isEnabled(item.args);
+    item.shortcut = this._shortcutForItem(item.command, item.args);
+    item.title = command.text(item.args) || item.command;
+    if (item.category !== newCategory) {
+      this._removeItem(item.id, false);
+      item.category = newCategory;
+      // Discover whether a section with this category already exists.
+      let sectionIndex = arrays.findIndex(this._sections, section => {
+        return section.title === newCategory;
+      });
+      if (sectionIndex === -1) {
+        // If a section with this header does not exist, add a new section.
+        this._sections.push({ title: item.category, registrations: [item.id] });
+      } else {
+        // If a section exists with this header, add to it.
+        this._sections[sectionIndex].registrations.push(item.id);
+      }
+    }
+  }
+
+  private _buffer: ICommandPaletteSection[] = [];
   private _commandRegistry: ICommandRegistry = null;
+  private _sections: ICommandPaletteSection[] = [];
   private _shortcutManager: IShortcutManager = null;
-  private _sections: ICommandPaletteSectionPrivate[] = [];
   private _searchResult: boolean = false;
   private _registry: {
-    [id: string]: ICommandPaletteItemPrivate;
+    [id: string]: ICommandPaletteItem;
   } = Object.create(null);
 }

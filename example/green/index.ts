@@ -61,75 +61,83 @@ class GreenHandler {
     widget.addClass('green-content');
     widget.title.text = 'Green';
     this._shell.addToRightArea(widget, { rank: 40 });
-    let commandId = 'demo:colors:green-0';
-    let command = createCommand();
-
-    this._registry.add([
-      { id: commandId, command: command },
-      { id: 'demo:colors:green-1', command: createCommand() },
-      { id: 'demo:colors:green-2', command: createCommand() },
-      { id: 'demo:colors:green-3', command: createCommand() },
-      { id: 'demo:colors:green-4', command: createCommand() },
-      { id: 'demo:colors:green-5', command: createCommand() }
-    ]);
-
-    this._shortcuts.add([
+    let registryItems = [
       {
-        sequence: ['Ctrl G'],
-        selector: '*',
-        command: commandId,
-        args: 'Green is best!'
-      }
-    ]);
-
-    this._palette.add([
-      {
-        text: 'All colors',
-        items: [
-          {
-            id: 'demo:colors:green-0',
-            title: 'Green',
-            caption: 'Green is best!',
-            args: 'Green is best!'
-          }
-        ]
+        id: `demo:colors:${widget.title.text.toLowerCase()}-0`,
+        command: createCommand()
       },
       {
-        text: 'Green',
-        items: [
-          {
-            id: 'demo:colors:green-1',
-            title: 'Green #1',
-            caption: 'Green number one',
-            args: 'Green is best!'
-          },
-          {
-            id: 'demo:colors:green-2',
-            title: 'Green #2',
-            caption: 'Green number two',
-            args: 'Green number two'
-          },
-          {
-            id: 'demo:colors:green-3',
-            title: 'Green #3',
-            caption: 'Green number three',
-            args: 'Green number three'
-          },
-          {
-            id: 'demo:colors:green-4',
-            title: 'Green #4',
-            caption: 'Green number four',
-            args: 'Green number four'
-          },
-          {
-            id: 'demo:colors:green-5',
-            title: 'Green #5',
-            caption: 'Green number five',
-            args: 'Green number five'
-          }
-        ]
+        id: `demo:colors:${widget.title.text.toLowerCase()}-1`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-2`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-3`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-4`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-5`,
+        command: createCommand()
       }
-    ]);
+    ];
+    let paletteItems = [
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-0`,
+        args: `${widget.title.text} is best!`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-1`,
+        args: `${widget.title.text} number one`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-2`,
+        args: `${widget.title.text} number two`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-3`,
+        args: `${widget.title.text} number three`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-4`,
+        args: `${widget.title.text} number four`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-5`,
+        args: `${widget.title.text} number five`
+      }
+    ];
+    let shortcutItems = [
+      {
+        sequence: [`Ctrl ${widget.title.text[0]}`],
+        selector: '*',
+        command: paletteItems[0].id,
+        args: paletteItems[0].args
+      }
+    ];
+    registryItems.forEach((item, idx) => {
+      let title = `${widget.title.text} ${idx}`;
+      item.command.setCategory(widget.title.text);
+      item.command.setText(title);
+      item.command.setCaption(paletteItems[idx].args);
+    });
+    registryItems[0].command.setText(`${widget.title.text} main`);
+    registryItems[0].command.setCategory('All colors');
+    // Test disabled commands.
+    registryItems[1].command.setEnabled(false);
+    registryItems[5].command.setEnabled(false);
+    // Add commands to registry.
+    this._registry.add(registryItems);
+    // Add shortcuts to shortcut manager.
+    this._shortcuts.add(shortcutItems);
+    // Add commands to palette.
+    this._palette.add(paletteItems);
   }
 
   private _commandDisposable: IDisposable;
