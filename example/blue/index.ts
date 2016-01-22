@@ -34,6 +34,13 @@ function resolve(container: Container): Promise<void> {
 }
 
 
+function createCommand(): SimpleCommand {
+  return new SimpleCommand({
+    handler: (message: string) => { console.log(`COMMAND: ${message}`); }
+  });
+}
+
+
 class BlueHandler {
 
   static requires = [IAppShell, ICommandPalette, ICommandRegistry];
@@ -53,64 +60,34 @@ class BlueHandler {
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
-    let id = 'demo:colors:blue-0';
-    let command = new SimpleCommand({
-      handler: (message: string) => { console.log(`COMMAND: ${message}`); }
+    let category = 'Blue';
+    let registryItems = [
+      { id: 'demo:colors:blue-0', command: createCommand() },
+      { id: 'demo:colors:blue-1', command: createCommand() },
+      { id: 'demo:colors:blue-2', command: createCommand() },
+      { id: 'demo:colors:blue-3', command: createCommand() },
+      { id: 'demo:colors:blue-4', command: createCommand() },
+      { id: 'demo:colors:blue-5', command: createCommand() }
+    ];
+    let paletteItems = [
+      { id: 'demo:colors:blue-0', args: 'Blue is best!' },
+      { id: 'demo:colors:blue-1', args: 'Blue number one' },
+      { id: 'demo:colors:blue-2', args: 'Blue number two' },
+      { id: 'demo:colors:blue-3', args: 'Blue number three' },
+      { id: 'demo:colors:blue-4', args: 'Blue number four' },
+      { id: 'demo:colors:blue-5', args: 'Blue number five' }
+    ];
+    registryItems.forEach((item, idx) => {
+      let title = item.id.split(':').pop().split('-')
+        .map(token => token[0].toLocaleUpperCase() + token.substr(1)).join(' ');
+      item.command.setCategory(category);
+      item.command.setText(title);
+      item.command.setCaption(paletteItems[idx].args);
     });
-    this._registry.add([{ id, command }]);
-    this._palette.add([
-      {
-        text: 'All colors',
-        items: [
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue',
-            caption: 'Blue is best!',
-            args: 'Blue is best!'
-          }
-        ]
-      },
-      {
-        text: 'Blue',
-        items: [
-          {
-            id: 'demo:colors:blue-foo',
-            title: 'Blue #0',
-            caption: 'Unregistered blue'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue #1',
-            args: 'Blue number one'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue #2',
-            caption: 'Blue number two',
-            args: 'Blue number two'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue three is a very very very long title',
-            caption: 'Blue number three has an extra long, long, long' +
-              ' caption, too.',
-            args: 'Blue number three'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue #4',
-            caption: 'Blue number four',
-            args: 'Blue number four'
-          },
-          {
-            id: 'demo:colors:blue-0',
-            title: 'Blue #5',
-            caption: 'Blue number five',
-            args: 'Blue number five'
-          }
-        ]
-      }
-    ]);
+    registryItems[0].command.setText('Blue main');
+    registryItems[0].command.setCategory('All colors');
+    this._registry.add(registryItems);
+    this._palette.add(paletteItems);
   }
 
   private _commandDisposable: IDisposable;

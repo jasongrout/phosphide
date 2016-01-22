@@ -59,63 +59,37 @@ class GreenHandler {
     widget.addClass('green-content');
     widget.title.text = 'Green';
     this._shell.addToRightArea(widget, { rank: 40 });
-    this._registry.add([
+    let category = 'Green';
+    let registryItems = [
       { id: 'demo:colors:green-0', command: createCommand() },
       { id: 'demo:colors:green-1', command: createCommand() },
       { id: 'demo:colors:green-2', command: createCommand() },
       { id: 'demo:colors:green-3', command: createCommand() },
       { id: 'demo:colors:green-4', command: createCommand() },
       { id: 'demo:colors:green-5', command: createCommand() }
-    ]);
-
-    this._palette.add([
-      {
-        text: 'All colors',
-        items: [
-          {
-            id: 'demo:colors:green-0',
-            title: 'Green',
-            caption: 'Green is best!',
-            args: 'Green is best!'
-          }
-        ]
-      },
-      {
-        text: 'Green',
-        items: [
-          {
-            id: 'demo:colors:green-1',
-            title: 'Green #1',
-            caption: 'Green number one',
-            args: 'Green is best!'
-          },
-          {
-            id: 'demo:colors:green-2',
-            title: 'Green #2',
-            caption: 'Green number two',
-            args: 'Green number two'
-          },
-          {
-            id: 'demo:colors:green-3',
-            title: 'Green #3',
-            caption: 'Green number three',
-            args: 'Green number three'
-          },
-          {
-            id: 'demo:colors:green-4',
-            title: 'Green #4',
-            caption: 'Green number four',
-            args: 'Green number four'
-          },
-          {
-            id: 'demo:colors:green-5',
-            title: 'Green #5',
-            caption: 'Green number five',
-            args: 'Green number five'
-          }
-        ]
-      }
-    ]);
+    ];
+    let paletteItems = [
+      { id: 'demo:colors:green-0', args: 'Green is best!' },
+      { id: 'demo:colors:green-1', args: 'Green number one' },
+      { id: 'demo:colors:green-2', args: 'Green number two' },
+      { id: 'demo:colors:green-3', args: 'Green number three' },
+      { id: 'demo:colors:green-4', args: 'Green number four' },
+      { id: 'demo:colors:green-5', args: 'Green number five' }
+    ];
+    registryItems.forEach((item, idx) => {
+      let title = item.id.split(':').pop().split('-')
+        .map(token => token[0].toLocaleUpperCase() + token.substr(1)).join(' ');
+      item.command.setCategory(category);
+      item.command.setText(title);
+      item.command.setCaption(paletteItems[idx].args);
+    });
+    registryItems[0].command.setText('Green main');
+    registryItems[0].command.setCategory('All colors');
+    // Test blank command text
+    registryItems[2].command.setText('');
+    registryItems[3].command.setText('');
+    this._registry.add(registryItems);
+    this._palette.add(paletteItems);
   }
 
   private _commandDisposable: IDisposable;

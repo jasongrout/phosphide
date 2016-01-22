@@ -59,63 +59,36 @@ class RedHandler {
     widget.addClass('red-content');
     widget.title.text = 'Red';
     this._shell.addToRightArea(widget, { rank: 30 });
-    this._registry.add([
+    let category = 'Red';
+    let registryItems = [
       { id: 'demo:colors:red-0', command: createCommand() },
       { id: 'demo:colors:red-1', command: createCommand() },
       { id: 'demo:colors:red-2', command: createCommand() },
       { id: 'demo:colors:red-3', command: createCommand() },
       { id: 'demo:colors:red-4', command: createCommand() },
       { id: 'demo:colors:red-5', command: createCommand() }
-    ]);
-
-    this._palette.add([
-      {
-        text: 'All colors',
-        items: [
-          {
-            id: 'demo:colors:red-0',
-            title: 'Red',
-            caption: 'Red is best!',
-            args: 'Red is best!'
-          }
-        ]
-      },
-      {
-        text: 'Red',
-        items: [
-          {
-            id: 'demo:colors:red-1',
-            title: 'Red #1',
-            caption: 'Red number one',
-            args: 'Red number one'
-          },
-          {
-            id: 'demo:colors:red-2',
-            title: 'Red #2',
-            caption: 'Red number two',
-            args: 'Red number two'
-          },
-          {
-            id: 'demo:colors:red-3',
-            title: 'Red #3',
-            caption: 'Red number three',
-            args: 'Red number three'
-          },
-          {
-            id: 'demo:colors:red-4',
-            title: 'Red #4',
-            caption: 'Red number four',
-            args: 'Red number four'
-          },
-          {
-            id: 'demo:colors:red-5',
-            title: 'Red #5',
-            caption: 'Red number five',
-            args: 'Red number five'
-          }
-        ]
-      }
-    ]);
+    ];
+    let paletteItems = [
+      { id: 'demo:colors:red-0', args: 'Red is best!' },
+      { id: 'demo:colors:red-1', args: 'Red number one' },
+      { id: 'demo:colors:red-2', args: 'Red number two' },
+      { id: 'demo:colors:red-3', args: 'Red number three' },
+      { id: 'demo:colors:red-4', args: 'Red number four' },
+      { id: 'demo:colors:red-5', args: 'Red number five' }
+    ];
+    registryItems.forEach((item, idx) => {
+      let title = item.id.split(':').pop().split('-')
+        .map(token => token[0].toLocaleUpperCase() + token.substr(1)).join(' ');
+      item.command.setCategory(category);
+      item.command.setText(title);
+      item.command.setCaption(paletteItems[idx].args);
+    });
+    registryItems[0].command.setText('Red main');
+    registryItems[0].command.setCategory('All colors');
+    // Test disabled command.
+    registryItems[5].command.setEnabled(false);
+    this._registry.add(registryItems);
+    this._palette.add(paletteItems);
   }
 
   private _commandDisposable: IDisposable;

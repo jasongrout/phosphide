@@ -59,64 +59,36 @@ class YellowHandler {
     widget.addClass('yellow-content');
     widget.title.text = 'Yellow';
     this._shell.addToLeftArea(widget, { rank: 20 });
-    let five = { id: 'demo:colors:yellow-5', command: createCommand() };
-    five.command.setEnabled(false);
-    this._registry.add([
+    let category = 'Yellow';
+    let registryItems = [
       { id: 'demo:colors:yellow-0', command: createCommand() },
       { id: 'demo:colors:yellow-1', command: createCommand() },
       { id: 'demo:colors:yellow-2', command: createCommand() },
       { id: 'demo:colors:yellow-3', command: createCommand() },
       { id: 'demo:colors:yellow-4', command: createCommand() },
-      five
-    ]);
-    this._palette.add([
-      {
-        text: 'All colors',
-        items: [
-          {
-            id: 'demo:colors:yellow-0',
-            title: 'Yellow',
-            caption: 'Yellow is best!',
-            args: 'Yellow is best!'
-          }
-        ]
-      },
-      {
-        text: 'Yellow',
-        items: [
-          {
-            id: 'demo:colors:yellow-1',
-            title: 'Yellow #1',
-            caption: 'Yellow number one',
-            args: 'Yellow number one'
-          },
-          {
-            id: 'demo:colors:yellow-2',
-            title: 'Yellow #2',
-            caption: 'Yellow number two',
-            args: 'Yellow number two'
-          },
-          {
-            id: 'demo:colors:yellow-3',
-            title: 'Yellow #3',
-            caption: 'Yellow number three',
-            args: 'Yellow number three'
-          },
-          {
-            id: 'demo:colors:yellow-4',
-            title: 'Yellow #4',
-            caption: 'Yellow number four',
-            args: 'Yellow number four'
-          },
-          {
-            id: 'demo:colors:yellow-5',
-            title: 'Yellow #5',
-            caption: 'Yellow number five',
-            args: 'Yellow number five'
-          }
-        ]
-      }
-    ]);
+      { id: 'demo:colors:yellow-5', command: createCommand() }
+    ];
+    let paletteItems = [
+      { id: 'demo:colors:yellow-0', args: 'Yellow is best!' },
+      { id: 'demo:colors:yellow-1', args: 'Yellow number one' },
+      { id: 'demo:colors:yellow-2', args: 'Yellow number two' },
+      { id: 'demo:colors:yellow-3', args: 'Yellow number three' },
+      { id: 'demo:colors:yellow-4', args: 'Yellow number four' },
+      { id: 'demo:colors:yellow-5', args: 'Yellow number five' }
+    ];
+    registryItems.forEach((item, idx) => {
+      let title = item.id.split(':').pop().split('-')
+        .map(token => token[0].toLocaleUpperCase() + token.substr(1)).join(' ');
+      item.command.setCategory(category);
+      item.command.setText(title);
+      item.command.setCaption(paletteItems[idx].args);
+    });
+    registryItems[0].command.setText('Yellow main');
+    registryItems[0].command.setCategory('All colors');
+    // Test disabled command.
+    registryItems[5].command.setEnabled(false);
+    this._registry.add(registryItems);
+    this._palette.add(paletteItems);
   }
 
   private _commandDisposable: IDisposable;
