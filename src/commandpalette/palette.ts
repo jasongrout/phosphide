@@ -10,7 +10,7 @@
 import * as arrays from 'phosphor-arrays';
 
 import {
-  safeExecute
+  Command, safeExecute
 } from 'phosphor-command';
 
 import {
@@ -204,6 +204,11 @@ interface ICommandPaletteItem {
    * A descriptive caption for the command.
    */
   caption?: string;
+
+  /**
+   * The section heading a command item appears under.
+   */
+  category: string;
 
   /**
    * The unique id for the command.
@@ -422,10 +427,10 @@ class CommandPalette extends Widget implements ICommandPalette {
     commands.forEach(spec => {
       let command = this._commandRegistry.get(spec.id);
       if (!command) return;
-      let category = command.category(spec.args);
       let item: ICommandPaletteItem = {
         args: spec.args,
         caption: command.caption(spec.args),
+        category: command.category(spec.args),
         command: spec.id,
         disabled: !command.isEnabled(spec.args),
         id: `palette-${++registrationSeed}`,
@@ -438,14 +443,11 @@ class CommandPalette extends Widget implements ICommandPalette {
       registrations.push(item.id);
       // Discover whether a section with this category already exists.
       let sectionIndex = arrays.findIndex(this._sections, section => {
-        return section.title === category;
+        return section.title === item.category;
       });
       if (sectionIndex === -1) {
         // If a section with this header does not exist, add a new section.
-        this._sections.push({
-          title: category,
-          registrations: [item.id]
-        });
+        this._sections.push({ title: item.category, registrations: [item.id] });
       } else {
         // If a section exists with this header, add to it.
         this._sections[sectionIndex].registrations.push(item.id);
@@ -453,7 +455,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     });
     this._bufferAllItems();
     return new DisposableDelegate(() => {
-      registrations.forEach(id => { this._removeItem(id); });
+      registrations.forEach(id => { this._removeItem(id, true); });
       this._bufferAllItems();
     });
 
@@ -545,9 +547,9 @@ class CommandPalette extends Widget implements ICommandPalette {
       let command = this._commandRegistry.get(item.command);
       // If a command doesn't exist any more, it needs to be removed.
       if (!command) {
-        this._removeItem(id);
+        this._removeItem(id, true);
       } else {
-        item.disabled = !command.isEnabled(item.args);
+        this._updateCommandItem(id, command)
       }
     });
     // Render the buffer.
@@ -814,13 +816,15 @@ class CommandPalette extends Widget implements ICommandPalette {
    * Remove a registered item from the registry and from the sections.
    *
    * @param id - The palette ID of the item being removed.
+   *
+   * @param deregister - A flag to delete the internal registration of the item.
    */
-  private _removeItem(id: string): void {
+  private _removeItem(id: string, deregister?: boolean): void {
     for (let section of this._sections) {
       for (let registered of section.registrations) {
         if (id === registered) {
-          delete this._registry[id];
           arrays.remove(section.registrations, id);
+          if (deregister) delete this._registry[id];
           return;
         }
       }
@@ -865,6 +869,30 @@ class CommandPalette extends Widget implements ICommandPalette {
       let titleB = this._registry[b].title;
       return titleA.localeCompare(titleB);
     }));
+  }
+
+  private _updateCommandItem(id: string, command: Command): void {
+    let item = this._registry[id];
+    let newCategory = command.category(item.args);
+    item.caption = command.caption(item.args)
+    item.disabled = !command.isEnabled(item.args);
+    item.shortcut = this._shortcutForItem(item.command, item.args);
+    item.title = command.text(item.args) || item.command;
+    if (item.category !== newCategory) {
+      this._removeItem(item.id, false);
+      item.category = newCategory;
+      // Discover whether a section with this category already exists.
+      let sectionIndex = arrays.findIndex(this._sections, section => {
+        return section.title === newCategory;
+      });
+      if (sectionIndex === -1) {
+        // If a section with this header does not exist, add a new section.
+        this._sections.push({ title: item.category, registrations: [item.id] });
+      } else {
+        // If a section exists with this header, add to it.
+        this._sections[sectionIndex].registrations.push(item.id);
+      }
+    }
   }
 
   private _buffer: ICommandPaletteSection[] = [];
