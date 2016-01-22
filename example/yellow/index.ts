@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry
+  IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
 } from 'phosphide';
 
 import {
@@ -42,16 +42,17 @@ function createCommand(): SimpleCommand {
 
 class YellowHandler {
 
-  static requires = [IAppShell, ICommandPalette, ICommandRegistry];
+  static requires = [IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager];
 
-  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): YellowHandler {
-    return new YellowHandler(shell, palette, registry);
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): YellowHandler {
+    return new YellowHandler(shell, palette, registry, shortcuts);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager) {
     this._shell = shell;
     this._palette = palette;
     this._registry = registry;
+    this._shortcuts = shortcuts;
   }
 
   run(): void {
@@ -59,35 +60,80 @@ class YellowHandler {
     widget.addClass('yellow-content');
     widget.title.text = 'Yellow';
     this._shell.addToLeftArea(widget, { rank: 20 });
-    let category = 'Yellow';
     let registryItems = [
-      { id: 'demo:colors:yellow-0', command: createCommand() },
-      { id: 'demo:colors:yellow-1', command: createCommand() },
-      { id: 'demo:colors:yellow-2', command: createCommand() },
-      { id: 'demo:colors:yellow-3', command: createCommand() },
-      { id: 'demo:colors:yellow-4', command: createCommand() },
-      { id: 'demo:colors:yellow-5', command: createCommand() }
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-0`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-1`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-2`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-3`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-4`,
+        command: createCommand()
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-5`,
+        command: createCommand()
+      }
     ];
     let paletteItems = [
-      { id: 'demo:colors:yellow-0', args: 'Yellow is best!' },
-      { id: 'demo:colors:yellow-1', args: 'Yellow number one' },
-      { id: 'demo:colors:yellow-2', args: 'Yellow number two' },
-      { id: 'demo:colors:yellow-3', args: 'Yellow number three' },
-      { id: 'demo:colors:yellow-4', args: 'Yellow number four' },
-      { id: 'demo:colors:yellow-5', args: 'Yellow number five' }
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-0`,
+        args: `${widget.title.text} is best!`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-1`,
+        args: `${widget.title.text} number one`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-2`,
+        args: `${widget.title.text} number two`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-3`,
+        args: `${widget.title.text} number three`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-4`,
+        args: `${widget.title.text} number four`
+      },
+      {
+        id: `demo:colors:${widget.title.text.toLowerCase()}-5`,
+        args: `${widget.title.text} number five`
+      }
     ];
     registryItems.forEach((item, idx) => {
-      let title = item.id.split(':').pop().split('-')
-        .map(token => token[0].toLocaleUpperCase() + token.substr(1)).join(' ');
-      item.command.setCategory(category);
+      let title = `${widget.title.text} ${idx}`;
+      item.command.setCategory(widget.title.text);
       item.command.setText(title);
       item.command.setCaption(paletteItems[idx].args);
     });
-    registryItems[0].command.setText('Yellow main');
+    registryItems[0].command.setText(`${widget.title.text} main`);
     registryItems[0].command.setCategory('All colors');
     // Test disabled command.
     registryItems[5].command.setEnabled(false);
+    // Add commands to registry.
     this._registry.add(registryItems);
+    // Add shortcuts to shortcut manager.
+    this._shortcuts.add([
+      {
+        sequence: ['Ctrl Y'],
+        selector: '*',
+        command: paletteItems[0].id,
+        args: paletteItems[0].args
+      }
+    ]);
+    // Add commands to palette.
     this._palette.add(paletteItems);
   }
 
@@ -95,4 +141,5 @@ class YellowHandler {
   private _shell: IAppShell;
   private _palette: ICommandPalette;
   private _registry: ICommandRegistry;
+  private _shortcuts: IShortcutManager;
 }

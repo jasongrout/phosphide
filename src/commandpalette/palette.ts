@@ -34,6 +34,10 @@ import {
 } from '../commandregistry/index';
 
 import {
+  IShortcutManager
+} from '../shortcutmanager/index';
+
+import {
   ICommandPalette
 } from './index';
 
@@ -386,11 +390,12 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param commandRegistry - A command registry instance
    */
-  constructor(commandRegistry: ICommandRegistry) {
+  constructor(commandRegistry: ICommandRegistry, shortcutManager: IShortcutManager) {
     super();
     this.addClass(PALETTE_CLASS);
     this._commandRegistry = commandRegistry;
     commandRegistry.commandsRemoved.connect(this._onCommandsRemoved, this);
+    this._shortcutManager = shortcutManager;
   }
 
   /**
@@ -424,7 +429,8 @@ class CommandPalette extends Widget implements ICommandPalette {
         registrationID: `palette-${++registrationSeed}`,
         title: command.text(spec.args) || spec.id,
         caption: command.caption(spec.args),
-        disabled: !command.isEnabled(spec.args)
+        disabled: !command.isEnabled(spec.args),
+        shortcut: this._shortcutForItem(spec.id, spec.args)
       };
       // Add the item to the private registry.
       this._registry[item.registrationID] = item;
@@ -830,8 +836,23 @@ class CommandPalette extends Widget implements ICommandPalette {
     let constructor = this.constructor as typeof CommandPalette;
     let items = section.registrations.map(id => this._registry[id]);
     let fragment = constructor.createSectionFragment(section.title, items);
-    let nodes = fragment.querySelectorAll(`.${COMMAND_CLASS}`);
     this.contentNode.appendChild(fragment);
+  }
+
+  /**
+   * Get the shortcut for an item.
+   *
+   * @param commandID - The command id.
+   *
+   * @param args - The command arguments.
+   */
+  private _shortcutForItem(commandID: string, args: any): string {
+    let shortcut = '';
+    let sequences = this._shortcutManager.getSequences(commandID, args);
+    if (sequences && sequences.length > 0) {
+      shortcut = sequences[0].map(s => s.replace(/\s/g, '-')).join(' ');
+    }
+    return shortcut;
   }
 
   /**
@@ -849,6 +870,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   private _buffer: ICommandPaletteSection[] = [];
   private _commandRegistry: ICommandRegistry = null;
   private _sections: ICommandPaletteSection[] = [];
+  private _shortcutManager: IShortcutManager = null;
   private _searchResult: boolean = false;
   private _registry: {
     [id: string]: ICommandPaletteItem;
