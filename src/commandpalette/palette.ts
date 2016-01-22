@@ -426,7 +426,10 @@ class CommandPalette extends Widget implements ICommandPalette {
     let registrations: string[] = [];
     commands.forEach(spec => {
       let command = this._commandRegistry.get(spec.id);
-      if (!command) return;
+      if (!command) {
+        console.warn(`Command ${spec.id} does not exist in command registry.`);
+        return;
+      }
       let item: ICommandPaletteItem = {
         args: spec.args,
         caption: command.caption(spec.args),
@@ -871,6 +874,13 @@ class CommandPalette extends Widget implements ICommandPalette {
     }));
   }
 
+  /**
+   * Update the local command item by referencing its underlying `Command`.
+   *
+   * @param id - The palette registration ID for the command item.
+   *
+   * @param command - The `Command` instance that the palette item references.
+   */
   private _updateCommandItem(id: string, command: Command): void {
     let item = this._registry[id];
     let newCategory = command.category(item.args);
@@ -878,29 +888,30 @@ class CommandPalette extends Widget implements ICommandPalette {
     item.disabled = !command.isEnabled(item.args);
     item.shortcut = this._shortcutForItem(item.command, item.args);
     item.title = command.text(item.args) || item.command;
-    if (item.category !== newCategory) {
-      this._removeItem(item.id, false);
-      item.category = newCategory;
-      // Discover whether a section with this category already exists.
-      let sectionIndex = arrays.findIndex(this._sections, section => {
-        return section.title === newCategory;
-      });
-      if (sectionIndex === -1) {
-        // If a section with this header does not exist, add a new section.
-        this._sections.push({ title: item.category, registrations: [item.id] });
-      } else {
-        // If a section exists with this header, add to it.
-        this._sections[sectionIndex].registrations.push(item.id);
-      }
+    // If the item does not need to be shifted into a different section, return.
+    if (item.category === newCategory) return;
+    // Delete the item from whichever section it currently resides in.
+    this._removeItem(item.id, false);
+    item.category = newCategory;
+    // Discover whether a section with this category already exists.
+    let sectionIndex = arrays.findIndex(this._sections, section => {
+      return section.title === newCategory;
+    });
+    if (sectionIndex === -1) {
+      // If a section with this header does not exist, add a new section.
+      this._sections.push({ title: item.category, registrations: [item.id] });
+    } else {
+      // If a section exists with this header, add to it.
+      this._sections[sectionIndex].registrations.push(item.id);
     }
   }
 
   private _buffer: ICommandPaletteSection[] = [];
   private _commandRegistry: ICommandRegistry = null;
-  private _sections: ICommandPaletteSection[] = [];
-  private _shortcutManager: IShortcutManager = null;
-  private _searchResult: boolean = false;
   private _registry: {
     [id: string]: ICommandPaletteItem;
   } = Object.create(null);
+  private _searchResult: boolean = false;
+  private _sections: ICommandPaletteSection[] = [];
+  private _shortcutManager: IShortcutManager = null;
 }

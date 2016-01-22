@@ -61,72 +61,36 @@ class RedHandler {
     widget.title.text = 'Red';
     this._shell.addToRightArea(widget, { rank: 30 });
     let registryItems = [
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-0`,
-        command: createCommand()
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-1`,
-        command: createCommand()
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-2`,
-        command: createCommand()
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-3`,
-        command: createCommand()
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-4`,
-        command: createCommand()
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-5`,
-        command: createCommand()
-      }
+      { id: 'red:show-0', command: createCommand() },
+      { id: 'red:show-1', command: createCommand() },
+      { id: 'red:show-2', command: createCommand() },
+      { id: 'red:show-3', command: createCommand() },
+      { id: 'red:show-4', command: createCommand() },
+      { id: 'red:show-5', command: createCommand() }
     ];
     let paletteItems = [
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-0`,
-        args: `${widget.title.text} is best!`
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-1`,
-        args: `${widget.title.text} number one`
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-2`,
-        args: `${widget.title.text} number two`
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-3`,
-        args: `${widget.title.text} number three`
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-4`,
-        args: `${widget.title.text} number four`
-      },
-      {
-        id: `demo:colors:${widget.title.text.toLowerCase()}-5`,
-        args: `${widget.title.text} number five`
-      }
+      { id: 'red:show-0', args: 'Red is best!' },
+      { id: 'red:show-1', args: 'Red number one' },
+      { id: 'red:show-2', args: 'Red number two' },
+      { id: 'red:show-3', args: 'Red number three' },
+      { id: 'red:show-4', args: 'Red number four' },
+      { id: 'red:show-5', args: 'Red number five' }
     ];
     let shortcutItems = [
       {
-        sequence: [`Ctrl ${widget.title.text[0]}`],
+        sequence: ['Ctrl R'],
         selector: '*',
         command: paletteItems[0].id,
         args: paletteItems[0].args
       }
     ];
     registryItems.forEach((item, idx) => {
-      let title = `${widget.title.text} ${idx}`;
+      let title = `Red ${idx}`;
       item.command.setCategory(widget.title.text);
       item.command.setText(title);
       item.command.setCaption(paletteItems[idx].args);
     });
-    registryItems[0].command.setText(`${widget.title.text} main`);
+    registryItems[0].command.setText('Red main');
     registryItems[0].command.setCategory('All colors');
     // Test disabled command.
     registryItems[2].command.setEnabled(false);
