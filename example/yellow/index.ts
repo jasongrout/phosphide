@@ -112,6 +112,14 @@ class YellowHandler {
         args: `${widget.title.text} number five`
       }
     ];
+    let shortcutItems = [
+      {
+        sequence: [`Ctrl ${widget.title.text[0]}`],
+        selector: '*',
+        command: paletteItems[0].id,
+        args: paletteItems[0].args
+      }
+    ];
     registryItems.forEach((item, idx) => {
       let title = `${widget.title.text} ${idx}`;
       item.command.setCategory(widget.title.text);
@@ -125,14 +133,7 @@ class YellowHandler {
     // Add commands to registry.
     this._registry.add(registryItems);
     // Add shortcuts to shortcut manager.
-    this._shortcuts.add([
-      {
-        sequence: ['Ctrl Y'],
-        selector: '*',
-        command: paletteItems[0].id,
-        args: paletteItems[0].args
-      }
-    ]);
+    this._shortcuts.add(shortcutItems);
     // Add commands to palette.
     this._palette.add(paletteItems);
   }
