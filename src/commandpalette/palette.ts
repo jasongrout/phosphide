@@ -877,7 +877,7 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Update the local command item by referencing its underlying `Command`.
    *
-   * @param id - The palette regitration ID for the command item.
+   * @param id - The palette registration ID for the command item.
    *
    * @param command - The `Command` instance that the palette item references.
    */
@@ -888,7 +888,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     item.disabled = !command.isEnabled(item.args);
     item.shortcut = this._shortcutForItem(item.command, item.args);
     item.title = command.text(item.args) || item.command;
-    // If the item does not need to be shifted into a different section, return;
+    // If the item does not need to be shifted into a different section, return.
     if (item.category === newCategory) return;
     // Delete the item from whichever section it currently resides in.
     this._removeItem(item.id, false);
