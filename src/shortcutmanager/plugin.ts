@@ -143,6 +143,9 @@ export class ShortcutManager {
     }
   }
 
+  /**
+   * Recursively perform deep equality testing on arbitrary object trees.
+   */
   private _deepEqual(x: any, y: any): boolean {
     return (x && y && typeof x === 'object' && typeof y === 'object') ?
       (Object.keys(x).length === Object.keys(y).length) &&
@@ -151,6 +154,15 @@ export class ShortcutManager {
         }, true) : (x === y);
   }
 
+  /**
+   * Convert a command into a handler suitable for keyboard shortcuts.
+   *
+   * @param id - The command id.
+   *
+   * @param args - Arguments to be passed to the command.
+   *
+   * @returns A zero-argument handler which returns a boolean.
+   */
   private _commandToKeyHandler(id: string, args: any): () => boolean {
     let registry = this._commandRegistry;
     let keyHandler = () => {

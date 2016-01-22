@@ -24,11 +24,26 @@ import {
 } from 'phosphor-keymap';
 
 
+/**
+ * An object which can be added to a Shortcut Manager.
+ */
 export
 interface IShortcutItem {
+  /**
+   * The key sequence to trigger this command.
+   */
   sequence: string[];
+  /**
+   * The CSS selector required for the sequence to match.
+   */
   selector: string;
+  /**
+   * The id of the command.
+   */
   command: string;
+  /**
+   * The arguments to be passed to the command.
+   */
   args?: any;
 }
 
