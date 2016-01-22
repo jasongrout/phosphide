@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry
+  IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
 } from 'phosphide';
 
 import {
@@ -36,16 +36,17 @@ function resolve(container: Container): Promise<void> {
 
 class BlueHandler {
 
-  static requires = [IAppShell, ICommandPalette, ICommandRegistry];
+  static requires = [IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager];
 
-  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): BlueHandler {
-    return new BlueHandler(shell, palette, registry);
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): BlueHandler {
+    return new BlueHandler(shell, palette, registry, shortcuts);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager) {
     this._shell = shell;
     this._palette = palette;
     this._registry = registry;
+    this._shortcuts = shortcuts;
   }
 
   run(): void {
@@ -53,11 +54,22 @@ class BlueHandler {
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
+
     let id = 'demo:colors:blue-0';
     let command = new SimpleCommand({
       handler: (message: string) => { console.log(`COMMAND: ${message}`); }
     });
     this._registry.add([{ id, command }]);
+
+    this._shortcuts.add([
+      {
+        sequence: ['Ctrl B'],
+        selector: '*',
+        command: id,
+        args: 'Blue is best!'
+      }
+    ]);
+
     this._palette.add([
       {
         text: 'All colors',
@@ -117,4 +129,5 @@ class BlueHandler {
   private _shell: IAppShell;
   private _palette: ICommandPalette;
   private _registry: ICommandRegistry;
+  private _shortcuts: IShortcutManager;
 }

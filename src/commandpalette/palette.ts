@@ -34,6 +34,10 @@ import {
 } from '../commandregistry/index';
 
 import {
+  IShortcutManager
+} from '../shortcutmanager/index';
+
+import {
   ICommandPalette, ICommandPaletteItem, ICommandPaletteSection
 } from './index';
 
@@ -352,12 +356,15 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param commandRegistry - A command registry instance
    */
-  constructor(commandRegistry: ICommandRegistry) {
+  constructor(commandRegistry: ICommandRegistry, shortcuts: IShortcutManager) {
     super();
     this.addClass(PALETTE_CLASS);
     this._commandRegistry = commandRegistry;
+    this._shortcutManager = shortcuts;
+
     commandRegistry.commandsAdded.connect(this._onCommandsUpdated, this);
     commandRegistry.commandsRemoved.connect(this._onCommandsUpdated, this);
+
   }
 
   /**
@@ -829,6 +836,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     let disableds: boolean[] = [];
     privSection.items.forEach(registrationID => {
       let priv = this._registry[registrationID];
+      priv.item.shortcut = this._shortcutForItem(priv.item.id, priv.item.args);
       section.items.push(priv.item);
       disableds.push(priv.disabled);
       registrations.push(registrationID);
@@ -841,6 +849,22 @@ class CommandPalette extends Widget implements ICommandPalette {
       if (disableds[i]) nodes[i].classList.add(DISABLED_CLASS);
     }
     this.contentNode.appendChild(fragment);
+  }
+
+  /**
+   * Get the shortcut for an item.
+   *
+   * @param id - The command id.
+   *
+   * @param args - The command arguments.
+   */
+  private _shortcutForItem(id: string, args: any): string {
+    let shortcut = '';
+    let sequences = this._shortcutManager.getSequences(id, args);
+    if (sequences && sequences.length > 0) {
+      shortcut = sequences[0].map(s => s.replace(/\s/g, '-')).join(' ');
+    }
+    return shortcut;
   }
 
   /**
@@ -857,6 +881,7 @@ class CommandPalette extends Widget implements ICommandPalette {
 
   private _buffer: ICommandPaletteSectionPrivate[] = [];
   private _commandRegistry: ICommandRegistry = null;
+  private _shortcutManager: IShortcutManager = null;
   private _sections: ICommandPaletteSectionPrivate[] = [];
   private _searchResult: boolean = false;
   private _registry: {

@@ -23,6 +23,10 @@ import {
   ICommandRegistry
 } from '../commandregistry/index';
 
+import {
+  IShortcutManager
+} from '../shortcutmanager/index';
+
 
 /**
  * Register the plugin contributions.
@@ -36,9 +40,9 @@ export
 function register(container: Container): void {
   container.register(ICommandPalette, {
     lifetime: Lifetime.Singleton,
-    requires: [ICommandRegistry],
-    create: (commandRegistry: ICommandRegistry): ICommandPalette => {
-      return new CommandPalette(commandRegistry);
+    requires: [ICommandRegistry, IShortcutManager],
+    create: (commandRegistry: ICommandRegistry, shortcuts: IShortcutManager): ICommandPalette => {
+      return new CommandPalette(commandRegistry, shortcuts);
     }
   });
 }

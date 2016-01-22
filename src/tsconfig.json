@@ -21,6 +21,8 @@
     "commandregistry/index.ts",
     "commandregistry/plugin.ts",
     "commandpalette/index.ts",
-    "commandpalette/plugin.ts"
+    "commandpalette/plugin.ts",
+    "shortcutmanager/index.ts",
+    "shortcutmanager/plugin.ts"
   ]
 }

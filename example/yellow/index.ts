@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry
+  IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
 } from 'phosphide';
 
 import {
@@ -42,33 +42,48 @@ function createCommand(): SimpleCommand {
 
 class YellowHandler {
 
-  static requires = [IAppShell, ICommandPalette, ICommandRegistry];
+  static requires = [IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager];
 
-  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry): YellowHandler {
-    return new YellowHandler(shell, palette, registry);
+  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): YellowHandler {
+    return new YellowHandler(shell, palette, registry, shortcuts);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry) {
+  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager) {
     this._shell = shell;
     this._palette = palette;
     this._registry = registry;
+    this._shortcuts = shortcuts;
   }
 
   run(): void {
     let widget = new Widget();
     widget.addClass('yellow-content');
     widget.title.text = 'Yellow';
+
+    let commandId = 'demo:colors:yellow-0';
     this._shell.addToLeftArea(widget, { rank: 20 });
     let five = { id: 'demo:colors:yellow-5', command: createCommand() };
     five.command.setEnabled(false);
+
+    let command = createCommand();
     this._registry.add([
-      { id: 'demo:colors:yellow-0', command: createCommand() },
+      { id: commandId, command: command },
       { id: 'demo:colors:yellow-1', command: createCommand() },
       { id: 'demo:colors:yellow-2', command: createCommand() },
       { id: 'demo:colors:yellow-3', command: createCommand() },
       { id: 'demo:colors:yellow-4', command: createCommand() },
       five
     ]);
+
+    this._shortcuts.add([
+      {
+        sequence: ['Ctrl Y'],
+        selector: '*',
+        command: commandId,
+        args: 'Yellow is best!'
+      }
+    ]);
+
     this._palette.add([
       {
         text: 'All colors',
@@ -123,4 +138,5 @@ class YellowHandler {
   private _shell: IAppShell;
   private _palette: ICommandPalette;
   private _registry: ICommandRegistry;
+  private _shortcuts: IShortcutManager;
 }

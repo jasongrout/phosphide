@@ -15,6 +15,7 @@ phosphide.loadPlugins(new di.Container(), [
   require('phosphide/lib/appshell/plugin'),
   require('phosphide/lib/commandregistry/plugin'),
   require('phosphide/lib/commandpalette/plugin'),
+  require('phosphide/lib/shortcutmanager/plugin'),
   require('application/index'),
   require('red/index'),
   require('blue/index'),
