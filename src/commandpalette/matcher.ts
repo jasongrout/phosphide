@@ -7,13 +7,12 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
-import {
-  ICommandRecord
-} from '../commandregistry/index';
-
 import FuzzySearch = require('fuzzysearch-js');
+
 import IndexOfFS = require('fuzzysearch-js/js/modules/IndexOfFS');
+
 import WordCountFS = require('fuzzysearch-js/js/modules/WordCountFS');
+
 import LevenshteinFS = require('fuzzysearch-js/js/modules/LevenshteinFS');
 
 

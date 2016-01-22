@@ -12,6 +12,10 @@ import {
 } from 'phosphide';
 
 import {
+  SimpleCommand
+} from 'phosphor-command';
+
+import {
   Container
 } from 'phosphor-di';
 
@@ -29,10 +33,11 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(GreenHandler).then(handler => { handler.run(); });
 }
 
-function createHandler(): (args: any) => void {
-  return (message: string) => {
-    console.log(`COMMAND: ${message}`);
-  };
+
+function createCommand(): SimpleCommand {
+  return new SimpleCommand({
+    handler: (message: string) => { console.log(`COMMAND: ${message}`); }
+  });
 }
 
 
@@ -57,23 +62,26 @@ class GreenHandler {
     widget.title.text = 'Green';
     this._shell.addToRightArea(widget, { rank: 40 });
     let commandId = 'demo:colors:green-0';
-    let handler = createHandler();
-    this._registry.add(commandId, handler);
-    this._registry.add('demo:colors:green-1', createHandler());
-    this._registry.add('demo:colors:green-2', createHandler());
-    this._registry.add('demo:colors:green-3', createHandler());
-    this._registry.add('demo:colors:green-4', createHandler());
-    this._registry.add('demo:colors:green-5', createHandler());
+    let command = createCommand();
 
-    this._shortcuts.add(
-      commandId,
-      void 0,
+    this._registry.add([
+      { id: commandId, command: command },
+      { id: 'demo:colors:green-1', command: createCommand() },
+      { id: 'demo:colors:green-2', command: createCommand() },
+      { id: 'demo:colors:green-3', command: createCommand() },
+      { id: 'demo:colors:green-4', command: createCommand() },
+      { id: 'demo:colors:green-5', command: createCommand() }
+    ]);
+
+    this._shortcuts.add([
       {
         sequence: ['Ctrl G'],
         selector: '*',
-        handler: handler
+        command: commandId,
+        args: 'Green is best!'
       }
-    );
+    ]);
+
     this._palette.add([
       {
         text: 'All colors',

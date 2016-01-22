@@ -10,6 +10,10 @@
 import * as arrays from 'phosphor-arrays';
 
 import {
+  safeExecute
+} from 'phosphor-command';
+
+import {
   IDisposable, DisposableDelegate
 } from 'phosphor-disposable';
 
@@ -26,7 +30,7 @@ import {
 } from 'phosphor-widget';
 
 import {
-  ICommandRecord, ICommandRegistry
+  ICommandRegistry
 } from '../commandregistry/index';
 
 import {
@@ -223,6 +227,9 @@ export
 class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Create the DOM node for a command palette.
+   *
+   * #### Notes
+   * This method may be reimplemented to create a custom root node.
    */
   static createNode(): HTMLElement {
     let node = document.createElement('div');
@@ -248,13 +255,16 @@ class CommandPalette extends Widget implements ICommandPalette {
    * @returns A new DOM node to use as a header in a command palette section.
    *
    * #### Notes
-   * This method may be reimplemented to create custom header.
+   * This method may be reimplemented to create custom headers.
    */
   static createHeaderNode(title: string): HTMLElement {
     let node = document.createElement('li');
+    let span = document.createElement('span');
+    let hr = document.createElement('hr');
     node.className = HEADER_CLASS;
-    node.appendChild(document.createTextNode(title));
-    node.appendChild(document.createElement('hr'));
+    span.textContent = title;
+    node.appendChild(span);
+    node.appendChild(hr);
     return node;
   }
 
@@ -352,9 +362,9 @@ class CommandPalette extends Widget implements ICommandPalette {
     this._commandRegistry = commandRegistry;
     this._shortcutManager = shortcuts;
 
-    commandRegistry.commandAdded.connect(this._onCommandUpdate, this);
-    commandRegistry.commandRemoved.connect(this._onCommandUpdate, this);
-    commandRegistry.commandChanged.connect(this._onCommandUpdate, this);
+    commandRegistry.commandsAdded.connect(this._onCommandsUpdated, this);
+    commandRegistry.commandsRemoved.connect(this._onCommandsUpdated, this);
+
   }
 
   /**
@@ -362,9 +372,8 @@ class CommandPalette extends Widget implements ICommandPalette {
    */
   dispose(): void {
     let commandRegistry = this._commandRegistry;
-    commandRegistry.commandAdded.disconnect(this._onCommandUpdate, this);
-    commandRegistry.commandRemoved.disconnect(this._onCommandUpdate, this);
-    commandRegistry.commandChanged.disconnect(this._onCommandUpdate, this);
+    commandRegistry.commandsAdded.disconnect(this._onCommandsUpdated, this);
+    commandRegistry.commandsRemoved.disconnect(this._onCommandsUpdated, this);
     this._sections.length = 0;
     this._buffer.length = 0;
     this._registry = null;
@@ -490,7 +499,8 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Ask the command registry about each palette commmand.
     Object.keys(this._registry).forEach(registrationID => {
       let priv = this._registry[registrationID];
-      priv.disabled = !this._commandRegistry.canExecute(priv.item.id);
+      let command = this._commandRegistry.get(priv.item.id);
+      priv.disabled = !command || !command.isEnabled(priv.item.args);
     });
     // Render the buffer.
     this._buffer.forEach(section => this._renderSection(section));
@@ -604,7 +614,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     } as ICommandPaletteSectionPrivate;
     for (let item of section.items) {
       registrationID = `palette-${++commandID}`;
-      this._registry[registrationID] = this._privatize(item);
+      this._registry[registrationID] = { disabled: false, item: item };
       registrations.push(registrationID);
       privSection.items.push(registrationID);
     }
@@ -631,7 +641,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       });
       if (itemIndex !== -1) continue;
       registrationID = `palette-${++commandID}`;
-      this._registry[registrationID] = this._privatize(item);
+      this._registry[registrationID] = { disabled: false, item: item };
       existingItems.push(registrationID);
       registrations.push(registrationID);
     }
@@ -705,9 +715,8 @@ class CommandPalette extends Widget implements ICommandPalette {
       target = target.parentElement;
     }
     let priv = this._registry[target.getAttribute(REGISTRATION_ID)];
-    if (!priv.disabled) {
-      this._commandRegistry.execute(priv.item.id, priv.item.args);
-    }
+    if (priv.disabled) return;
+    safeExecute(this._commandRegistry.get(priv.item.id), priv.item.args);
   }
 
   /**
@@ -742,7 +751,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       let active = this._findActive();
       if (!active) return;
       let priv = this._registry[active.getAttribute(REGISTRATION_ID)];
-      this._commandRegistry.execute(priv.item.id, priv.item.args);
+      safeExecute(this._commandRegistry.get(priv.item.id), priv.item.args);
       this._deactivate();
       return;
     }
@@ -785,34 +794,17 @@ class CommandPalette extends Widget implements ICommandPalette {
    *
    * @param sender - The command registry instance that signaled a change.
    *
-   * @param id - The command ID that was changed.
+   * @param ids - The command IDs that were added/removed.
    */
-  private _onCommandUpdate(sender: ICommandRegistry, id: string): void {
+  private _onCommandsUpdated(sender: ICommandRegistry, ids: string[]): void {
+    let commandIDs = ids.reduce((acc, val) => {
+      acc[val] = null;
+      return acc;
+    }, Object.create(null) as { [id: string]: void });
     let staleRegistry = Object.keys(this._registry).some(registrationID => {
-      return this._registry[registrationID].item.id === id;
+      return this._registry[registrationID].item.id in commandIDs;
     });
     if (staleRegistry) this.update();
-  }
-
-  /**
-   * Convert an `ICommandPaletteItem` to an `ICommandPaletteItemPrivate`.
-   *
-   * @param item - The item being converted.
-   *
-   * @returns an `ICommandPaletteItemPrivate`
-   */
-  private _privatize(item: ICommandPaletteItem): ICommandPaletteItemPrivate {
-    // By default, until the registry is checked, all added items work.
-    let disabled = false;
-    let shortcut = '';
-    if (this._commandRegistry.get(item.id)) {
-      let sequences = this._shortcutManager.getSequencesForId(item.id);
-      if (sequences.length >= 1) {
-        shortcut = sequences[0].map(s => s.replace(/\s/g, '-')).join(' ');
-      }
-    }
-    item.shortcut = shortcut;
-    return { disabled, item };
   }
 
   /**
@@ -844,6 +836,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     let disableds: boolean[] = [];
     privSection.items.forEach(registrationID => {
       let priv = this._registry[registrationID];
+      priv.item.shortcut = this._shortcutForItem(priv.item.id, priv.item.args);
       section.items.push(priv.item);
       disableds.push(priv.disabled);
       registrations.push(registrationID);
@@ -856,6 +849,22 @@ class CommandPalette extends Widget implements ICommandPalette {
       if (disableds[i]) nodes[i].classList.add(DISABLED_CLASS);
     }
     this.contentNode.appendChild(fragment);
+  }
+
+  /**
+   * Get the shortcut for an item.
+   *
+   * @param id - The command id.
+   *
+   * @param args - The command arguments.
+   */
+  private _shortcutForItem(id: string, args: any): string {
+    let shortcut = '';
+    let sequences = this._shortcutManager.getSequences(id, args);
+    if (sequences && sequences.length > 0) {
+      shortcut = sequences[0].map(s => s.replace(/\s/g, '-')).join(' ');
+    }
+    return shortcut;
   }
 
   /**

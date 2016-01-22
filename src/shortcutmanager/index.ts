@@ -12,6 +12,10 @@ import {
 } from 'phosphor-di';
 
 import {
+  Command
+} from 'phosphor-command';
+
+import {
   IDisposable
 } from 'phosphor-disposable';
 
@@ -21,10 +25,11 @@ import {
 
 
 export
-interface IKeyCommand {
+interface IShortcutItem {
   sequence: string[];
   selector: string;
-  handler: (args: any) => void;
+  command: string;
+  args?: any;
 }
 
 
@@ -40,7 +45,7 @@ export interface IShortcutManager {
    *
    * @returns A disposable which removes the added key bindings.
    */
-  add(id: string, args: any, bindings: IKeyCommand): IDisposable;
+  add(items: IShortcutItem[]): IDisposable;
 
   /**
    * Test whether a handler with a specific id is registered.
@@ -58,7 +63,7 @@ export interface IShortcutManager {
    *
    * @returns The keybinding for the specified handler, or `undefined`.
    */
-  getSequencesForId(id: string): string[][];
+  getSequences(id: string, args: any): string[][];
 }
 
 
