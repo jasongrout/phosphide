@@ -426,7 +426,10 @@ class CommandPalette extends Widget implements ICommandPalette {
     let registrations: string[] = [];
     commands.forEach(spec => {
       let command = this._commandRegistry.get(spec.id);
-      if (!command) return;
+      if (!command) {
+        console.warn(`Command ${spec.id} does not exist in command registry.`);
+        return;
+      }
       let item: ICommandPaletteItem = {
         args: spec.args,
         caption: command.caption(spec.args),
