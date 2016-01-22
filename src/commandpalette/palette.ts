@@ -201,19 +201,24 @@ interface ICommandPaletteItem {
   args?: any;
 
   /**
+   * A descriptive caption for the command.
+   */
+  caption?: string;
+
+  /**
    * The unique id for the command.
    */
-  commandID: string;
+  command: string;
 
   /**
    * A flag indicating whether the command is disabled.
    */
-  disabled?: boolean;
+  disabled: boolean;
 
   /**
    * The palette instance ID for an item.
    */
-  registrationID: string;
+  id: string;
 
   /**
    * The shortcut for the command.
@@ -224,11 +229,6 @@ interface ICommandPaletteItem {
    * The title of the command.
    */
   title: string;
-
-  /**
-   * A descriptive caption for the command.
-   */
-  caption?: string;
 }
 
 
@@ -321,7 +321,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     shortcut.className = SHORTCUT_CLASS;
     caption.className = CAPTION_CLASS;
     // Populate the content and attributes for each element.
-    node.setAttribute(REGISTRATION_ID, item.registrationID);
+    node.setAttribute(REGISTRATION_ID, item.id);
     title.textContent = item.title;
     title.setAttribute('title', item.title);
     if (item.shortcut) shortcut.textContent = item.shortcut;
@@ -425,17 +425,17 @@ class CommandPalette extends Widget implements ICommandPalette {
       let category = command.category(spec.args);
       let item: ICommandPaletteItem = {
         args: spec.args,
-        commandID: spec.id,
-        registrationID: `palette-${++registrationSeed}`,
-        title: command.text(spec.args) || spec.id,
         caption: command.caption(spec.args),
+        command: spec.id,
         disabled: !command.isEnabled(spec.args),
-        shortcut: this._shortcutForItem(spec.id, spec.args)
+        id: `palette-${++registrationSeed}`,
+        shortcut: this._shortcutForItem(spec.id, spec.args),
+        title: command.text(spec.args) || spec.id
       };
       // Add the item to the private registry.
-      this._registry[item.registrationID] = item;
+      this._registry[item.id] = item;
       // Add the item to the list of registrations to dispose later.
-      registrations.push(item.registrationID);
+      registrations.push(item.id);
       // Discover whether a section with this category already exists.
       let sectionIndex = arrays.findIndex(this._sections, section => {
         return section.title === category;
@@ -444,11 +444,11 @@ class CommandPalette extends Widget implements ICommandPalette {
         // If a section with this header does not exist, add a new section.
         this._sections.push({
           title: category,
-          registrations: [item.registrationID]
+          registrations: [item.id]
         });
       } else {
         // If a section exists with this header, add to it.
-        this._sections[sectionIndex].registrations.push(item.registrationID);
+        this._sections[sectionIndex].registrations.push(item.id);
       }
     });
     this._bufferAllItems();
@@ -540,12 +540,12 @@ class CommandPalette extends Widget implements ICommandPalette {
     // Clear the node.
     this.contentNode.textContent = '';
     // Ask the command registry about each palette commmand.
-    Object.keys(this._registry).forEach(registrationID => {
-      let item = this._registry[registrationID];
-      let command = this._commandRegistry.get(item.commandID);
+    Object.keys(this._registry).forEach(id => {
+      let item = this._registry[id];
+      let command = this._commandRegistry.get(item.command);
       // If a command doesn't exist any more, it needs to be removed.
       if (!command) {
-        this._removeItem(registrationID);
+        this._removeItem(id);
       } else {
         item.disabled = !command.isEnabled(item.args);
       }
@@ -719,7 +719,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
     let item = this._registry[target.getAttribute(REGISTRATION_ID)];
     if (item.disabled) return;
-    safeExecute(this._commandRegistry.get(item.commandID), item.args);
+    safeExecute(this._commandRegistry.get(item.command), item.args);
   }
 
   /**
@@ -754,7 +754,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       let active = this._findActive();
       if (!active) return;
       let item = this._registry[active.getAttribute(REGISTRATION_ID)];
-      safeExecute(this._commandRegistry.get(item.commandID), item.args);
+      safeExecute(this._commandRegistry.get(item.command), item.args);
       this._deactivate();
       return;
     }
@@ -800,12 +800,12 @@ class CommandPalette extends Widget implements ICommandPalette {
    * @param ids - The command IDs that were removed.
    */
   private _onCommandsRemoved(sender: ICommandRegistry, ids: string[]): void {
-    let commandIDs = ids.reduce((acc, val) => {
+    let commands = ids.reduce((acc, val) => {
       acc[val] = null;
       return acc;
     }, Object.create(null) as { [id: string]: void });
-    let staleRegistry = Object.keys(this._registry).some(registrationID => {
-      return this._registry[registrationID].commandID in commandIDs;
+    let staleRegistry = Object.keys(this._registry).some(id => {
+      return this._registry[id].command in commands;
     });
     if (staleRegistry) this.update();
   }
@@ -813,12 +813,12 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Remove a registered item from the registry and from the sections.
    *
-   * @param registrationID - The internal ID of the item being removed.
+   * @param id - The palette ID of the item being removed.
    */
-  private _removeItem(registrationID: string): void {
+  private _removeItem(id: string): void {
     for (let section of this._sections) {
-      for (let id of section.registrations) {
-        if (id === registrationID) {
+      for (let registered of section.registrations) {
+        if (id === registered) {
           delete this._registry[id];
           arrays.remove(section.registrations, id);
           return;
@@ -842,13 +842,13 @@ class CommandPalette extends Widget implements ICommandPalette {
   /**
    * Get the shortcut for an item.
    *
-   * @param commandID - The command id.
+   * @param command - The command id.
    *
    * @param args - The command arguments.
    */
-  private _shortcutForItem(commandID: string, args: any): string {
+  private _shortcutForItem(command: string, args: any): string {
     let shortcut = '';
-    let sequences = this._shortcutManager.getSequences(commandID, args);
+    let sequences = this._shortcutManager.getSequences(command, args);
     if (sequences && sequences.length > 0) {
       shortcut = sequences[0].map(s => s.replace(/\s/g, '-')).join(' ');
     }
