@@ -23,6 +23,10 @@ import {
   IKeyBinding
 } from 'phosphor-keymap';
 
+import {
+  ISignal
+} from 'phosphor-signaling';
+
 
 /**
  * An object which can be added to a Shortcut Manager.
@@ -52,6 +56,15 @@ interface IShortcutItem {
  * An object which manages a collection of shortcuts.
  */
 export interface IShortcutManager {
+  /**
+   * A signal emitted when shortcuts are added to the manager.
+   */
+  shortcutsAdded: ISignal<IShortcutManager, IShortcutItem[]>;
+
+  /**
+   * A signal emitted when shortcuts are removed from the manager.
+   */
+  shortcutsRemoved: ISignal<IShortcutManager, IShortcutItem[]>
 
   /**
    * Add key bindings to the key map manager.

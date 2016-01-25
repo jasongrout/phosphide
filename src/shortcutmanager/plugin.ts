@@ -20,6 +20,10 @@ import {
 } from 'phosphor-keymap';
 
 import {
+  Signal, ISignal
+} from 'phosphor-signaling';
+
+import {
   IShortcutManager, IShortcutItem
 } from './index';
 
@@ -40,6 +44,7 @@ export
 function register(container: Container): void {
   container.register(IShortcutManager, ShortcutManager);
 }
+
 
 export class ShortcutManager {
 
@@ -63,6 +68,20 @@ export class ShortcutManager {
     document.addEventListener('keydown', event => {
       this._keymap.processKeydownEvent(event);
     });
+  }
+
+  /**
+   * A signal emitted when a shortcut is added to the manager.
+   */
+  get shortcutsAdded(): ISignal<ShortcutManager, IShortcutItem[]> {
+    return ShortcutManagerPrivate.shortcutsAddedSignal.bind(this);
+  }
+
+  /**
+   * A signal emitted when a shortcut is removed from the manager.
+   */
+  get shortcutsRemoved(): ISignal<ShortcutManager, IShortcutItem[]> {
+    return ShortcutManagerPrivate.shortcutsRemovedSignal.bind(this);
   }
 
   /**
@@ -101,25 +120,26 @@ export class ShortcutManager {
         command: this._commandRegistry.get(id),
         args: item.args
       });
+
     }
 
     let added = this._keymap.add(bindings);
+    this.shortcutsAdded.emit(items.slice());
 
     return new DisposableDelegate(() => {
       added.dispose();
       for (let i = 0; i < items.length; ++i) {
         let arr = this._commandShortcutMap[items[i].command];
-        if (arr) {
-          for (let j = 0; j < arr.length; ++i) {
-            if (deepEqual(arr[j].args, items[i].args)) {
-              arr.splice(j, 1);
-              if (arr.length === 0) {
-                delete this._commandShortcutMap[items[i].command];
-              }
+        for (let j = 0; j < arr.length; ++i) {
+          if (deepEqual(arr[j].args, items[i].args)) {
+            arr.splice(j, 1);
+            if (arr.length === 0) {
+              delete this._commandShortcutMap[items[i].command];
             }
           }
         }
       }
+      this.shortcutsRemoved.emit(items.slice());
     });
   }
 
@@ -172,4 +192,21 @@ function deepEqual(x: any, y: any): boolean {
       Object.keys(x).reduce(function(isEqual, key) {
         return isEqual && deepEqual(x[key], y[key]);
       }, true) : (x === y);
+}
+
+
+/**
+ * The namespace for the `ShortcutManager` class private data.
+ */
+namespace ShortcutManagerPrivate {
+  /**
+   * A signal emitted when a shortcut is added to the manager.
+   */
+  export
+  const shortcutsAddedSignal = new Signal<ShortcutManager, IShortcutItem[]>();
+  /**
+   * A signal emitted when a shortcut is added to the manager.
+   */
+  export
+  const shortcutsRemovedSignal = new Signal<ShortcutManager, IShortcutItem[]>();
 }
