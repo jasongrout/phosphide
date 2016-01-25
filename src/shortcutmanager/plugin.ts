@@ -16,8 +16,7 @@ import {
 } from 'phosphor-disposable';
 
 import {
-  EN_US, IKeyboardLayout, keystrokeForKeydownEvent,
-  normalizeKeystroke, IKeyBinding, KeymapManager
+  IKeyBinding, KeymapManager
 } from 'phosphor-keymap';
 
 import {
