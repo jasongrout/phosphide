@@ -142,28 +142,6 @@ export class ShortcutManager {
     }
   }
 
-  /**
-   * Convert a command into a handler suitable for keyboard shortcuts.
-   *
-   * @param id - The command id.
-   *
-   * @param args - Arguments to be passed to the command.
-   *
-   * @returns A zero-argument handler which returns a boolean.
-   */
-  private _commandToKeyHandler(id: string, args: any): () => boolean {
-    let registry = this._commandRegistry;
-    let keyHandler = () => {
-      let command = registry.get(id);
-      if (command) {
-        command.execute(args);
-        return true;
-      }
-      return false;
-    };
-    return keyHandler;
-  }
-
   private _keymap: KeymapManager = null;
   private _commandRegistry: ICommandRegistry = null;
   private _commandShortcutMap: CommandShortcutMap = {};
