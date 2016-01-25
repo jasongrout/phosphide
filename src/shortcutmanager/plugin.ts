@@ -85,7 +85,7 @@ export class ShortcutManager {
       let exists = false;
 
       for (let i = 0; i < arr.length; ++i) {
-        if (this._deepEqual(arr[i].args, item.args)) {
+        if (deepEqual(arr[i].args, item.args)) {
           console.log('Shortcut already set: ' + item.sequence);
           exists = true;
         }
@@ -134,23 +134,12 @@ export class ShortcutManager {
     let arr = this._commandShortcutMap[id];
     if (arr) {
       for (let i = 0; i < arr.length; ++i) {
-        if (this._deepEqual(arr[i].args, args)) {
+        if (deepEqual(arr[i].args, args)) {
           result.push(arr[i].sequence);
         }
       }
       return result;
     }
-  }
-
-  /**
-   * Recursively perform deep equality testing on arbitrary object trees.
-   */
-  private _deepEqual(x: any, y: any): boolean {
-    return (x && y && typeof x === 'object' && typeof y === 'object') ?
-      (Object.keys(x).length === Object.keys(y).length) &&
-        Object.keys(x).reduce(function(isEqual, key) {
-          return isEqual && this._deepEqual(x[key], y[key]);
-        }, true) : (x === y);
   }
 
   /**
@@ -182,3 +171,15 @@ export class ShortcutManager {
 
 
 type CommandShortcutMap = { [id: string]: Array<{args: any, sequence: string[]}> };
+
+
+/**
+ * Recursively perform deep equality testing on arbitrary object trees.
+ */
+function deepEqual(x: any, y: any): boolean {
+  return (x && y && typeof x === 'object' && typeof y === 'object') ?
+    (Object.keys(x).length === Object.keys(y).length) &&
+      Object.keys(x).reduce(function(isEqual, key) {
+        return isEqual && deepEqual(x[key], y[key]);
+      }, true) : (x === y);
+}
