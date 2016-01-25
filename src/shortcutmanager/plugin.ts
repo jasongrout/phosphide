@@ -144,17 +144,6 @@ export class ShortcutManager {
   }
 
   /**
-   * Test whether a handler with a specific id is registered.
-   *
-   * @param id - The id of the command of interest.
-   *
-   * @returns `true` if the id is registered, `false` otherwise.
-   */
-  hasCommand(id: string): boolean {
-    return id in this._commandShortcutMap;
-  }
-
-  /**
    * Lookup a handler with a specific id.
    *
    * @param id - The id of the handler of interest.

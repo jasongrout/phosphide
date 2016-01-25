@@ -76,15 +76,6 @@ export interface IShortcutManager {
   add(items: IShortcutItem[]): IDisposable;
 
   /**
-   * Test whether a handler with a specific id is registered.
-   *
-   * @param id - The id of the command of interest.
-   *
-   * @returns `true` if the id is registered, `false` otherwise.
-   */
-  hasCommand(id: string): boolean;
-
-  /**
    * Lookup a command.
    *
    * @param id - The command of interest.
