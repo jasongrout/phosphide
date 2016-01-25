@@ -107,7 +107,19 @@ export class ShortcutManager {
 
     return new DisposableDelegate(() => {
       added.dispose();
-      // remove from id -> sequence map.
+      for (let i = 0; i < items.length; ++i) {
+        let arr = this._commandShortcutMap[items[i].command];
+        if (arr) {
+          for (let j = 0; j < arr.length; ++i) {
+            if (deepEqual(arr[j].args, items[i].args)) {
+              arr.splice(j, 1);
+              if (arr.length === 0) {
+                delete this._commandShortcutMap[items[i].command];
+              }
+            }
+          }
+        }
+      }
     });
   }
 
