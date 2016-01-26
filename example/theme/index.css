@@ -22,11 +22,6 @@ body {
 }
 
 
-.p-CommandPalette {
-  font-family: "Helvetica Neue", Helvetica;
-}
-
-
 .p-SideBar {
   min-width: 36px;
   max-width: 36px;
@@ -98,7 +93,7 @@ body {
 
 #p-left-stack {
   padding: 5px;
-  background: white;
+  background: #eeeeee;
 }
 
 
@@ -276,7 +271,8 @@ body {
 
 
 .p-CommandPalette {
-  background: #white;
+  background: #eeeeee;
+  font-family: "Helvetica Neue", Helvetica;
   min-width: 250px;
   min-height: 50px;
   padding: 4px 4px 0px 4px;
