@@ -10,7 +10,7 @@
 import * as arrays from 'phosphor-arrays';
 
 import {
-  Command, safeExecute
+  Command
 } from 'phosphor-command';
 
 import {
@@ -724,7 +724,7 @@ class CommandPalette extends Widget implements ICommandPalette {
     }
     let item = this._registry[target.getAttribute(REGISTRATION_ID)];
     if (item.disabled) return;
-    safeExecute(this._commandRegistry.get(item.command), item.args);
+    this._commandRegistry.get(item.command).execute(item.args);
   }
 
   /**
@@ -759,7 +759,7 @@ class CommandPalette extends Widget implements ICommandPalette {
       let active = this._findActive();
       if (!active) return;
       let item = this._registry[active.getAttribute(REGISTRATION_ID)];
-      safeExecute(this._commandRegistry.get(item.command), item.args);
+      this._commandRegistry.get(item.command).execute(item.args);
       this._deactivate();
       return;
     }
