@@ -79,8 +79,6 @@ class CommandPaletteManager implements ICommandPalette {
     this._commandPalette = new CommandPalette();
     this._commandRegistry = commandRegistry;
     this._shortcutManager = shortcutManager;
-    let onCommandsRemoved = this._onCommandsRemoved;
-    this._commandRegistry.commandsRemoved.connect(onCommandsRemoved, this);
   }
 
   /**
