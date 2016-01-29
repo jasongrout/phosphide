@@ -35,8 +35,8 @@ class Application {
   }
 
   constructor(shell: IAppShell, palette: ICommandPalette) {
-    palette.title.text = 'Commands';
-    shell.addToLeftArea(palette, { rank: 40 });
+    palette.widget.title.text = 'Commands';
+    shell.addToLeftArea(palette.widget, { rank: 40 });
     shell.attach(document.body);
     window.addEventListener('resize', () => { shell.update(); });
   }

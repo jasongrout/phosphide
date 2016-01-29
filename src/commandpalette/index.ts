@@ -24,7 +24,7 @@ import {
  * The public interface of the command palette.
  */
 export
-interface ICommandPalette extends Widget {
+interface ICommandPalette {
   /**
    * Add new command items to the palette.
    *
@@ -39,6 +39,10 @@ interface ICommandPalette extends Widget {
    * @param query - The query string
    */
   search(query: string): void;
+  /**
+   * The underlying palette widget.
+   */
+  widget: Widget;
 }
 
 
