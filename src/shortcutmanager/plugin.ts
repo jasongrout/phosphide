@@ -46,8 +46,13 @@ function register(container: Container): void {
 }
 
 
+/**
+ * An object for managing shortcuts.
+ */
 export class ShortcutManager {
-
+  /**
+   * The dependencies required by the shortcut manager.
+   */
   static requires: Token<any>[] = [ICommandRegistry];
 
   /**
@@ -96,7 +101,6 @@ export class ShortcutManager {
 
     for (let item of items) {
       let id = item.command;
-
       let arr = this._commandShortcutMap[id];
       if (!arr) {
         this._commandShortcutMap[id] = arr = [];
@@ -169,6 +173,9 @@ export class ShortcutManager {
 }
 
 
+/**
+ * The type used to map command id's to arrays of arg and sequence definitions.
+ */
 type CommandShortcutMap = { [id: string]: Array<{args: any, sequence: string[]}> };
 
 
