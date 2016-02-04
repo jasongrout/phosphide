@@ -114,9 +114,13 @@ export class ShortcutManager {
         }
       }
 
-      if (!exists) {
-        arr.push({args: item.args, sequence: item.sequence});
+      // If the given command and args is already registered,
+      // don't register it, just move on to the next one.
+      if (exists) {
+        continue;
       }
+
+      arr.push({args: item.args, sequence: item.sequence});
 
       bindings.push({
         sequence: item.sequence,
@@ -124,7 +128,6 @@ export class ShortcutManager {
         command: this._commandRegistry.get(id),
         args: item.args
       });
-
     }
 
     let added = this._keymap.add(bindings);
@@ -148,11 +151,11 @@ export class ShortcutManager {
   }
 
   /**
-   * Lookup a handler with a specific id.
+   * Get the registered key sequences for the given command id and args.
    *
-   * @param id - The id of the handler of interest.
+   * @param id - The command of interest.
    *
-   * @returns The keybindings for the specified id, or `undefined`.
+   * @returns The keybindings for the specified id and args, or `undefined`.
    */
   getSequences(id: string, args: any): string[][] {
     let result: string[][] = [];
@@ -174,7 +177,7 @@ export class ShortcutManager {
 
 
 /**
- * The type used to map command id's to arrays of arg and sequence definitions.
+ * The type used to map command IDs to arrays of arg and sequence definitions.
  */
 type CommandShortcutMap = { [id: string]: Array<{args: any, sequence: string[]}> };
 
