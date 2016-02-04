@@ -12,7 +12,7 @@ import {
 } from 'phosphor-di';
 
 import {
-  Command
+  ICommand
 } from 'phosphor-command';
 
 import {
@@ -37,7 +37,7 @@ interface ICommandItem {
   /**
    * The command to add to the registry.
    */
-  command: Command;
+  command: ICommand;
 }
 
 
@@ -70,7 +70,7 @@ interface ICommandRegistry {
    *
    * @returns The command with the specified id, or `undefined`.
    */
-  get(id: string): Command;
+  get(id: string): ICommand;
 
   /**
    * Add commands to the registry.

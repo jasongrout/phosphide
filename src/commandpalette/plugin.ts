@@ -11,9 +11,9 @@ import {
   Container, Lifetime
 } from 'phosphor-di';
 
-import {
-  CommandItem, ICommandItemOptions
-} from 'phosphor-command';
+// import {
+//   CommandItem, ICommandItemOptions
+// } from 'phosphor-command';
 
 import {
   CommandPalette
@@ -92,13 +92,13 @@ class CommandPaletteManager implements ICommandPalette {
     let commandItems = items.map(item => {
       let command = this._commandRegistry.get(item.id);
       if (!command) return null;
-      let options: ICommandItemOptions = { command: command };
+      let options = { command: command, shortcut: "" };
       let shortcut = this._shortcutManager.getSequences(item.id, item.args);
       if (shortcut && shortcut.length > 0) {
         options.shortcut = shortcut[0]
           .map(s => s.replace(/\s/g, '-')).join(' ');
       }
-      return new CommandItem(options);
+      //return new CommandItem(options);
     }).filter(item => !!item);
     if (!commandItems.length) return;
     this._commandPalette.add(commandItems);

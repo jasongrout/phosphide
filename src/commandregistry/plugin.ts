@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  Command
+  ICommand
 } from 'phosphor-command';
 
 import {
@@ -44,7 +44,13 @@ function register(container: Container): void {
 
 /**
  * A concrete implementation of ICommandRegistry.
+ *
+ * #### Notes
+ * This is only being exported for use in unit-tests, or
+ * for subclassing in separate applications. In normal use
+ * this should not be accessed directly.
  */
+export
 class CommandRegistry implements ICommandRegistry {
   /**
    * The dependencies required by the command registry.
@@ -95,7 +101,7 @@ class CommandRegistry implements ICommandRegistry {
    *
    * @returns The command with the specified id, or `undefined`.
    */
-  get(id: string): Command {
+  get(id: string): ICommand {
     return this._map[id];
   }
 
@@ -139,7 +145,7 @@ class CommandRegistry implements ICommandRegistry {
     });
   }
 
-  private _map: { [id: string]: Command };
+  private _map: { [id: string]: ICommand };
 }
 
 

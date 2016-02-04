@@ -49,7 +49,8 @@ function register(container: Container): void {
 /**
  * An object for managing shortcuts.
  */
-export class ShortcutManager {
+export
+class ShortcutManager {
   /**
    * The dependencies required by the shortcut manager.
    */

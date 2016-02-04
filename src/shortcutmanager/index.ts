@@ -12,16 +12,8 @@ import {
 } from 'phosphor-di';
 
 import {
-  Command
-} from 'phosphor-command';
-
-import {
   IDisposable
 } from 'phosphor-disposable';
-
-import {
-  IKeyBinding
-} from 'phosphor-keymap';
 
 import {
   ISignal
