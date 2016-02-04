@@ -99,6 +99,20 @@ describe('phosphide', () => {
         expect(reg.list().length).to.be(0);
       });
 
+      it('should not add a given id more than once', () => {
+        let disp = reg.add([item]);
+        let item2 = {
+          id: "cmd:test",
+          command: cmd
+        };
+        let disp2 = reg.add([item2]);
+        expect(reg.list().length).to.be(1);
+        disp2.dispose();
+        expect(reg.list().length).to.be(1);
+        disp.dispose();
+        expect(reg.list().length).to.be(0);
+      });
+
     });
 
   });
