@@ -105,9 +105,9 @@ class CommandPaletteManager implements ICommandPalette {
       return options;
     }).filter(item => !!item);
     if (!modelItems.length) return;
-    this._paletteModel.addItems(modelItems);
+    let paletteItems = this._paletteModel.addItems(modelItems);
     return new DisposableDelegate(() => {
-      //this._commandPalette.remove(commandItems);
+      this._paletteModel.removeItems(paletteItems);
     });
   }
 
