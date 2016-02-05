@@ -9,7 +9,7 @@
     "phosphor-arrays": "^1.0.6",
     "phosphor-boxpanel": "^1.0.0-rc.0",
     "phosphor-command": "^0.9.0",
-    "phosphor-commandpalette": "file:../phosphor-commandpalette",
+    "phosphor-commandpalette": "^0.0.3",
     "phosphor-di": "^0.9.0",
     "phosphor-disposable": "^1.0.5",
     "phosphor-dockpanel": "^0.9.6",
