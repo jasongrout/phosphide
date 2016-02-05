@@ -12,10 +12,6 @@ import {
 } from 'phosphor-di';
 
 import {
-  ICommand
-} from 'phosphor-command';
-
-import {
   IDisposable
 } from 'phosphor-disposable';
 
@@ -37,7 +33,7 @@ interface ICommandItem {
   /**
    * The command to add to the registry.
    */
-  command: ICommand;
+  handler: (args: any) => void;
 }
 
 
@@ -70,7 +66,7 @@ interface ICommandRegistry {
    *
    * @returns The command with the specified id, or `undefined`.
    */
-  get(id: string): ICommand;
+  get(id: string): (args: any) => void;
 
   /**
    * Add commands to the registry.

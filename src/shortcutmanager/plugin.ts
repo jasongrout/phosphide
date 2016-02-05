@@ -126,7 +126,7 @@ class ShortcutManager {
       bindings.push({
         sequence: item.sequence,
         selector: item.selector,
-        command: this._commandRegistry.get(id),
+        handler: this._handlerForKeymap(id),
         args: item.args
       });
     }
@@ -169,6 +169,14 @@ class ShortcutManager {
       }
       return result;
     }
+  }
+
+  private _handlerForKeymap(id: string): (args: any) => boolean {
+    let handler = this._commandRegistry.get(id);
+    return (args: any) => {
+      handler(args);
+      return true;
+    };
   }
 
   private _keymap: KeymapManager = null;

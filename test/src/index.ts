@@ -10,10 +10,6 @@
 import expect = require('expect.js');
 
 import {
-  ICommand
-} from 'phosphor-command';
-
-import {
   ICommandItem
 } from '../../lib/commandregistry/index';
 
@@ -21,26 +17,31 @@ import {
   CommandRegistry
 } from '../../lib/commandregistry/plugin';
 
+import {
+  IShortcutItem
+} from '../../lib/shortcutmanager/index';
+
+import {
+  ShortcutManager
+} from '../../lib/shortcutmanager/plugin';
+
 
 
 describe('phosphide', () => {
+  let reg: CommandRegistry = null;
 
   describe('CommandRegistry', () => {
-    let reg: CommandRegistry = null;
-    let cmd: ICommand = null;
+    let cmd: (args: any) => void = null;
     let item: ICommandItem = null;
     let count = 0;
 
     beforeEach(() => {
       count = 0;
       reg = new CommandRegistry();
-      cmd = {
-        execute: (args: any) => { count += 1; },
-        isEnabled: (args: any) => { return true; }
-      };
+      cmd = (args: any) => { count += 1; };
       item = {
         id: "cmd:test",
-        command: cmd
+        handler: cmd
       };
     });
 
@@ -103,7 +104,7 @@ describe('phosphide', () => {
         let disp = reg.add([item]);
         let item2 = {
           id: "cmd:test",
-          command: cmd
+          handler: cmd
         };
         let disp2 = reg.add([item2]);
         expect(reg.list().length).to.be(1);
@@ -111,6 +112,32 @@ describe('phosphide', () => {
         expect(reg.list().length).to.be(1);
         disp.dispose();
         expect(reg.list().length).to.be(0);
+      });
+
+    });
+
+  });
+
+  describe('ShortcutManager', () => {
+    let shortcuts: ShortcutManager = null;
+
+    beforeEach(() => {
+      reg = new CommandRegistry();
+      shortcuts = new ShortcutManager(reg);
+    });
+
+    describe('#create()', () => {
+
+      it('should create a new instance', () => {
+        expect(new ShortcutManager(reg)).to.not.be(shortcuts);
+      });
+
+    });
+
+    describe('#constructor()', () => {
+
+      it('should take a single argument', () => {
+        expect(shortcuts instanceof ShortcutManager).to.be(true);
       });
 
     });

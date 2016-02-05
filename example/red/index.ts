@@ -12,10 +12,6 @@ import {
 } from 'phosphide';
 
 import {
-  SimpleCommand
-} from 'phosphor-command';
-
-import {
   Container
 } from 'phosphor-di';
 
@@ -33,10 +29,8 @@ function resolve(container: Container): Promise<void> {
   return container.resolve(RedHandler).then(handler => { handler.run(); });
 }
 
-function createCommand(): SimpleCommand {
-  return new SimpleCommand({
-    handler: (message: string) => { console.log(`COMMAND: ${message}`); }
-  });
+function createHandler(): (args: any) => void {
+  return (message: string) => { console.log(`COMMAND: ${message}`); };
 }
 
 
@@ -61,20 +55,56 @@ class RedHandler {
     widget.title.text = 'Red';
     this._shell.addToRightArea(widget, { rank: 30 });
     let registryItems = [
-      { id: 'red:show-0', command: createCommand() },
-      { id: 'red:show-1', command: createCommand() },
-      { id: 'red:show-2', command: createCommand() },
-      { id: 'red:show-3', command: createCommand() },
-      { id: 'red:show-4', command: createCommand() },
-      { id: 'red:show-5', command: createCommand() }
+      { id: 'red:show-0', handler: createHandler() },
+      { id: 'red:show-1', handler: createHandler() },
+      { id: 'red:show-2', handler: createHandler() },
+      { id: 'red:show-3', handler: createHandler() },
+      { id: 'red:show-4', handler: createHandler() },
+      { id: 'red:show-5', handler: createHandler() }
     ];
     let paletteItems = [
-      { id: 'red:show-0', args: 'Red is best!' },
-      { id: 'red:show-1', args: 'Red number one' },
-      { id: 'red:show-2', args: 'Red number two' },
-      { id: 'red:show-3', args: 'Red number three' },
-      { id: 'red:show-4', args: 'Red number four' },
-      { id: 'red:show-5', args: 'Red number five' }
+      {
+        id: 'red:show-0',
+        args: 'Red is best!',
+        text: 'Red 0',
+        caption: 'Red is best!',
+        category: 'All Colours'
+      },
+      {
+        id: 'red:show-1',
+        args: 'Red number one',
+        text: 'Red 1',
+        caption: 'Red number one',
+        category: 'Red'
+      },
+      {
+        id: 'red:show-2',
+        args: 'Red number two',
+        text: 'Red 2',
+        caption: 'Red number two',
+        category: 'Red'
+      },
+      {
+        id: 'red:show-3',
+        args: 'Red number three',
+        text: 'Red 3',
+        caption: 'Red number three',
+        category: 'Red'
+      },
+      {
+        id: 'red:show-4',
+        args: 'Red number four',
+        text: 'Red 4',
+        caption: 'Red number four',
+        category: 'Red'
+      },
+      {
+        id: 'red:show-5',
+        args: 'Red number five',
+        text: 'Red 5',
+        caption: 'Red number five',
+        category: 'Red'
+      }
     ];
     let shortcutItems = [
       {
@@ -84,16 +114,7 @@ class RedHandler {
         args: paletteItems[0].args
       }
     ];
-    registryItems.forEach((item, idx) => {
-      let title = `Red ${idx}`;
-      item.command.setCategory(widget.title.text);
-      item.command.setText(title);
-      item.command.setCaption(paletteItems[idx].args);
-    });
-    registryItems[0].command.setText('Red main');
-    registryItems[0].command.setCategory('All colors');
-    // Test disabled command.
-    registryItems[2].command.setEnabled(false);
+
     // Add commands to registry.
     this._registry.add(registryItems);
     // Add shortcuts to shortcut manager.
