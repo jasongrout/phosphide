@@ -17,13 +17,13 @@ import {
   CommandRegistry
 } from '../../lib/commandregistry/plugin';
 
-import {
-  IShortcutItem
-} from '../../lib/shortcutmanager/index';
-
-import {
-  ShortcutManager
-} from '../../lib/shortcutmanager/plugin';
+// import {
+//   IShortcutItem
+// } from '../../lib/shortcutmanager/index';
+//
+// import {
+//   ShortcutManager
+// } from '../../lib/shortcutmanager/plugin';
 
 
 
@@ -118,30 +118,30 @@ describe('phosphide', () => {
 
   });
 
-  describe('ShortcutManager', () => {
-    let shortcuts: ShortcutManager = null;
-
-    beforeEach(() => {
-      reg = new CommandRegistry();
-      shortcuts = new ShortcutManager(reg);
-    });
-
-    describe('#create()', () => {
-
-      it('should create a new instance', () => {
-        expect(new ShortcutManager(reg)).to.not.be(shortcuts);
-      });
-
-    });
-
-    describe('#constructor()', () => {
-
-      it('should take a single argument', () => {
-        expect(shortcuts instanceof ShortcutManager).to.be(true);
-      });
-
-    });
-
-  });
+  // describe('ShortcutManager', () => {
+  //   let shortcuts: ShortcutManager = null;
+  //
+  //   beforeEach(() => {
+  //     reg = new CommandRegistry();
+  //     shortcuts = new ShortcutManager(reg);
+  //   });
+  //
+  //   describe('#create()', () => {
+  //
+  //     it('should create a new instance', () => {
+  //       expect(new ShortcutManager(reg)).to.not.be(shortcuts);
+  //     });
+  //
+  //   });
+  //
+  //   describe('#constructor()', () => {
+  //
+  //     it('should take a single argument', () => {
+  //       expect(shortcuts instanceof ShortcutManager).to.be(true);
+  //     });
+  //
+  //   });
+  //
+  // });
 
 });
