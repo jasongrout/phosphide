@@ -26,23 +26,34 @@ import {
 } from '../../lib/shortcutmanager/plugin';
 
 
+class ExtendedShortcutManager extends ShortcutManager {
+  signalCount = 0;
+
+  onSignal(s: any, v: any) {
+    this.signalCount++;
+  }
+}
+
 
 describe('phosphide', () => {
   let reg: CommandRegistry = null;
+  let cmd: (args: any) => void = null;
+  let item: ICommandItem = null;
+  let count = 0;
+
+  beforeEach(() => {
+    reg = new CommandRegistry();
+    cmd = (args: any) => { count += 1; };
+    item = {
+      id: "cmd:test",
+      handler: cmd
+    };
+  });
 
   describe('CommandRegistry', () => {
-    let cmd: (args: any) => void = null;
-    let item: ICommandItem = null;
-    let count = 0;
 
     beforeEach(() => {
       count = 0;
-      reg = new CommandRegistry();
-      cmd = (args: any) => { count += 1; };
-      item = {
-        id: "cmd:test",
-        handler: cmd
-      };
     });
 
     describe('#create()', () => {
@@ -120,16 +131,16 @@ describe('phosphide', () => {
 
   describe('ShortcutManager', () => {
     let shortcuts: ShortcutManager = null;
+    let shortItem: IShortcutItem = null;
 
     beforeEach(() => {
-      reg = new CommandRegistry();
       shortcuts = new ShortcutManager(reg);
     });
 
     describe('#create()', () => {
 
       it('should create a new instance', () => {
-        expect(new ShortcutManager(reg)).to.not.be(shortcuts);
+        expect(ShortcutManager.create(reg)).to.not.be(shortcuts);
       });
 
     });
@@ -141,6 +152,107 @@ describe('phosphide', () => {
       });
 
     });
+
+    describe('#add()', () => {
+
+      it('should ')
+    });
+
+    describe('#shortcutsAdded', () => {
+      let ext: ExtendedShortcutManager = null;
+      let shortItem: IShortcutItem = null;
+
+      beforeEach(() => {
+        reg.add([item]);
+        ext = new ExtendedShortcutManager(reg);
+        shortItem = {
+          sequence: ['Ctrl E'],
+          selector: '*',
+          command: "cmd:test",
+        };
+      })
+
+      it('should signal when items are added', () => {
+        ext.shortcutsAdded.connect(ext.onSignal, ext);
+        expect(ext.signalCount).to.be(0);
+        ext.add([shortItem]);
+        expect(ext.signalCount).to.be(1);
+      });
+
+    });
+
+    describe('#shortcutsRemoved', () => {
+      let ext: ExtendedShortcutManager = null;
+      let shortItem: IShortcutItem = null;
+
+      beforeEach(() => {
+        reg.add([item]);
+        ext = new ExtendedShortcutManager(reg);
+        shortItem = {
+          sequence: ['Ctrl H'],
+          selector: '*',
+          command: "cmd:test"
+        };
+      });
+
+      it('should signal when items are removed', () => {
+        ext.shortcutsRemoved.connect(ext.onSignal, ext);
+        expect(ext.signalCount).to.be(0);
+        let disp = ext.add([shortItem]);
+        expect(ext.signalCount).to.be(0);
+        disp.dispose();
+        expect(ext.signalCount).to.be(1);
+      });
+
+    });
+
+    describe('#getSequences()', () => {
+      let short1: IShortcutItem = null;
+      let short2: IShortcutItem = null;
+
+      beforeEach(() => {
+        short1 = {
+          sequence: ['Ctrl H'],
+          selector: '*',
+          command: 'cmd:test',
+          args: 0
+        };
+        short2 = {
+          sequence: ['Ctrl J'],
+          selector: '*',
+          command: 'cmd:test',
+          args: 1
+        };
+
+      });
+
+      it('should return all valid sequences', () => {
+        shortcuts.add([short1, short2]);
+        let results = shortcuts.getSequences('cmd:test', 0);
+        expect(results.length).to.be(1);
+        expect(results[0].length).to.be(1);
+        expect(results[0][0]).to.be('Ctrl H');
+
+        let results1 = shortcuts.getSequences('cmd:test', 1);
+        expect(results1.length).to.be(1);
+        expect(results1[0].length).to.be(1);
+        expect(results1[0][0]).to.be('Ctrl J');
+      });
+
+      it('should perform deep equality test before adding', () => {
+        short1.args = { first: { second: 'third' } };
+        short2.args = { first: { second: 'third' } };
+        shortcuts.add([short1, short2]);
+
+        let args = { first: { second: 'third' } };
+        let results = shortcuts.getSequences('cmd:test', args);
+        expect(results.length).to.be(1);
+        expect(results[0].length).to.be(1);
+      })
+
+    });
+
+
 
   });
 

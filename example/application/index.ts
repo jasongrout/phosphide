@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette
+  IAppShell, ICommandPalette, IShortcutManager
 } from 'phosphide';
 
 import {
@@ -28,16 +28,21 @@ function resolve(container: Container): Promise<void> {
  */
 class Application {
 
-  static requires: Token<any>[] = [IAppShell, ICommandPalette];
+  static requires: Token<any>[] = [IAppShell, ICommandPalette, IShortcutManager];
 
-  static create(shell: IAppShell, palette: ICommandPalette): Application {
-    return new Application(shell, palette);
+  static create(shell: IAppShell, palette: ICommandPalette, shortcuts: IShortcutManager): Application {
+    return new Application(shell, palette, shortcuts);
   }
 
-  constructor(shell: IAppShell, palette: ICommandPalette) {
+  constructor(shell: IAppShell, palette: ICommandPalette, shortcuts: IShortcutManager) {
     palette.widget.title.text = 'Commands';
     shell.addToLeftArea(palette.widget, { rank: 40 });
     shell.attach(document.body);
     window.addEventListener('resize', () => { shell.update(); });
+
+    // Setup the keydown listener for the document.
+    document.addEventListener('keydown', event => {
+      shortcuts.keymap.processKeydownEvent(event);
+    });
   }
 }

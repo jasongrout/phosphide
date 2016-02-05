@@ -16,6 +16,10 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  KeymapManager
+} from 'phosphor-keymap';
+
+import {
   ISignal
 } from 'phosphor-signaling';
 
@@ -57,6 +61,11 @@ export interface IShortcutManager {
    * A signal emitted when shortcuts are removed from the manager.
    */
   shortcutsRemoved: ISignal<IShortcutManager, IShortcutItem[]>
+
+  /**
+   * The keymap manager underlying this shortcut manager.
+   */
+  keymap: KeymapManager;
 
   /**
    * Add key bindings to the shortcut manager.
