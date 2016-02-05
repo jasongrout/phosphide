@@ -10,6 +10,10 @@
 import expect = require('expect.js');
 
 import {
+  Layout, Widget
+} from 'phosphor-widget';
+
+import {
   ICommandItem
 } from '../../lib/commandregistry/index';
 
@@ -24,6 +28,18 @@ import {
 import {
   ShortcutManager
 } from '../../lib/shortcutmanager/plugin';
+
+import {
+  IAppShell
+} from '../../lib/appshell/index';
+
+import {
+  AppShell
+} from '../../lib/appshell/plugin';
+
+import {
+  SideBar
+} from '../../lib/appshell/sidebar';
 
 
 class ExtendedShortcutManager extends ShortcutManager {
@@ -248,7 +264,147 @@ describe('phosphide', () => {
         let results = shortcuts.getSequences('cmd:test', args);
         expect(results.length).to.be(1);
         expect(results[0].length).to.be(1);
-      })
+      });
+
+    });
+
+  });
+
+  describe('AppShell', () => {
+    let shell: IAppShell = null;
+
+    beforeEach(() => {
+      shell = new AppShell();
+    });
+
+    describe('#create()', () => {
+
+      it('should return a new instance', () => {
+        expect(AppShell.create()).to.not.be(shell);
+      });
+
+    });
+
+    describe('#constructor()', () => {
+
+      it('should accept no arguments', () => {
+        expect(shell instanceof AppShell).to.be(true);
+      });
+
+      it('should have a default layout', () => {
+        expect(shell.layout instanceof Layout).to.be(true);
+      });
+
+    });
+
+  });
+
+  describe('SideBar', () => {
+    let side: SideBar = null;
+    let w1: Widget = null;
+    let w2: Widget = null;
+
+    beforeEach(() => {
+      side = new SideBar();
+      w1 = new Widget();
+      w1.title.text = "W1";
+      w2 = new Widget();
+      w2.title.text = "W2";
+    })
+
+    describe('#constructor()', () => {
+
+      it('should take no arguments', () => {
+        expect(side instanceof SideBar).to.be(true);
+      });
+
+    });
+
+    describe('#dispose()', () => {
+
+      it('should remove added widgets', () => {
+        side.addTitle(w1.title);
+        side.addTitle(w2.title);
+
+        expect(side.titleCount()).to.be(2);
+        side.dispose();
+        expect(side.titleCount()).to.be(0);
+      });
+
+    });
+
+    describe('#titleCount()', () => {
+
+      it('should default to zero', () => {
+        expect(side.titleCount()).to.be(0);
+      });
+
+      it('should give the correct number of added titles', () => {
+        side.addTitle(w1.title);
+        expect(side.titleCount()).to.be(1);
+        side.addTitle(w2.title);
+        expect(side.titleCount()).to.be(2);
+      });
+
+    });
+
+    describe('#titleAt()', () => {
+
+      it('should return undefined if no titles present', () => {
+        expect(side.titleAt(0)).to.be(undefined);
+      });
+
+      it('should return the correct title', () => {
+        side.addTitle(w1.title);
+        expect(side.titleAt(0)).to.be(w1.title);
+
+        side.addTitle(w2.title);
+        expect(side.titleAt(0)).to.be(w1.title);
+        expect(side.titleAt(1)).to.be(w2.title);
+      });
+
+    });
+
+    describe('#titleIndex()', () => {
+
+      it('should return `-1` if not found', () => {
+        expect(side.titleIndex(w1.title)).to.be(-1);
+      });
+
+      it('should return the correct indices', () => {
+        side.addTitle(w1.title);
+        expect(side.titleIndex(w1.title)).to.be(0);
+        side.addTitle(w2.title);
+        expect(side.titleIndex(w1.title)).to.be(0);
+        expect(side.titleIndex(w2.title)).to.be(1);
+      });
+
+    });
+
+    describe('#insertTitle()', () => {
+
+      it('should move existing titles if insert occurs before', () => {
+        side.addTitle(w1.title);
+        side.insertTitle(0, w2.title);
+        expect(side.titleAt(0)).to.be(w2.title);
+        expect(side.titleAt(1)).to.be(w1.title);
+      });
+
+    });
+
+    describe('#removeTitle()', () => {
+
+      it('should remove a title if it exists', () => {
+        side.addTitle(w1.title);
+        side.removeTitle(w1.title);
+        expect(side.titleCount()).to.be(0);
+      });
+
+      it('should be a no-op if the title does not exist', () => {
+        side.addTitle(w1.title);
+        side.removeTitle(w2.title);
+        expect(side.titleCount()).to.be(1);
+      });
 
     });
 
