@@ -12,11 +12,7 @@ import {
 } from 'phosphor-di';
 
 import {
-  CommandItem, ICommandItemOptions
-} from 'phosphor-command';
-
-import {
-  CommandPalette
+  CommandPalette, IStandardPaletteItemOptions, StandardPaletteModel
 } from 'phosphor-commandpalette';
 
 import {
@@ -32,7 +28,7 @@ import {
 } from './index';
 
 import {
-  ICommandRegistry
+  ICommandRegistry, ICommandItem
 } from '../commandregistry/index';
 
 import {
@@ -76,7 +72,9 @@ class CommandPaletteManager implements ICommandPalette {
    * @param shortcutManager - An instance of a shortcut manager.
    */
   constructor(commandRegistry: ICommandRegistry, shortcutManager: IShortcutManager) {
+    this._paletteModel = new StandardPaletteModel();
     this._commandPalette = new CommandPalette();
+    this._commandPalette.model = this._paletteModel;
     this._commandRegistry = commandRegistry;
     this._shortcutManager = shortcutManager;
   }
@@ -88,33 +86,32 @@ class CommandPaletteManager implements ICommandPalette {
    *
    * @returns An `IDisposable` to remove the added commands from the palette
    */
-  add(items: { id: string, args: any }[]): IDisposable {
-    let commandItems = items.map(item => {
-      let command = this._commandRegistry.get(item.id);
-      if (!command) return null;
-      let options: ICommandItemOptions = { command: command };
+  add(items: { id: string, args: any, caption: string, category: string, text: string }[]): IDisposable {
+    let modelItems = items.map(item => {
+      let handler = this._commandRegistry.get(item.id);
+      if (!handler) return null;
+      let options: IStandardPaletteItemOptions = {
+        handler: handler,
+        args: item.args,
+        text: item.text,
+        shortcut: "",
+        category: item.category,
+        caption: item.caption };
       let shortcut = this._shortcutManager.getSequences(item.id, item.args);
       if (shortcut && shortcut.length > 0) {
         options.shortcut = shortcut[0]
           .map(s => s.replace(/\s/g, '-')).join(' ');
       }
-      return new CommandItem(options);
+      return options;
     }).filter(item => !!item);
-    if (!commandItems.length) return;
-    this._commandPalette.add(commandItems);
+    if (!modelItems.length) return;
+    let paletteItems = this._paletteModel.addItems(modelItems);
     return new DisposableDelegate(() => {
-      this._commandPalette.remove(commandItems);
+      this._paletteModel.removeItems(paletteItems);
     });
   }
-  /**
-   * Search for a specific query string among command titles and captions.
-   *
-   * @param query - The query string
-   */
-  search(query: string): void {
-    this._commandPalette.search(query);
-  }
 
+  private _paletteModel: StandardPaletteModel;
   private _commandPalette: CommandPalette;
   private _commandRegistry: ICommandRegistry;
   private _shortcutManager: IShortcutManager;

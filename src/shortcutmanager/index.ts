@@ -12,15 +12,11 @@ import {
 } from 'phosphor-di';
 
 import {
-  Command
-} from 'phosphor-command';
-
-import {
   IDisposable
 } from 'phosphor-disposable';
 
 import {
-  IKeyBinding
+  KeymapManager
 } from 'phosphor-keymap';
 
 import {
@@ -67,7 +63,12 @@ export interface IShortcutManager {
   shortcutsRemoved: ISignal<IShortcutManager, IShortcutItem[]>
 
   /**
-   * Add key bindings to the key map manager.
+   * The keymap manager underlying this shortcut manager.
+   */
+  keymap: KeymapManager;
+
+  /**
+   * Add key bindings to the shortcut manager.
    *
    * @param bindings - The key bindings to add to the manager.
    *
@@ -76,11 +77,11 @@ export interface IShortcutManager {
   add(items: IShortcutItem[]): IDisposable;
 
   /**
-   * Lookup a command.
+   * Get the registered key sequences for the given command id and args.
    *
    * @param id - The command of interest.
    *
-   * @returns The keybinding for the specified handler, or `undefined`.
+   * @returns The keybindings for the specified id and args, or `undefined`.
    */
   getSequences(id: string, args: any): string[][];
 }

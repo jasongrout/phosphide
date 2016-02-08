@@ -12,10 +12,6 @@ import {
 } from 'phosphide';
 
 import {
-  SimpleCommand
-} from 'phosphor-command';
-
-import {
   Container
 } from 'phosphor-di';
 
@@ -34,10 +30,8 @@ function resolve(container: Container): Promise<void> {
 }
 
 
-function createCommand(): SimpleCommand {
-  return new SimpleCommand({
-    handler: (message: string) => { console.log(`COMMAND: ${message}`); }
-  });
+function createHandler(): (args: any) => void {
+  return (message: string) => { console.log(`COMMAND: ${message}`); };
 }
 
 
@@ -62,20 +56,56 @@ class BlueHandler {
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
     let registryItems = [
-      { id: 'blue:show-0', command: createCommand() },
-      { id: 'blue:show-1', command: createCommand() },
-      { id: 'blue:show-2', command: createCommand() },
-      { id: 'blue:show-3', command: createCommand() },
-      { id: 'blue:show-4', command: createCommand() },
-      { id: 'blue:show-5', command: createCommand() }
+      { id: 'blue:show-0', handler: createHandler() },
+      { id: 'blue:show-1', handler: createHandler() },
+      { id: 'blue:show-2', handler: createHandler() },
+      { id: 'blue:show-3', handler: createHandler() },
+      { id: 'blue:show-4', handler: createHandler() },
+      { id: 'blue:show-5', handler: createHandler() }
     ];
     let paletteItems = [
-      { id: 'blue:show-0', args: 'Blue is best!' },
-      { id: 'blue:show-1', args: 'Blue number one' },
-      { id: 'blue:show-2', args: 'Blue number two' },
-      { id: 'blue:show-3', args: 'Blue number three' },
-      { id: 'blue:show-4', args: 'Blue number four' },
-      { id: 'blue:show-5', args: 'Blue number five' }
+      {
+        id: 'blue:show-0',
+        args: 'Blue is best!',
+        text: 'Blue 0',
+        caption: 'Blue is best!',
+        category: 'All Colours'
+      },
+      {
+        id: 'blue:show-1',
+        args: 'Blue number one',
+        text: 'Blue 1',
+        caption: 'Blue number one',
+        category: 'Blue'
+      },
+      {
+        id: 'blue:show-2',
+        args: 'Blue number two',
+        text: 'Blue 2',
+        caption: 'Blue number two',
+        category: 'Blue'
+      },
+      {
+        id: 'blue:show-3',
+        args: 'Blue number three',
+        text: 'Blue 3',
+        caption: 'Blue number three',
+        category: 'Blue'
+      },
+      {
+        id: 'blue:show-4',
+        args: 'Blue number four',
+        text: 'Blue 4',
+        caption: 'Blue number four',
+        category: 'Blue'
+      },
+      {
+        id: 'blue:show-5',
+        args: 'Blue number five',
+        text: 'Blue 5',
+        caption: 'Blue number five',
+        category: 'Blue'
+      }
     ];
     let shortcutItems = [
       {
@@ -85,14 +115,7 @@ class BlueHandler {
         args: paletteItems[0].args
       }
     ];
-    registryItems.forEach((item, idx) => {
-      let title = `Blue ${idx}`;
-      item.command.setCategory(widget.title.text);
-      item.command.setText(title);
-      item.command.setCaption(paletteItems[idx].args);
-    });
-    registryItems[0].command.setText('Blue main');
-    registryItems[0].command.setCategory('All colors');
+
     // Add commands to registry.
     this._registry.add(registryItems);
     // Add shortcuts to shortcut manager.

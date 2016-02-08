@@ -271,81 +271,80 @@ body {
 
 
 .p-CommandPalette {
-  background: #EEEEEE;
-  font-family: "Helvetica Neue", Helvetica;
+  background: #F5F5F5;
+  border: 1px solid #CCCCCC;
+  font-family: Helvetica, Arial, sans-serif;
   min-width: 250px;
-  min-height: 50px;
-  padding: 4px 4px 0px 4px;
-}
-
-
-.p-CommandPalette-header {
-  color: #757575;
-  font-size: 11px;
-  font-weight: 500;
-  margin-top: 12px;
-}
-
-
-.p-CommandPalette-header hr {
-  height: 1px;
-  border-width: 0;
-  background-color: #E0E0E0;
 }
 
 
 .p-CommandPalette-search {
-  margin-bottom: 4px;
+  padding: 8px;
 }
 
 
 .p-CommandPalette-inputWrapper {
   border: 1px solid #E0E0E0;
-  padding: 4px;
+  background: white;
+  padding: 4px 6px;
 }
 
 
-.p-CommandPalette-search input {
+.p-CommandPalette-input {
   width: 100%;
-  border: none;
   outline: none;
+  border: none;
+  font-size: 16px;
 }
 
 
-.p-CommandPalette-command {
+.p-CommandPalette-header {
+  color: #757575;
+  padding: 8px 0px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #E1E1E1;
+  cursor: pointer;
+}
+
+
+.p-CommandPalette-headerText {
+  margin-left: 4px;
+}
+
+
+.p-CommandPalette-item {
   color: #757575;
   font-weight: 500;
   font-size: 13px;
-  padding: 3px 0 3px 2px;
+  padding: 4px 8px;
 }
 
-.p-CommandPalette-title {
-  padding-right: 5px;
+.p-CommandPalette-header.p-mod-active,
+.p-CommandPalette-item.p-mod-active {
+  background: #7FDBFF;
 }
 
-.p-CommandPalette-command.p-mod-disabled,
-.p-CommandPalette-command.p-mod-disabled .p-CommandPalette-caption {
-  color: #D5D5D5;
+
+.p-CommandPalette-item:hover:not(.p-mod-active) {
+  background: #EBEBEB;
 }
 
-.p-CommandPalette-caption {
+
+.p-CommandPalette-itemText > em {
+  font-style: normal;
+  font-weight: bold;
+  color: #303030;
+}
+
+
+.p-CommandPalette-itemCaption {
   color: #9E9E9E;
   font-weight: 400;
-  font-size: 10px;
-  padding-right: 5px;
+  font-size: 11px;
 }
 
-.p-CommandPalette-shortcut {
-  padding-right: 5px;
+.p-CommandPalette-itemShortcut {
+  float: right;
 }
 
-.p-CommandPalette-shortcut:empty {
-  padding-right: 0;
-}
-
-.p-CommandPalette-command.p-mod-active,
-.p-CommandPalette-command.p-mod-active .p-CommandPalette-caption,
-.p-CommandPalette-command.p-mod-active .p-CommandPalette-shortcut {
-  background: #2196F3;
-  color: #FFFFFF;
-}

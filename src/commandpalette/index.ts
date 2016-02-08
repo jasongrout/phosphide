@@ -34,12 +34,6 @@ interface ICommandPalette {
    */
   add(commands: { id: string, args: any }[]): IDisposable;
   /**
-   * Search for a specific query string among command titles and captions.
-   *
-   * @param query - The query string
-   */
-  search(query: string): void;
-  /**
    * The underlying palette widget.
    */
   widget: Widget;

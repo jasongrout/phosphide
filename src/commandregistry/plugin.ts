@@ -8,10 +8,6 @@
 'use strict';
 
 import {
-  Command
-} from 'phosphor-command';
-
-import {
   Container, Token
 } from 'phosphor-di';
 
@@ -44,7 +40,13 @@ function register(container: Container): void {
 
 /**
  * A concrete implementation of ICommandRegistry.
+ *
+ * #### Notes
+ * This is only being exported for use in unit-tests, or
+ * for subclassing in separate applications. In normal use
+ * this should not be accessed directly.
  */
+export
 class CommandRegistry implements ICommandRegistry {
   /**
    * The dependencies required by the command registry.
@@ -95,7 +97,7 @@ class CommandRegistry implements ICommandRegistry {
    *
    * @returns The command with the specified id, or `undefined`.
    */
-  get(id: string): Command {
+  get(id: string): (args: any) => void {
     return this._map[id];
   }
 
@@ -115,11 +117,11 @@ class CommandRegistry implements ICommandRegistry {
     let added: string[] = [];
 
     // Add the new commands to the map and warn for duplicates.
-    for (let { id, command } of items) {
+    for (let { id, handler } of items) {
       if (id in this._map) {
         console.warn(`Command '${id}' is already registered.`);
       } else {
-        this._map[id] = command;
+        this._map[id] = handler;
         added.push(id);
       }
     }
@@ -139,7 +141,7 @@ class CommandRegistry implements ICommandRegistry {
     });
   }
 
-  private _map: { [id: string]: Command };
+  private _map: { [id: string]: (args: any) => void };
 }
 
 

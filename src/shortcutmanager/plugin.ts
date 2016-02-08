@@ -49,7 +49,8 @@ function register(container: Container): void {
 /**
  * An object for managing shortcuts.
  */
-export class ShortcutManager {
+export
+class ShortcutManager {
   /**
    * The dependencies required by the shortcut manager.
    */
@@ -68,11 +69,6 @@ export class ShortcutManager {
   constructor(registry: ICommandRegistry) {
     this._keymap = new KeymapManager();
     this._commandRegistry = registry;
-
-    // Setup the keydown listener for the document.
-    document.addEventListener('keydown', event => {
-      this._keymap.processKeydownEvent(event);
-    });
   }
 
   /**
@@ -87,6 +83,10 @@ export class ShortcutManager {
    */
   get shortcutsRemoved(): ISignal<ShortcutManager, IShortcutItem[]> {
     return ShortcutManagerPrivate.shortcutsRemovedSignal.bind(this);
+  }
+
+  get keymap(): KeymapManager {
+    return this._keymap;
   }
 
   /**
@@ -114,17 +114,20 @@ export class ShortcutManager {
         }
       }
 
-      if (!exists) {
-        arr.push({args: item.args, sequence: item.sequence});
+      // If the given command and args is already registered,
+      // don't register it, just move on to the next one.
+      if (exists) {
+        continue;
       }
+
+      arr.push({args: item.args, sequence: item.sequence});
 
       bindings.push({
         sequence: item.sequence,
         selector: item.selector,
-        command: this._commandRegistry.get(id),
+        handler: this._handlerForKeymap(id),
         args: item.args
       });
-
     }
 
     let added = this._keymap.add(bindings);
@@ -148,11 +151,11 @@ export class ShortcutManager {
   }
 
   /**
-   * Lookup a handler with a specific id.
+   * Get the registered key sequences for the given command id and args.
    *
-   * @param id - The id of the handler of interest.
+   * @param id - The command of interest.
    *
-   * @returns The keybindings for the specified id, or `undefined`.
+   * @returns The keybindings for the specified id and args, or `undefined`.
    */
   getSequences(id: string, args: any): string[][] {
     let result: string[][] = [];
@@ -167,6 +170,14 @@ export class ShortcutManager {
     }
   }
 
+  private _handlerForKeymap(id: string): (args: any) => boolean {
+    let handler = this._commandRegistry.get(id);
+    return (args: any) => {
+      handler(args);
+      return true;
+    };
+  }
+
   private _keymap: KeymapManager = null;
   private _commandRegistry: ICommandRegistry = null;
   private _commandShortcutMap: CommandShortcutMap = {};
@@ -174,7 +185,7 @@ export class ShortcutManager {
 
 
 /**
- * The type used to map command id's to arrays of arg and sequence definitions.
+ * The type used to map command IDs to arrays of arg and sequence definitions.
  */
 type CommandShortcutMap = { [id: string]: Array<{args: any, sequence: string[]}> };
 
