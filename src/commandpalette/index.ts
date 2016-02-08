@@ -32,7 +32,7 @@ interface ICommandPalette {
    *
    * @returns An `IDisposable` to remove the added commands from the palette
    */
-  add(commands: { id: string, args: any }[]): IDisposable;
+  add(items: { id: string, args: any, caption: string, category: string, text: string }[]): IDisposable;
   /**
    * Search for a specific query string among command titles and captions.
    *
