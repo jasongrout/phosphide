@@ -78,7 +78,7 @@ function register(container: Container): void {
 /**
  * A concrete implementation of `IAppShell`.
  */
- export
+export
 class AppShell extends Widget implements IAppShell {
   /**
    * The dependencies required by the application shell.

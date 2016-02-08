@@ -111,15 +111,6 @@ class CommandPaletteManager implements ICommandPalette {
     });
   }
 
-  /**
-   * Search for a specific query string among command titles and captions.
-   *
-   * @param query - The query string
-   */
-  search(query: string): void {
-    //this._commandPalette.search(query);
-  }
-
   private _paletteModel: StandardPaletteModel;
   private _commandPalette: CommandPalette;
   private _commandRegistry: ICommandRegistry;
