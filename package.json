@@ -1,6 +1,6 @@
 {
   "name": "phosphide",
-  "version": "0.2.0",
+  "version": "0.5.1",
   "description": "Slightly opinionated scaffolding for building plugin-based IDE-style applications.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -46,7 +46,7 @@
   },
   "scripts": {
     "clean": "rimraf lib && rimraf test/build && rimraf test/coverage",
-    "build:example": "rimraf example/node_modules/phosphide && cd example && npm install && npm run build",
+    "build:example": "cd example && rimraf node_modules/phosphide && npm install && npm run build",
     "build:css": "node scripts/copycss.js",
     "build:src": "tsc --project src",
     "build:test": "tsc --project test/src && webpack --config test/webpack.conf.js",

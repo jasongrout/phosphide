@@ -63,11 +63,6 @@ export interface IShortcutManager {
   shortcutsRemoved: ISignal<IShortcutManager, IShortcutItem[]>
 
   /**
-   * The keymap manager underlying this shortcut manager.
-   */
-  keymap: KeymapManager;
-
-  /**
    * Add key bindings to the shortcut manager.
    *
    * @param bindings - The key bindings to add to the manager.

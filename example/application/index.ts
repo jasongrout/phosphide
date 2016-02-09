@@ -39,10 +39,5 @@ class Application {
     shell.addToLeftArea(palette.widget, { rank: 40 });
     shell.attach(document.body);
     window.addEventListener('resize', () => { shell.update(); });
-
-    // Setup the keydown listener for the document.
-    document.addEventListener('keydown', event => {
-      shortcuts.keymap.processKeydownEvent(event);
-    });
   }
 }

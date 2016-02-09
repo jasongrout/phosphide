@@ -67,8 +67,12 @@ class ShortcutManager {
    * Construct a shortcut manager.
    */
   constructor(registry: ICommandRegistry) {
+    // TODO: keyboard layout and listener node should be configurable.
     this._keymap = new KeymapManager();
     this._commandRegistry = registry;
+    document.addEventListener('keydown', event => {
+      this._keymap.processKeydownEvent(event);
+    });
   }
 
   /**
@@ -83,10 +87,6 @@ class ShortcutManager {
    */
   get shortcutsRemoved(): ISignal<ShortcutManager, IShortcutItem[]> {
     return ShortcutManagerPrivate.shortcutsRemovedSignal.bind(this);
-  }
-
-  get keymap(): KeymapManager {
-    return this._keymap;
   }
 
   /**
@@ -171,9 +171,8 @@ class ShortcutManager {
   }
 
   private _handlerForKeymap(id: string): (args: any) => boolean {
-    let handler = this._commandRegistry.get(id);
     return (args: any) => {
-      handler(args);
+      this._commandRegistry.get(id)(args);
       return true;
     };
   }
