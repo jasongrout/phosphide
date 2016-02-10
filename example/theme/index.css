@@ -299,8 +299,10 @@ body {
 
 
 .p-CommandPalette-header {
+  margin-left: 4px;
+  text-transform: capitalize;
   color: #757575;
-  padding: 8px 0px;
+  padding: 8px 0 8px 4px;
   font-size: 12px;
   font-weight: 600;
   background: #E1E1E1;
@@ -308,12 +310,7 @@ body {
 }
 
 
-.p-CommandPalette-headerText {
-  margin-left: 4px;
-}
-
-
-.p-CommandPalette-item {
+.p-CommandPalette-command {
   color: #757575;
   font-weight: 500;
   font-size: 13px;
@@ -321,30 +318,31 @@ body {
 }
 
 .p-CommandPalette-header.p-mod-active,
-.p-CommandPalette-item.p-mod-active {
+.p-CommandPalette-command.p-mod-active {
   background: #7FDBFF;
 }
 
 
-.p-CommandPalette-item:hover:not(.p-mod-active) {
+.p-CommandPalette-command:hover:not(.p-mod-active) {
   background: #EBEBEB;
 }
 
 
-.p-CommandPalette-itemText > em {
+.p-CommandPalette-headerText > mark,
+.p-CommandPalette-commandText > mark {
   font-style: normal;
   font-weight: bold;
   color: #303030;
 }
 
 
-.p-CommandPalette-itemCaption {
+.p-CommandPalette-commandCaption {
   color: #9E9E9E;
   font-weight: 400;
   font-size: 11px;
 }
 
-.p-CommandPalette-itemShortcut {
+.p-CommandPalette-commandShortcut {
   float: right;
 }
 
