@@ -308,7 +308,6 @@ class SideBarHandler {
       let widget = this._stackedPanel.childAt(i);
       if (widget.id === id) {
         this._sideBar.currentTitle = widget.title;
-        this._stackedPanel.setHidden(false);
         return;
       }
     }
