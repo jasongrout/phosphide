@@ -52,7 +52,6 @@ class BlueHandler {
 
   run(): void {
     let widget = new Widget();
-    widget.id = 'blue';
     widget.addClass('blue-content');
     widget.title.text = 'Blue';
     this._shell.addToLeftArea(widget, { rank: 10 });
