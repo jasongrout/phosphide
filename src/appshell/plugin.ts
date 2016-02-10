@@ -43,6 +43,10 @@ import {
 } from 'phosphor-widget';
 
 import {
+  ICommandRegistry, ICommandItem
+} from '../commandregistry/index';
+
+import {
   IAppShell, IMainAreaOptions, ISideAreaOptions
 } from './index';
 
@@ -83,19 +87,19 @@ class AppShell extends Widget implements IAppShell {
   /**
    * The dependencies required by the application shell.
    */
-  static requires: Token<any>[] = [];
+  static requires: Token<any>[] = [ICommandRegistry];
 
   /**
    * Create a new application shell instance.
    */
-  static create(): IAppShell {
-    return new AppShell();
+  static create(registry: ICommandRegistry): IAppShell {
+    return new AppShell(registry);
   }
 
   /**
    * Construct a new application shell.
    */
-  constructor() {
+  constructor(registry: ICommandRegistry) {
     super();
     this.addClass(APP_SHELL_CLASS);
 
@@ -156,6 +160,26 @@ class AppShell extends Widget implements IAppShell {
     rootLayout.addChild(hboxPanel);
 
     this.layout = rootLayout;
+
+    registry.add([
+      {
+        id: 'appshell-actions:activate',
+        handler: (args: { id: string }) => { this._activate(args.id); }
+      },
+      {
+        id: 'appshell-actions:collapse',
+        handler: (args: { side: string }) => {
+          switch (args.side) {
+          case 'left':
+            this._leftHandler.sideBar.currentTitle = null;
+            break;
+          case 'right':
+            this._rightHandler.sideBar.currentTitle = null;
+            break;
+          }
+        }
+      }
+    ]);
   }
 
   /**
@@ -187,6 +211,25 @@ class AppShell extends Widget implements IAppShell {
   addToMainArea(widget: Widget, options: IMainAreaOptions = {}): void {
     // TODO
     this._dockPanel.insertTabAfter(widget);
+  }
+
+  /**
+   * Select a widget that resides in either of the side panels.
+   *
+   * @param id - The widget's unique ID.
+   */
+  private _activate(id: string): void {
+    let edgeHandlers = [this._leftHandler, this._rightHandler];
+    for (let handler of edgeHandlers) {
+      for (let i = 0, n = handler.stackedPanel.childCount(); i < n; ++i) {
+        let widget = handler.stackedPanel.childAt(i);
+        if (widget.id === id) {
+          handler.sideBar.currentTitle = widget.title;
+          handler.stackedPanel.setHidden(false);
+          return;
+        }
+      }
+    }
   }
 
   private _topPanel: Panel;
