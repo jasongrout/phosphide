@@ -107,8 +107,8 @@ class AppShell extends Widget implements IAppShell {
     let hboxPanel = new BoxPanel();
     let dockPanel = new DockPanel();
     let hsplitPanel = new SplitPanel();
-    let leftHandler = new SideBarHandler();
-    let rightHandler = new SideBarHandler();
+    let leftHandler = new SideBarHandler('left');
+    let rightHandler = new SideBarHandler('right');
     let rootLayout = new BoxLayout();
 
     this._topPanel = topPanel;
@@ -163,20 +163,26 @@ class AppShell extends Widget implements IAppShell {
 
     registry.add([
       {
-        id: 'appshell-actions:activate',
-        handler: (args: { id: string }) => { this._activate(args.id); }
+        id: 'appshell:activate-left',
+        handler: (args: any) => { this._leftHandler.activate(args.id); }
       },
       {
-        id: 'appshell-actions:collapse',
-        handler: (args: { side: string }) => {
-          switch (args.side) {
-          case 'left':
-            this._leftHandler.sideBar.currentTitle = null;
-            break;
-          case 'right':
-            this._rightHandler.sideBar.currentTitle = null;
-            break;
-          }
+        id: 'appshell:activate-right',
+        handler: (args: any) => { this._rightHandler.activate(args.id); }
+      },
+      {
+        id: 'appshell:collapse-left',
+        handler: () => { this._leftHandler.sideBar.currentTitle = null; }
+      },
+      {
+        id: 'appshell:collapse-right',
+        handler: () => { this._rightHandler.sideBar.currentTitle = null; }
+      },
+      {
+        id: 'appshell:collapse-both',
+        handler: () => {
+          this._leftHandler.sideBar.currentTitle = null;
+          this._rightHandler.sideBar.currentTitle = null;
         }
       }
     ]);
@@ -187,12 +193,20 @@ class AppShell extends Widget implements IAppShell {
    */
   addToTopArea(widget: Widget, options: ISideAreaOptions = {}): void {
     // TODO
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
   }
 
   /**
    * Add a widget to the left content area.
    */
   addToLeftArea(widget: Widget, options: ISideAreaOptions = {}): void {
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
     let rank = 'rank' in options ? options.rank : 100;
     this._leftHandler.addWidget(widget, rank);
   }
@@ -201,6 +215,10 @@ class AppShell extends Widget implements IAppShell {
    * Add a widget to the right content area.
    */
   addToRightArea(widget: Widget, options: ISideAreaOptions = {}): void {
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
     let rank = 'rank' in options ? options.rank : 100;
     this._rightHandler.addWidget(widget, rank);
   }
@@ -210,26 +228,11 @@ class AppShell extends Widget implements IAppShell {
    */
   addToMainArea(widget: Widget, options: IMainAreaOptions = {}): void {
     // TODO
-    this._dockPanel.insertTabAfter(widget);
-  }
-
-  /**
-   * Select a widget that resides in either of the side panels.
-   *
-   * @param id - The widget's unique ID.
-   */
-  private _activate(id: string): void {
-    let edgeHandlers = [this._leftHandler, this._rightHandler];
-    for (let handler of edgeHandlers) {
-      for (let i = 0, n = handler.stackedPanel.childCount(); i < n; ++i) {
-        let widget = handler.stackedPanel.childAt(i);
-        if (widget.id === id) {
-          handler.sideBar.currentTitle = widget.title;
-          handler.stackedPanel.setHidden(false);
-          return;
-        }
-      }
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
     }
+    this._dockPanel.insertTabAfter(widget);
   }
 
   private _topPanel: Panel;
@@ -271,7 +274,8 @@ class SideBarHandler {
   /**
    * Construct a new side bar handler.
    */
-  constructor() {
+  constructor(side: string) {
+    this._side = side;
     this._sideBar = new SideBar();
     this._stackedPanel = new StackedPanel();
     this._sideBar.hide();
@@ -293,6 +297,22 @@ class SideBarHandler {
   get stackedPanel(): StackedPanel {
     return this._stackedPanel;
   }
+
+  /**
+   * Activate a widget residing in the side bar by ID.
+   *
+   * @param id - The widget's unique ID.
+   */
+  activate(id: string):void {
+    for (let i = 0, n = this._stackedPanel.childCount(); i < n; ++i) {
+      let widget = this._stackedPanel.childAt(i);
+      if (widget.id === id) {
+        this._sideBar.currentTitle = widget.title;
+        return;
+      }
+    }
+  }
+
 
   /**
    * Add a widget and its title to the stacked panel and side bar.
@@ -347,7 +367,12 @@ class SideBarHandler {
     let oldWidget = this._findTitleWidget(args.oldValue);
     let newWidget = this._findTitleWidget(args.newValue);
     if (oldWidget) oldWidget.hide();
-    if (newWidget) newWidget.show();
+    if (newWidget) {
+      newWidget.show();
+      document.body.dataset[`${this._side}Area`] = newWidget.id;
+    } else {
+      delete document.body.dataset[`${this._side}Area`];
+    }
     this._refreshVisibility();
   }
 
@@ -360,6 +385,7 @@ class SideBarHandler {
     this._refreshVisibility();
   }
 
+  private _side: string;
   private _sideBar: SideBar;
   private _stackedPanel: StackedPanel;
   private _items: IRankItem[] = [];

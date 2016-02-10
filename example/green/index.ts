@@ -52,6 +52,7 @@ class GreenHandler {
 
   run(): void {
     let widget = new Widget();
+    widget.id = 'green';
     widget.addClass('green-content');
     widget.title.text = 'Green';
     this._shell.addToRightArea(widget, { rank: 40 });

@@ -64,6 +64,7 @@ function createEditor(n: number): CodeMirrorWidget {
     lineNumbers: true,
     tabSize: 2,
   });
+  widget.id = `editor-${n}`;
   widget.title.text = `Untitled - ${n}.ts`;
   return widget;
 }

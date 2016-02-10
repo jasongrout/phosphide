@@ -51,6 +51,7 @@ class YellowHandler {
 
   run(): void {
     let widget = new Widget();
+    widget.id = 'yellow';
     widget.addClass('yellow-content');
     widget.title.text = 'Yellow';
     this._shell.addToLeftArea(widget, { rank: 20 });
