@@ -53,6 +53,11 @@ interface ICommandRegistry {
   commandsRemoved: ISignal<ICommandRegistry, string[]>;
 
   /**
+   * A signal emitted when a command is executed.
+   */
+  commandExecuted: ISignal<ICommandRegistry, { id: string, args: any }>;
+
+  /**
    * List the currently registered commands.
    *
    * @returns A new array of the registered command ids.
@@ -60,13 +65,13 @@ interface ICommandRegistry {
   list(): string[];
 
   /**
-   * Lookup a command with a specific id.
+   * Test whether the registry contains a command.
    *
    * @param id - The id of the command of interest.
    *
-   * @returns The command with the specified id, or `undefined`.
+   * @returns `true` if the command is registered, `false` otherwise.
    */
-  get(id: string): (args: any) => void;
+  has(id: string): boolean;
 
   /**
    * Add commands to the registry.
@@ -80,6 +85,20 @@ interface ICommandRegistry {
    * logged to the console and that specific command will be ignored.
    */
   add(items: ICommandItem[]): IDisposable;
+
+  /**
+   * Execute a registered command.
+   *
+   * @param id - The id of the command of interest.
+   *
+   * @param args - The arguments to pass to the command, if necessary.
+   *
+   * #### Notes
+   * If the command id is not registered, a warning will be logged.
+   *
+   * If the handler throws an exception, it will be caught and logged.
+   */
+  execute(id: string, args?: any): void;
 }
 
 
