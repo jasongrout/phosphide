@@ -111,7 +111,7 @@ describe('phosphide', () => {
         expect(reg.has('cmd:test')).to.be(false);
       });
 
-      it('should return true if command is registered', () => {
+      it('should return `true` if command is registered', () => {
         reg.add([item]);
         expect(reg.has('cmd:test')).to.be(true);
       });
