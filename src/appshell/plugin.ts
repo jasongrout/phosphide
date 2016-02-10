@@ -163,34 +163,26 @@ class AppShell extends Widget implements IAppShell {
 
     registry.add([
       {
-        id: 'appshell-actions:activateLeft',
-        handler: (args: { id: string }) => { this._activate('left', args.id); }
+        id: 'appshell:activate-left',
+        handler: (args: any) => { this._leftHandler.activate(args.id); }
       },
       {
-        id: 'appshell-actions:activateRight',
-        handler: (args: { id: string }) => { this._activate('right', args.id); }
+        id: 'appshell:activate-right',
+        handler: (args: any) => { this._rightHandler.activate(args.id); }
       },
       {
-        id: 'appshell-actions:collapseLeft',
-        handler: () => {
-          this._leftHandler.sideBar.currentTitle = null;
-          delete document.body.dataset['leftArea'];
-        }
+        id: 'appshell:collapse-left',
+        handler: () => { this._leftHandler.sideBar.currentTitle = null; }
       },
       {
-        id: 'appshell-actions:collapseRight',
-        handler: () => {
-          this._rightHandler.sideBar.currentTitle = null;
-          delete document.body.dataset['rightArea'];
-        }
+        id: 'appshell:collapse-right',
+        handler: () => { this._rightHandler.sideBar.currentTitle = null; }
       },
       {
-        id: 'appshell-actions:collapseBoth',
+        id: 'appshell:collapse-both',
         handler: () => {
           this._leftHandler.sideBar.currentTitle = null;
           this._rightHandler.sideBar.currentTitle = null;
-          delete document.body.dataset['leftArea'];
-          delete document.body.dataset['rightArea'];
         }
       }
     ]);
@@ -241,37 +233,6 @@ class AppShell extends Widget implements IAppShell {
       return;
     }
     this._dockPanel.insertTabAfter(widget);
-  }
-
-  /**
-   * Select a widget that resides in either of the side panels.
-   *
-   * @param side - The `'left'` or `'right'` panel.
-   *
-   * @param id - The widget's unique ID.
-   */
-  private _activate(side: string, id: string): void {
-    let edgeHandlers = [this._leftHandler, this._rightHandler];
-    let handler: SideBarHandler;
-    switch (side) {
-    case 'left':
-      handler = this._leftHandler;
-      break;
-    case 'right':
-      handler = this._rightHandler;
-      break;
-    default:
-      throw new Error(`side: ${side} is invalid`);
-    }
-    for (let i = 0, n = handler.stackedPanel.childCount(); i < n; ++i) {
-      let widget = handler.stackedPanel.childAt(i);
-      if (widget.id === id) {
-        document.body.dataset[`${side}Area`] = id;
-        handler.sideBar.currentTitle = widget.title;
-        handler.stackedPanel.setHidden(false);
-        return;
-      }
-    }
   }
 
   private _topPanel: Panel;
@@ -338,6 +299,23 @@ class SideBarHandler {
   }
 
   /**
+   * Activate a widget residing in the side bar by ID.
+   *
+   * @param id - The widget's unique ID.
+   */
+  activate(id: string):void {
+    for (let i = 0, n = this._stackedPanel.childCount(); i < n; ++i) {
+      let widget = this._stackedPanel.childAt(i);
+      if (widget.id === id) {
+        this._sideBar.currentTitle = widget.title;
+        this._stackedPanel.setHidden(false);
+        return;
+      }
+    }
+  }
+
+
+  /**
    * Add a widget and its title to the stacked panel and side bar.
    *
    * If the widget is already added, it will be moved.
@@ -380,14 +358,7 @@ class SideBarHandler {
    */
   private _refreshVisibility(): void {
     this._sideBar.setHidden(this._sideBar.titleCount() === 0);
-    if (this._sideBar.currentTitle === null) {
-      delete document.body.dataset[`${this._side}Area`];
-      this._stackedPanel.setHidden(true);
-    } else {
-      let id = this._findTitleWidget(this._sideBar.currentTitle).id;
-      document.body.dataset[`${this._side}Area`] = id;
-      this._stackedPanel.setHidden(false);
-    }
+    this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
   }
 
   /**
@@ -397,7 +368,12 @@ class SideBarHandler {
     let oldWidget = this._findTitleWidget(args.oldValue);
     let newWidget = this._findTitleWidget(args.newValue);
     if (oldWidget) oldWidget.hide();
-    if (newWidget) newWidget.show();
+    if (newWidget) {
+      newWidget.show();
+      document.body.dataset[`${this._side}Area`] = newWidget.id;
+    } else {
+      delete document.body.dataset[`${this._side}Area`];
+    }
     this._refreshVisibility();
   }
 
