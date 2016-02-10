@@ -172,7 +172,7 @@ class ShortcutManager {
 
   private _handlerForKeymap(id: string): (args: any) => boolean {
     return (args: any) => {
-      this._commandRegistry.get(id)(args);
+      this._commandRegistry.execute(id, args);
       return true;
     };
   }

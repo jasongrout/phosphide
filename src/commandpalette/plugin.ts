@@ -88,13 +88,15 @@ class CommandPaletteManager implements ICommandPalette {
    */
   add(items: { id: string, args: any, caption: string, category: string, text: string }[]): IDisposable {
     let modelItems = items.map(item => {
-      let handler = this._commandRegistry.get(item.id);
-      if (!handler) return null;
+      let commandExists = this._commandRegistry.has(item.id);
+      if (!commandExists) return null;
       let options: IStandardPaletteItemOptions = {
-        handler: handler,
+        handler: (args: any) => {
+          this._commandRegistry.execute(item.id, args);
+        },
         args: item.args,
         text: item.text,
-        shortcut: "",
+        shortcut: '',
         category: item.category,
         caption: item.caption };
       let shortcut = this._shortcutManager.getSequences(item.id, item.args);

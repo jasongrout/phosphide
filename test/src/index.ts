@@ -105,15 +105,15 @@ describe('phosphide', () => {
 
     });
 
-    describe('#get()', () => {
+    describe('#has()', () => {
 
-      it('should return `undefined` if command is not registered', () => {
-        expect(reg.get("cmd:test")).to.be(undefined);
+      it('should return `false` if command is not registered', () => {
+        expect(reg.has('cmd:test')).to.be(false);
       });
 
-      it('should correctly return a registered command', () => {
+      it('should return `true` if command is registered', () => {
         reg.add([item]);
-        expect(reg.get("cmd:test")).to.be(cmd);
+        expect(reg.has('cmd:test')).to.be(true);
       });
 
     });
