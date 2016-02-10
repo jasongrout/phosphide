@@ -187,12 +187,20 @@ class AppShell extends Widget implements IAppShell {
    */
   addToTopArea(widget: Widget, options: ISideAreaOptions = {}): void {
     // TODO
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
   }
 
   /**
    * Add a widget to the left content area.
    */
   addToLeftArea(widget: Widget, options: ISideAreaOptions = {}): void {
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
     let rank = 'rank' in options ? options.rank : 100;
     this._leftHandler.addWidget(widget, rank);
   }
@@ -201,6 +209,10 @@ class AppShell extends Widget implements IAppShell {
    * Add a widget to the right content area.
    */
   addToRightArea(widget: Widget, options: ISideAreaOptions = {}): void {
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
     let rank = 'rank' in options ? options.rank : 100;
     this._rightHandler.addWidget(widget, rank);
   }
@@ -210,6 +222,10 @@ class AppShell extends Widget implements IAppShell {
    */
   addToMainArea(widget: Widget, options: IMainAreaOptions = {}): void {
     // TODO
+    if (!widget.id) {
+      console.error('widgets added to app shell must have unique id property');
+      return;
+    }
     this._dockPanel.insertTabAfter(widget);
   }
 
