@@ -274,13 +274,13 @@ describe('phosphide', () => {
     let shell: IAppShell = null;
 
     beforeEach(() => {
-      shell = new AppShell();
+      shell = new AppShell(new CommandRegistry());
     });
 
     describe('#create()', () => {
 
       it('should return a new instance', () => {
-        expect(AppShell.create()).to.not.be(shell);
+        expect(AppShell.create(new CommandRegistry())).to.not.be(shell);
       });
 
     });
