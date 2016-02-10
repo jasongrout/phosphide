@@ -82,23 +82,57 @@ class CommandRegistry implements ICommandRegistry {
   }
 
   /**
+   * A signal emitted when a command is executed.
+   */
+  get commandExecuted(): ISignal<ICommandRegistry, { id: string, args: any }> {
+    return CommandRegistryPrivate.commandExecutedSignal.bind(this);
+  }
+
+  /**
+   * Execute a registered command.
+   *
+   * @param id - The id of the command of interest.
+   *
+   * @param args - The arguments to pass to the command, if necessary.
+   *
+   * #### Notes
+   * If the command id is not registered, a warning will be logged.
+   *
+   * If the handler throws an exception, it will be caught and logged.
+   */
+  execute(id: string, args?: any): void {
+    let command = this._map[id];
+    if (!command) {
+      console.warn(`command ${id} does not exist in command registry`);
+      return;
+    }
+    try {
+      command(args);
+      this.commandExecuted.emit({ id, args });
+    } catch (error) {
+      console.warn(`execution of command ${id} failed with args: `, args);
+    }
+
+  }
+
+  /**
+   * Test whether the registry contains a command.
+   *
+   * @param id - The id of the command of interest.
+   *
+   * @returns `true` if the command is registered, `false` otherwise.
+   */
+  has(id: string): boolean {
+    return !!this._map[id];
+  }
+
+  /**
    * List the ids of the currently registered commands.
    *
    * @returns A new array of the registered command ids.
    */
   list(): string[] {
     return Object.keys(this._map);
-  }
-
-  /**
-   * Lookup a command with a specific id.
-   *
-   * @param id - The id of the command of interest.
-   *
-   * @returns The command with the specified id, or `undefined`.
-   */
-  get(id: string): (args: any) => void {
-    return this._map[id];
   }
 
   /**
@@ -160,4 +194,9 @@ namespace CommandRegistryPrivate {
    */
   export
   const commandsRemovedSignal = new Signal<CommandRegistry, string[]>();
+  /**
+   * A signal emitted when a command is added to the registry.
+   */
+  export
+  const commandExecutedSignal = new Signal<CommandRegistry, { id: string, args: any }>();
 }
