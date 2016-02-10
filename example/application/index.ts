@@ -36,6 +36,7 @@ class Application {
 
   constructor(shell: IAppShell, palette: ICommandPalette, shortcuts: IShortcutManager) {
     palette.widget.title.text = 'Commands';
+    palette.widget.id = 'command-palette';
     shell.addToLeftArea(palette.widget, { rank: 40 });
     shell.attach(document.body);
     window.addEventListener('resize', () => { shell.update(); });

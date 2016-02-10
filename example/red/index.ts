@@ -51,6 +51,7 @@ class RedHandler {
 
   run(): void {
     let widget = new Widget();
+    widget.id = 'red';
     widget.addClass('red-content');
     widget.title.text = 'Red';
     this._shell.addToRightArea(widget, { rank: 30 });
