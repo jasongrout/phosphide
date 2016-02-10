@@ -107,8 +107,8 @@ class AppShell extends Widget implements IAppShell {
     let hboxPanel = new BoxPanel();
     let dockPanel = new DockPanel();
     let hsplitPanel = new SplitPanel();
-    let leftHandler = new SideBarHandler();
-    let rightHandler = new SideBarHandler();
+    let leftHandler = new SideBarHandler('left');
+    let rightHandler = new SideBarHandler('right');
     let rootLayout = new BoxLayout();
 
     this._topPanel = topPanel;
@@ -163,22 +163,34 @@ class AppShell extends Widget implements IAppShell {
 
     registry.add([
       {
-        id: 'appshell-actions:activate',
-        handler: (args: { id: string }) => { this._activate(args.id); }
+        id: 'appshell-actions:activateLeft',
+        handler: (args: { id: string }) => { this._activate('left', args.id); }
+      },
+      {
+        id: 'appshell-actions:activateRight',
+        handler: (args: { id: string }) => { this._activate('right', args.id); }
       },
       {
         id: 'appshell-actions:collapseLeft',
-        handler: () => { this._leftHandler.sideBar.currentTitle = null; }
+        handler: () => {
+          this._leftHandler.sideBar.currentTitle = null;
+          delete document.body.dataset['leftArea'];
+        }
       },
       {
         id: 'appshell-actions:collapseRight',
-        handler: () => { this._rightHandler.sideBar.currentTitle = null; }
+        handler: () => {
+          this._rightHandler.sideBar.currentTitle = null;
+          delete document.body.dataset['rightArea'];
+        }
       },
       {
         id: 'appshell-actions:collapseBoth',
         handler: () => {
           this._leftHandler.sideBar.currentTitle = null;
           this._rightHandler.sideBar.currentTitle = null;
+          delete document.body.dataset['leftArea'];
+          delete document.body.dataset['rightArea'];
         }
       }
     ]);
@@ -204,6 +216,7 @@ class AppShell extends Widget implements IAppShell {
       return;
     }
     let rank = 'rank' in options ? options.rank : 100;
+    document.body.dataset['leftArea'] = widget.id;
     this._leftHandler.addWidget(widget, rank);
   }
 
@@ -234,18 +247,30 @@ class AppShell extends Widget implements IAppShell {
   /**
    * Select a widget that resides in either of the side panels.
    *
+   * @param side - The `'left'` or `'right'` panel.
+   *
    * @param id - The widget's unique ID.
    */
-  private _activate(id: string): void {
+  private _activate(side: string, id: string): void {
     let edgeHandlers = [this._leftHandler, this._rightHandler];
-    for (let handler of edgeHandlers) {
-      for (let i = 0, n = handler.stackedPanel.childCount(); i < n; ++i) {
-        let widget = handler.stackedPanel.childAt(i);
-        if (widget.id === id) {
-          handler.sideBar.currentTitle = widget.title;
-          handler.stackedPanel.setHidden(false);
-          return;
-        }
+    let handler: SideBarHandler;
+    switch (side) {
+    case 'left':
+      handler = this._leftHandler;
+      break;
+    case 'right':
+      handler = this._rightHandler;
+      break;
+    default:
+      throw new Error(`side: ${side} is invalid`);
+    }
+    for (let i = 0, n = handler.stackedPanel.childCount(); i < n; ++i) {
+      let widget = handler.stackedPanel.childAt(i);
+      if (widget.id === id) {
+        document.body.dataset[`${side}Area`] = id;
+        handler.sideBar.currentTitle = widget.title;
+        handler.stackedPanel.setHidden(false);
+        return;
       }
     }
   }
@@ -289,7 +314,8 @@ class SideBarHandler {
   /**
    * Construct a new side bar handler.
    */
-  constructor() {
+  constructor(side: string) {
+    this._side = side;
     this._sideBar = new SideBar();
     this._stackedPanel = new StackedPanel();
     this._sideBar.hide();
@@ -355,7 +381,14 @@ class SideBarHandler {
    */
   private _refreshVisibility(): void {
     this._sideBar.setHidden(this._sideBar.titleCount() === 0);
-    this._stackedPanel.setHidden(this._sideBar.currentTitle === null);
+    if (this._sideBar.currentTitle === null) {
+      delete document.body.dataset[`${this._side}Area`];
+      this._stackedPanel.setHidden(true);
+    } else {
+      let id = this._findTitleWidget(this._sideBar.currentTitle).id;
+      document.body.dataset[`${this._side}Area`] = id;
+      this._stackedPanel.setHidden(false);
+    }
   }
 
   /**
@@ -378,6 +411,7 @@ class SideBarHandler {
     this._refreshVisibility();
   }
 
+  private _side: string;
   private _sideBar: SideBar;
   private _stackedPanel: StackedPanel;
   private _items: IRankItem[] = [];
