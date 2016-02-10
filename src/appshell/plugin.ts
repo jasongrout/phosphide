@@ -167,16 +167,18 @@ class AppShell extends Widget implements IAppShell {
         handler: (args: { id: string }) => { this._activate(args.id); }
       },
       {
-        id: 'appshell-actions:collapse',
-        handler: (args: { side: string }) => {
-          switch (args.side) {
-          case 'left':
-            this._leftHandler.sideBar.currentTitle = null;
-            break;
-          case 'right':
-            this._rightHandler.sideBar.currentTitle = null;
-            break;
-          }
+        id: 'appshell-actions:collapseLeft',
+        handler: () => { this._leftHandler.sideBar.currentTitle = null; }
+      },
+      {
+        id: 'appshell-actions:collapseRight',
+        handler: () => { this._rightHandler.sideBar.currentTitle = null; }
+      },
+      {
+        id: 'appshell-actions:collapseBoth',
+        handler: () => {
+          this._leftHandler.sideBar.currentTitle = null;
+          this._rightHandler.sideBar.currentTitle = null;
         }
       }
     ]);
