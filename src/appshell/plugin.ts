@@ -216,7 +216,6 @@ class AppShell extends Widget implements IAppShell {
       return;
     }
     let rank = 'rank' in options ? options.rank : 100;
-    document.body.dataset['leftArea'] = widget.id;
     this._leftHandler.addWidget(widget, rank);
   }
 
