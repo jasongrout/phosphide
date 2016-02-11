@@ -62,7 +62,7 @@ function register(container: Container): void {
 
 class CommandPaletteManager implements ICommandPalette {
   /**
-   * A signal emitted when a shortcut is added to the manager.
+   * A signal emitted when a command is triggered by the palette.
    */
   get commandTriggered(): ISignal<CommandPaletteManager, void> {
     return CommandPaletteManagerPrivate.commandTriggeredSignal.bind(this);
