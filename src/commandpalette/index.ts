@@ -37,6 +37,9 @@ export
 interface ICommandPalette {
   /**
    * A signal emitted when a command is triggered by the palette.
+   *
+   * #### Note
+   * The order in which the command executes and the signal emits is undefined.
    */
   commandTriggered: ISignal<ICommandPalette, { id: string, args: any }>;
   /**
