@@ -64,7 +64,7 @@ class CommandPaletteManager implements ICommandPalette {
   /**
    * A signal emitted when a command is triggered by the palette.
    */
-  get commandTriggered(): ISignal<CommandPaletteManager, void> {
+  get commandTriggered(): ISignal<CommandPaletteManager, { id: string, args: any }> {
     return CommandPaletteManagerPrivate.commandTriggeredSignal.bind(this);
   }
   /**
@@ -133,7 +133,7 @@ class CommandPaletteManager implements ICommandPalette {
   }
 
   private _commandHandler = (command: any) => {
-    this.commandTriggered.emit(void 0);
+    this.commandTriggered.emit(command);
     this._commandRegistry.execute(command.id, command.args);
   };
   private _paletteModel: StandardPaletteModel;
@@ -151,5 +151,5 @@ namespace CommandPaletteManagerPrivate {
    * A signal emitted when a command is triggered by the palette.
    */
   export
-  const commandTriggeredSignal = new Signal<CommandPaletteManager, void>();
+  const commandTriggeredSignal = new Signal<CommandPaletteManager, { id: string, args: any }>();
 }

@@ -38,7 +38,7 @@ interface ICommandPalette {
   /**
    * A signal emitted when a command is triggered by the palette.
    */
-  commandTriggered: ISignal<ICommandPalette, void>;
+  commandTriggered: ISignal<ICommandPalette, { id: string, args: any }>;
   /**
    * Add new command items to the palette.
    *
