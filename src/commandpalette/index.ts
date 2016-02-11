@@ -42,6 +42,12 @@ interface ICommandPalette {
    * The order in which the command executes and the signal emits is undefined.
    */
   commandTriggered: ISignal<ICommandPalette, { id: string, args: any }>;
+
+  /**
+   * The underlying palette widget.
+   */
+  widget: Widget;
+
   /**
    * Add new command items to the palette.
    *
@@ -50,10 +56,6 @@ interface ICommandPalette {
    * @returns An `IDisposable` to remove the added commands from the palette
    */
   add(items: { id: string, args: any, caption: string, category: string, text: string }[]): IDisposable;
-  /**
-   * The underlying palette widget.
-   */
-  widget: Widget;
 }
 
 
