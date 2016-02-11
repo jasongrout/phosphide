@@ -16,15 +16,38 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  ISignal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
 
 /**
  * The public interface of the command palette.
+ *
+ * #### Notes
+ * In addition to the public API, an `ICommandPalette` instance also needs to
+ *   register the following commands:
+ * 1. `'command-palette:focus-input'`, which takes no arguments and focuses the
+ *   search bar.
  */
 export
 interface ICommandPalette {
+  /**
+   * A signal emitted when a command is triggered by the palette.
+   *
+   * #### Note
+   * The order in which the command executes and the signal emits is undefined.
+   */
+  commandTriggered: ISignal<ICommandPalette, { id: string, args: any }>;
+
+  /**
+   * The underlying palette widget.
+   */
+  widget: Widget;
+
   /**
    * Add new command items to the palette.
    *
@@ -33,10 +56,6 @@ interface ICommandPalette {
    * @returns An `IDisposable` to remove the added commands from the palette
    */
   add(items: { id: string, args: any, caption: string, category: string, text: string }[]): IDisposable;
-  /**
-   * The underlying palette widget.
-   */
-  widget: Widget;
 }
 
 
