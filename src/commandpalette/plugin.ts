@@ -20,6 +20,10 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  Signal, ISignal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
@@ -58,6 +62,12 @@ function register(container: Container): void {
 
 class CommandPaletteManager implements ICommandPalette {
   /**
+   * A signal emitted when a shortcut is added to the manager.
+   */
+  get commandTriggered(): ISignal<CommandPaletteManager, void> {
+    return CommandPaletteManagerPrivate.commandTriggeredSignal.bind(this);
+  }
+  /**
    * The underlying palette widget.
    */
   get widget(): Widget {
@@ -77,6 +87,16 @@ class CommandPaletteManager implements ICommandPalette {
     this._commandPalette.model = this._paletteModel;
     this._commandRegistry = commandRegistry;
     this._shortcutManager = shortcutManager;
+
+    commandRegistry.add([
+      {
+        id: 'command-palette:focus-input',
+        handler: () => {
+          this._commandPalette.inputNode.focus();
+          this._commandPalette.inputNode.select();
+        }
+      }
+    ]);
   }
 
   /**
@@ -91,14 +111,13 @@ class CommandPaletteManager implements ICommandPalette {
       let commandExists = this._commandRegistry.has(item.id);
       if (!commandExists) return null;
       let options: IStandardPaletteItemOptions = {
-        handler: (args: any) => {
-          this._commandRegistry.execute(item.id, args);
-        },
-        args: item.args,
+        handler: this._commandHandler,
+        args: { id: item.id, args: item.args },
         text: item.text,
         shortcut: '',
         category: item.category,
-        caption: item.caption };
+        caption: item.caption
+      };
       let shortcut = this._shortcutManager.getSequences(item.id, item.args);
       if (shortcut && shortcut.length > 0) {
         options.shortcut = shortcut[0]
@@ -113,8 +132,24 @@ class CommandPaletteManager implements ICommandPalette {
     });
   }
 
+  private _commandHandler = (command: any) => {
+    this.commandTriggered.emit(void 0);
+    this._commandRegistry.execute(command.id, command.args);
+  };
   private _paletteModel: StandardPaletteModel;
   private _commandPalette: CommandPalette;
   private _commandRegistry: ICommandRegistry;
   private _shortcutManager: IShortcutManager;
+}
+
+
+/**
+ * The namespace for the `CommandPaletteManager` class private data.
+ */
+namespace CommandPaletteManagerPrivate {
+  /**
+   * A signal emitted when a command is triggered by the palette.
+   */
+  export
+  const commandTriggeredSignal = new Signal<CommandPaletteManager, void>();
 }

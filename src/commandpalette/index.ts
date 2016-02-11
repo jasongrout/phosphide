@@ -16,15 +16,29 @@ import {
 } from 'phosphor-disposable';
 
 import {
+  ISignal
+} from 'phosphor-signaling';
+
+import {
   Widget
 } from 'phosphor-widget';
 
 
 /**
  * The public interface of the command palette.
+ *
+ * #### Notes
+ * In addition to the public API, an `ICommandPalette` instance also needs to
+ *   register the following commands:
+ * 1. `'command-palette:focus-input'`, which takes no arguments and focuses the
+ *   search bar.
  */
 export
 interface ICommandPalette {
+  /**
+   * A signal emitted when a command is triggered by the palette.
+   */
+  commandTriggered: ISignal<ICommandPalette, void>;
   /**
    * Add new command items to the palette.
    *
