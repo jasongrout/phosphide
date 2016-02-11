@@ -62,19 +62,6 @@ function register(container: Container): void {
 
 class CommandPaletteManager implements ICommandPalette {
   /**
-   * A signal emitted when a command is triggered by the palette.
-   */
-  get commandTriggered(): ISignal<CommandPaletteManager, { id: string, args: any }> {
-    return CommandPaletteManagerPrivate.commandTriggeredSignal.bind(this);
-  }
-  /**
-   * The underlying palette widget.
-   */
-  get widget(): Widget {
-    return this._commandPalette;
-  }
-
-  /**
    * Create a new `CommandPaletteManager`
    *
    * @param commandRegistry - An instance of a command registry.
@@ -97,6 +84,20 @@ class CommandPaletteManager implements ICommandPalette {
         }
       }
     ]);
+  }
+
+  /**
+   * A signal emitted when a command is triggered by the palette.
+   */
+  get commandTriggered(): ISignal<CommandPaletteManager, { id: string, args: any }> {
+    return CommandPaletteManagerPrivate.commandTriggeredSignal.bind(this);
+  }
+
+  /**
+   * The underlying palette widget.
+   */
+  get widget(): Widget {
+    return this._commandPalette;
   }
 
   /**
@@ -132,10 +133,11 @@ class CommandPaletteManager implements ICommandPalette {
     });
   }
 
-  private _commandHandler = (command: any) => {
-    this.commandTriggered.emit(command);
-    this._commandRegistry.execute(command.id, command.args);
+  private _commandHandler = (commandSpec: any) => {
+    this.commandTriggered.emit(commandSpec);
+    this._commandRegistry.execute(commandSpec.id, commandSpec.args);
   };
+
   private _paletteModel: StandardPaletteModel;
   private _commandPalette: CommandPalette;
   private _commandRegistry: ICommandRegistry;
