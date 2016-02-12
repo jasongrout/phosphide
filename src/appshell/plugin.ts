@@ -178,7 +178,7 @@ class AppShell extends Widget implements IAppShell {
        * #### Notes
        * If `args.id` is provided and a widget with that ID does not exist,
        * this is a no-op.
-       * If the a widget with that ID exists but is not currently active,
+       * If a widget with that ID exists but is not currently active,
        * this is a no-op.
        * If no ID is provided, the side bar closes (if open).
        */
@@ -201,7 +201,7 @@ class AppShell extends Widget implements IAppShell {
        * #### Notes
        * If `args.id` is provided and a widget with that ID does not exist,
        * this is a no-op.
-       * If the a widget with that ID exists but is not currently active,
+       * If a widget with that ID exists but is not currently active,
        * this is a no-op.
        * If no ID is provided, the side bar closes (if open).
        */
