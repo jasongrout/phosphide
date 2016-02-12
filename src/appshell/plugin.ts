@@ -170,13 +170,51 @@ class AppShell extends Widget implements IAppShell {
         id: 'appshell:activate-right',
         handler: (args: any) => { this._rightHandler.activate(args.id); }
       },
+      /**
+       * This command collapses the left side bar.
+       *
+       * @param args.id - An optional widget ID.
+       *
+       * #### Notes
+       * If `args.id` is provided and a widget with that ID does not exist,
+       * this is a no-op.
+       * If a widget with that ID exists but is not currently active,
+       * this is a no-op.
+       * If no ID is provided, the side bar closes (if open).
+       */
       {
         id: 'appshell:collapse-left',
-        handler: () => { this._leftHandler.sideBar.currentTitle = null; }
+        handler: (args: any) => {
+          let id = args && args.id;
+          if (id) {
+            this._leftHandler.deactivate(id);
+          } else {
+            this._leftHandler.sideBar.currentTitle = null;
+          }
+        }
       },
+      /**
+       * This command collapses the right side bar.
+       *
+       * @param args.id - An optional widget ID.
+       *
+       * #### Notes
+       * If `args.id` is provided and a widget with that ID does not exist,
+       * this is a no-op.
+       * If a widget with that ID exists but is not currently active,
+       * this is a no-op.
+       * If no ID is provided, the side bar closes (if open).
+       */
       {
         id: 'appshell:collapse-right',
-        handler: () => { this._rightHandler.sideBar.currentTitle = null; }
+        handler: (args: any) => {
+          let id = args && args.id;
+          if (id) {
+            this._rightHandler.deactivate(id);
+          } else {
+            this._rightHandler.sideBar.currentTitle = null;
+          }
+        }
       },
       {
         id: 'appshell:collapse-both',
@@ -328,6 +366,27 @@ class SideBarHandler {
     this._stackedPanel.insertChild(index, widget);
     this._sideBar.insertTitle(index, widget.title);
     this._refreshVisibility();
+  }
+
+  /**
+   * Deactivate a widget residing in the side bar by ID.
+   *
+   * @param id - The widget's unique ID.
+   *
+   * #### Notes
+   * This is a no-op if the ID does not exist in the side bar. If the ID exists
+   * but is not currently active, this is a no-op.
+   */
+  deactivate(id: string):void {
+    for (let i = 0, n = this._stackedPanel.childCount(); i < n; ++i) {
+      let widget = this._stackedPanel.childAt(i);
+      if (widget.id === id) {
+        if (widget.title === this._sideBar.currentTitle) {
+          this._sideBar.currentTitle = null;
+        }
+        return;
+      }
+    }
   }
 
   /**
