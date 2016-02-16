@@ -217,12 +217,12 @@ class CommandPaletteManager implements ICommandPalette {
       };
       return options;
     }).filter(item => !!item);
-    if (!modelItems.length) {
-      delete this._addedGroups[group];
-      return;
-    }
     this._paletteModel.removeItems(items);
-    this._addedGroups[group] = this._paletteModel.addItems(modelItems);
+    if (modelItems.length) {
+      this._addedGroups[group] = this._paletteModel.addItems(modelItems);
+    } else {
+      delete this._addedGroups[group];
+    }
   }
 
   private _commandHandler = (commandSpec: any) => {
