@@ -119,10 +119,10 @@ class BlueHandler {
 
     // Add commands to registry.
     this._registry.add(registryItems);
-    // Add shortcuts to shortcut manager.
-    this._shortcuts.add(shortcutItems);
     // Add commands to palette.
     this._palette.add(paletteItems);
+    // Add shortcuts to shortcut manager.
+    this._shortcuts.add(shortcutItems);
   }
 
   private _commandDisposable: IDisposable;

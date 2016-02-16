@@ -12,7 +12,8 @@ import {
 } from 'phosphor-di';
 
 import {
-  CommandPalette, IStandardPaletteItemOptions, StandardPaletteModel
+  CommandPalette, StandardPaletteModel,
+  IStandardPaletteItemOptions, StandardPaletteItem
 } from 'phosphor-commandpalette';
 
 import {
@@ -36,8 +37,13 @@ import {
 } from '../commandregistry/index';
 
 import {
-  IShortcutManager
+  IShortcutManager, IShortcutItem
 } from '../shortcutmanager/index';
+
+/**
+ * The ID seed for added groups of palette items.
+ */
+var id = 0;
 
 
 /**
@@ -74,6 +80,9 @@ class CommandPaletteManager implements ICommandPalette {
     this._commandPalette.model = this._paletteModel;
     this._commandRegistry = commandRegistry;
     this._shortcutManager = shortcutManager;
+
+    shortcutManager.shortcutsAdded.connect(this._onShortcutsChanged, this);
+    shortcutManager.shortcutsRemoved.connect(this._onShortcutsChanged, this);
 
     commandRegistry.add([
       {
@@ -130,10 +139,67 @@ class CommandPaletteManager implements ICommandPalette {
       return options;
     }).filter(item => !!item);
     if (!modelItems.length) return;
-    let paletteItems = this._paletteModel.addItems(modelItems);
+    let group = `palette-items-${++id}`;
+    this._addedGroups[group] = this._paletteModel.addItems(modelItems);
     return new DisposableDelegate(() => {
-      this._paletteModel.removeItems(paletteItems);
+      this._paletteModel.removeItems(this._addedGroups[group]);
+      delete this._addedGroups[group];
     });
+  }
+
+  private _onShortcutsChanged(sender: IShortcutManager, items: IShortcutItem[]): void {
+    let modifiedGroups: { [group: string]: void } = Object.create(null);
+    let changeMap = items.reduce((acc, item) => {
+      if (acc[item.command]) {
+        acc[item.command].push(item.args);
+      } else {
+        acc[item.command] = [item.args];
+      }
+      return acc;
+    }, {} as { [command: string]: any[] });
+    let flatGroups = Object.keys(this._addedGroups).reduce((acc, group) => {
+      return acc.concat(this._addedGroups[group].map(item => {
+        return { group, item };
+      }));
+    }, [] as { group: string, item: StandardPaletteItem }[]);
+    for (let groupItem of flatGroups) {
+      let command = (groupItem.item.args as { id: string, args: any }).id;
+      if (!(command in changeMap)) continue;
+      let args = (groupItem.item.args as { id: string, args: any }).args;
+      if (changeMap[command].indexOf(args) === -1) continue;
+      modifiedGroups[groupItem.group] = null;
+    }
+    Object.keys(modifiedGroups).forEach(group => { this._updateGroup(group); });
+  }
+
+  private _updateGroup(group: string): void {
+    let items = this._addedGroups[group];
+    let modelItems = items.map(item => {
+      let command = item.args.id;
+      let args = item.args.args;
+      let commandExists = this._commandRegistry.has(command);
+      if (!commandExists) return null;
+      let options: IStandardPaletteItemOptions = {
+        handler: this._commandHandler,
+        args: { id: command, args: args },
+        text: item.text,
+        shortcut: '',
+        category: item.category,
+        caption: item.caption
+      };
+      let shortcut = this._shortcutManager.getSequences(command, args);
+      if (shortcut && shortcut.length > 0) {
+        options.shortcut = shortcut[0]
+          .map(s => s.replace(/\s/g, '-')).join(' ');
+      }
+      return options;
+    }).filter(item => !!item);
+    if (!modelItems.length) {
+      delete this._addedGroups[group];
+      return;
+    }
+    this._paletteModel.removeItems(items);
+    this._addedGroups[group] = this._paletteModel.addItems(modelItems);
   }
 
   private _commandHandler = (commandSpec: any) => {
@@ -141,9 +207,12 @@ class CommandPaletteManager implements ICommandPalette {
     this._commandRegistry.execute(commandSpec.id, commandSpec.args);
   };
 
-  private _paletteModel: StandardPaletteModel;
+  private _addedGroups: {
+    [id: string]: StandardPaletteItem[];
+  } = Object.create(null);
   private _commandPalette: CommandPalette;
   private _commandRegistry: ICommandRegistry;
+  private _paletteModel: StandardPaletteModel;
   private _shortcutManager: IShortcutManager;
 }
 
