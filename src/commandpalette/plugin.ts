@@ -79,9 +79,8 @@ function getShortcut(shortcutManager: IShortcutManager, command: string, args: a
   let shortcut = shortcutManager.getSequences(command, args);
   if (shortcut && shortcut.length > 0) {
     return shortcut[0].map(s => s.replace(/\s/g, '-')).join(' ');
-  } else {
-    return '';
   }
+  return '';
 }
 
 
@@ -140,7 +139,7 @@ class CommandPaletteManager implements ICommandPalette {
    */
   add(items: { id: string, args: any, caption: string, category: string, text: string }[]): IDisposable {
     let modelOptions = items.map(item => {
-      if (this._commandRegistry.has(item.id)) {
+      if (!this._commandRegistry.has(item.id)) {
         return null;
       }
       return {
@@ -203,7 +202,13 @@ class CommandPaletteManager implements ICommandPalette {
       if (!(command in changes)) continue;
       if (changes[command].indexOf(args) === -1) continue;
 
-      this._updateCommand(addition.item, i);
+      let removed = this._updateCommand(addition.item, i);
+
+      // If the command was removed, change loop bounds.
+      if (removed) {
+        n -= 1;
+        i -= 1;
+      }
     }
   }
 
@@ -213,8 +218,10 @@ class CommandPaletteManager implements ICommandPalette {
    * @param item - The palette item to update.
    *
    * @param index - The local index in `_additions` where it is stored.
+   *
+   * @returns `true` if the item was removed.
    */
-  private _updateCommand(item: StandardPaletteItem, index: number): void {
+  private _updateCommand(item: StandardPaletteItem, index: number): boolean {
     let command = item.args.id;
     let args = item.args.args;
 
