@@ -156,10 +156,10 @@ class CommandPaletteManager implements ICommandPalette {
     let group = `palette-items-${++id}`;
     this._addedGroups[group] = this._paletteModel.addItems(modelItems);
     return new DisposableDelegate(() => {
-      if (this._addedGroups[group] && this._addedGroups[group].length) {
+      if (this._addedGroups[group]) {
         this._paletteModel.removeItems(this._addedGroups[group]);
+        delete this._addedGroups[group];
       }
-      delete this._addedGroups[group];
     });
   }
 
