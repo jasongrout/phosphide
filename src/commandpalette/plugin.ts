@@ -228,7 +228,7 @@ class CommandPaletteManager implements ICommandPalette {
     if (!this._commandRegistry.has(command)) {
       this._paletteModel.removeItem(item);
       this._additions.splice(index, 1);
-      return;
+      return true;
     };
 
     let options: IStandardPaletteItemOptions = {
@@ -242,6 +242,7 @@ class CommandPaletteManager implements ICommandPalette {
 
     this._paletteModel.removeItem(item);
     this._additions[index].item = this._paletteModel.addItem(options);
+    return false;
   }
 
   private _commandHandler = (commandSpec: any) => {
