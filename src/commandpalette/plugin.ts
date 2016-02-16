@@ -139,25 +139,31 @@ class CommandPaletteManager implements ICommandPalette {
    * @returns An `IDisposable` to remove the added commands from the palette
    */
   add(items: { id: string, args: any, caption: string, category: string, text: string }[]): IDisposable {
-    let modelItems = items.map(item => {
-      let commandExists = this._commandRegistry.has(item.id);
-      if (!commandExists) return null;
-      let options: IStandardPaletteItemOptions = {
+    let modelOptions = items.map(item => {
+      if (this._commandRegistry.has(item.id)) {
+        return null;
+      }
+      return {
         handler: this._commandHandler,
         args: { id: item.id, args: item.args },
         text: item.text,
         shortcut: getShortcut(this._shortcutManager, item.id, item.args),
         category: item.category,
         caption: item.caption
-      };
-      return options;
+      } as IStandardPaletteItemOptions;
     }).filter(item => !!item);
-    if (!modelItems.length) return;
+
+    if (!modelOptions.length) {
+      return;
+    }
+
+    // Keep a local reference to the set of items that are disposed together.
     let disposable = `palette-items-${++id}`;
-    let additions = this._paletteModel.addItems(modelItems).map(item => {
+    let additions = this._paletteModel.addItems(modelOptions).map(item => {
       return { disposable, item };
     });
     Array.prototype.push.apply(this._additions, additions);
+
     return new DisposableDelegate(() => {
       let rest = this._additions.filter(addition => {
         let keep = addition.disposable !== disposable;
