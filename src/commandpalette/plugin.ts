@@ -66,6 +66,25 @@ function register(container: Container): void {
 }
 
 
+/**
+ * Fetch and format a shortcut sequence.
+ *
+ * @param shortcutManager - The shortcut manager that will be queried.
+ *
+ * @param command - The ID of the comand.
+ *
+ * @param args - The arguments passed to the command.
+ */
+function getShortcut(shortcutManager: IShortcutManager, command: string, args: any): string {
+  let shortcut = shortcutManager.getSequences(command, args);
+  if (shortcut && shortcut.length > 0) {
+    return shortcut[0].map(s => s.replace(/\s/g, '-')).join(' ');
+  } else {
+    return '';
+  }
+}
+
+
 class CommandPaletteManager implements ICommandPalette {
   /**
    * Create a new `CommandPaletteManager`
@@ -127,26 +146,30 @@ class CommandPaletteManager implements ICommandPalette {
         handler: this._commandHandler,
         args: { id: item.id, args: item.args },
         text: item.text,
-        shortcut: '',
+        shortcut: getShortcut(this._shortcutManager, item.id, item.args),
         category: item.category,
         caption: item.caption
       };
-      let shortcut = this._shortcutManager.getSequences(item.id, item.args);
-      if (shortcut && shortcut.length > 0) {
-        options.shortcut = shortcut[0]
-          .map(s => s.replace(/\s/g, '-')).join(' ');
-      }
       return options;
     }).filter(item => !!item);
     if (!modelItems.length) return;
     let group = `palette-items-${++id}`;
     this._addedGroups[group] = this._paletteModel.addItems(modelItems);
     return new DisposableDelegate(() => {
-      this._paletteModel.removeItems(this._addedGroups[group]);
+      if (this._addedGroups[group] && this._addedGroups[group].length) {
+        this._paletteModel.removeItems(this._addedGroups[group]);
+      }
       delete this._addedGroups[group];
     });
   }
 
+  /**
+   * A handler for shortcut manager add and remove signals.
+   *
+   * @param sender - The shortcut manager triggering the signal.
+   *
+   * @param items - The list of shortcuts being added or removed.
+   */
   private _onShortcutsChanged(sender: IShortcutManager, items: IShortcutItem[]): void {
     let modifiedGroups: { [group: string]: void } = Object.create(null);
     let changeMap = items.reduce((acc, item) => {
@@ -172,6 +195,11 @@ class CommandPaletteManager implements ICommandPalette {
     Object.keys(modifiedGroups).forEach(group => { this._updateGroup(group); });
   }
 
+  /**
+   * Update a disposable palette item group when it is stale.
+   *
+   * @param group - The internal ID of the disposable palette item group.
+   */
   private _updateGroup(group: string): void {
     let items = this._addedGroups[group];
     let modelItems = items.map(item => {
@@ -183,15 +211,10 @@ class CommandPaletteManager implements ICommandPalette {
         handler: this._commandHandler,
         args: { id: command, args: args },
         text: item.text,
-        shortcut: '',
+        shortcut: getShortcut(this._shortcutManager, command, args),
         category: item.category,
         caption: item.caption
       };
-      let shortcut = this._shortcutManager.getSequences(command, args);
-      if (shortcut && shortcut.length > 0) {
-        options.shortcut = shortcut[0]
-          .map(s => s.replace(/\s/g, '-')).join(' ');
-      }
       return options;
     }).filter(item => !!item);
     if (!modelItems.length) {
@@ -208,7 +231,7 @@ class CommandPaletteManager implements ICommandPalette {
   };
 
   private _addedGroups: {
-    [id: string]: StandardPaletteItem[];
+    [group: string]: StandardPaletteItem[];
   } = Object.create(null);
   private _commandPalette: CommandPalette;
   private _commandRegistry: ICommandRegistry;
