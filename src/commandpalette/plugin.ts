@@ -153,13 +153,21 @@ class CommandPaletteManager implements ICommandPalette {
       return options;
     }).filter(item => !!item);
     if (!modelItems.length) return;
-    let group = `palette-items-${++id}`;
-    this._addedGroups[group] = this._paletteModel.addItems(modelItems);
+    let disposable = `palette-items-${++id}`;
+    let additions = this._paletteModel.addItems(modelItems).map(item => {
+      return { disposable, item };
+    });
+    Array.prototype.push.apply(this._additions, additions);
     return new DisposableDelegate(() => {
-      if (this._addedGroups[group]) {
-        this._paletteModel.removeItems(this._addedGroups[group]);
-        delete this._addedGroups[group];
+      let rest = this._additions.filter(addition => {
+        let keep = addition.disposable !== disposable;
+        if (!keep) this._paletteModel.removeItem(addition.item);
+        return keep;
+      });
+      if (rest.length === this._additions.length) {
+        return;
       }
+      this._additions = rest;
     });
   }
 
@@ -171,8 +179,8 @@ class CommandPaletteManager implements ICommandPalette {
    * @param items - The list of shortcuts being added or removed.
    */
   private _onShortcutsChanged(sender: IShortcutManager, items: IShortcutItem[]): void {
-    let modifiedGroups: { [group: string]: void } = Object.create(null);
-    let changeMap = items.reduce((acc, item) => {
+    // Create a map of items for easily checking whether a command has changed.
+    let changes = items.reduce((acc, item) => {
       if (acc[item.command]) {
         acc[item.command].push(item.args);
       } else {
@@ -180,49 +188,47 @@ class CommandPaletteManager implements ICommandPalette {
       }
       return acc;
     }, {} as { [command: string]: any[] });
-    let flatGroups = Object.keys(this._addedGroups).reduce((acc, group) => {
-      return acc.concat(this._addedGroups[group].map(item => {
-        return { group, item };
-      }));
-    }, [] as { group: string, item: StandardPaletteItem }[]);
-    for (let groupItem of flatGroups) {
-      let command = (groupItem.item.args as { id: string, args: any }).id;
-      if (!(command in changeMap)) continue;
-      let args = (groupItem.item.args as { id: string, args: any }).args;
-      if (changeMap[command].indexOf(args) === -1) continue;
-      modifiedGroups[groupItem.group] = null;
+    // Check if each added item is in the map and needs to be updated.
+    for (let i = 0, n = this._additions.length; i < n; ++i) {
+      let addition = this._additions[i];
+      let command = addition.item.args.id;
+      let args = addition.item.args.args;
+
+      if (!(command in changes)) continue;
+      if (changes[command].indexOf(args) === -1) continue;
+
+      this._updateCommand(addition.item, i);
     }
-    Object.keys(modifiedGroups).forEach(group => { this._updateGroup(group); });
   }
 
   /**
-   * Update a disposable palette item group when it is stale.
+   * Update a palette item in the model and replace its internal cached version.
    *
-   * @param group - The internal ID of the disposable palette item group.
+   * @param item - The palette item to update.
+   *
+   * @param index - The local index in `_additions` where it is stored.
    */
-  private _updateGroup(group: string): void {
-    let items = this._addedGroups[group];
-    let modelItems = items.map(item => {
-      let command = item.args.id;
-      let args = item.args.args;
-      let commandExists = this._commandRegistry.has(command);
-      if (!commandExists) return null;
-      let options: IStandardPaletteItemOptions = {
-        handler: this._commandHandler,
-        args: { id: command, args: args },
-        text: item.text,
-        shortcut: getShortcut(this._shortcutManager, command, args),
-        category: item.category,
-        caption: item.caption
-      };
-      return options;
-    }).filter(item => !!item);
-    this._paletteModel.removeItems(items);
-    if (modelItems.length) {
-      this._addedGroups[group] = this._paletteModel.addItems(modelItems);
-    } else {
-      delete this._addedGroups[group];
-    }
+  private _updateCommand(item: StandardPaletteItem, index: number): void {
+    let command = item.args.id;
+    let args = item.args.args;
+
+    if (!this._commandRegistry.has(command)) {
+      this._paletteModel.removeItem(item);
+      this._additions.splice(index, 1);
+      return;
+    };
+
+    let options: IStandardPaletteItemOptions = {
+      handler: this._commandHandler,
+      args: { id: command, args: args },
+      text: item.text,
+      shortcut: getShortcut(this._shortcutManager, command, args),
+      category: item.category,
+      caption: item.caption
+    };
+
+    this._paletteModel.removeItem(item);
+    this._additions[index].item = this._paletteModel.addItem(options);
   }
 
   private _commandHandler = (commandSpec: any) => {
@@ -230,9 +236,7 @@ class CommandPaletteManager implements ICommandPalette {
     this._commandRegistry.execute(commandSpec.id, commandSpec.args);
   };
 
-  private _addedGroups: {
-    [group: string]: StandardPaletteItem[];
-  } = Object.create(null);
+  private _additions: { disposable: string, item: StandardPaletteItem }[] = [];
   private _commandPalette: CommandPalette;
   private _commandRegistry: ICommandRegistry;
   private _paletteModel: StandardPaletteModel;
