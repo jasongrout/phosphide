@@ -141,8 +141,8 @@ class ServiceRegistry {
    * Services are singletons. The same service instance will be
    * returned each time a given service type is resolved.
    */
-  resolve<T>(kind: IType<T>): Promise<T> {
-    return Private.resolve(kind, this._providersByType, []);
+  resolveService<T>(kind: IType<T>): Promise<T> {
+    return Private.resolveService(kind, this._providersByType, []);
   }
 
   private _providersByID = Private.createProviderIDMap();
@@ -272,7 +272,7 @@ namespace Private {
    *   type, or rejects if the instance cannot be created.
    */
   export
-  function resolve<T>(kind: IType<T>, map: ProviderTypeMap, path: string[]): Promise<T> {
+  function resolveService<T>(kind: IType<T>, map: ProviderTypeMap, path: string[]): Promise<T> {
     // Reject the promise if there is provider for the type.
     let pex = map.get(kind);
     if (!pex) {
@@ -312,7 +312,7 @@ namespace Private {
     path.push(pex.id);
 
     // Generate the resolver promises from the provider dependencies.
-    let reqs = pex.requires.map(kind => resolve(kind, map, path));
+    let reqs = pex.requires.map(kind => resolveService(kind, map, path));
 
     // Pop the provider id from the path stack.
     path.pop();
