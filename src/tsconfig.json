@@ -19,6 +19,7 @@
     "core/applicationshell.ts",
     "core/extensionregistry.ts",
     "core/serviceregistry.ts",
+    "core/sidebar.ts",
     "appshell/index.ts",
     "appshell/plugin.ts",
     "appshell/sidebar.ts",
@@ -27,6 +28,7 @@
     "commandpalette/index.ts",
     "commandpalette/plugin.ts",
     "shortcutmanager/index.ts",
-    "shortcutmanager/plugin.ts"
+    "shortcutmanager/plugin.ts",
+    "services/commandregistry.ts"
   ]
 }
