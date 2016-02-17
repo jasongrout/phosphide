@@ -60,7 +60,7 @@ export interface IShortcutManager {
   /**
    * A signal emitted when shortcuts are removed from the manager.
    */
-  shortcutsRemoved: ISignal<IShortcutManager, IShortcutItem[]>
+  shortcutsRemoved: ISignal<IShortcutManager, IShortcutItem[]>;
 
   /**
    * Add key bindings to the shortcut manager.
