@@ -207,7 +207,7 @@ const commandRegistryProvider = {
 
 
 /**
- * The namespace for the private extension registry functionality.
+ * The namespace for the private command registry functionality.
  */
 namespace Private {
   /**
