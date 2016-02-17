@@ -54,6 +54,14 @@ interface IServiceProvider<T> {
 
 /**
  * A class which manages a registry of service providers.
+ *
+ * #### Notes
+ * A service registry is used by populating it with service providers,
+ * then calling the `resolve` method to get the singleton instance of
+ * a specified service type.
+ *
+ * This class is used internally by the `Application` class. It will
+ * not typically be used directly by user code.
  */
 export
 class ServiceRegistry {
@@ -65,14 +73,14 @@ class ServiceRegistry {
   /**
    * Register a service provider with the registry.
    *
-   * @param provider - The service provider to register.
+   * @param provider - The service provider to add to the registry.
    *
    * #### Notes
    * An error will be thrown if a provider with the same id is already
    * registered, if a provider which provides the identical service is
    * already registered, or if the provider has a circular dependency.
    */
-  register<T>(provider: IServiceProvider<T>): void {
+  registerProvider<T>(provider: IServiceProvider<T>): void {
     // Throw an error if the provider id is already registered.
     let pid = provider.id;
     if (pid in this._providersByID) {
@@ -88,7 +96,7 @@ class ServiceRegistry {
     // Throw an error if the provider has a circular dependency.
     let cycle = Private.findCycle(provider, this._providersByType);
     if (cycle) {
-      throw new Error(`cycle detected: ${cycle.join(' -> ')}`);
+      throw new Error(`provider cycle detected: ${cycle.join(' -> ')}`);
     }
 
     // Create the extended provider and add it to the registry.
@@ -110,12 +118,12 @@ class ServiceRegistry {
   }
 
   /**
-   * Test whether the registry has a provider for a service.
+   * Test whether the registry has a provider for the given service.
    *
    * @param kind - The type of the service of interest.
    *
    * @returns `true` if a service provider is registered for the
-   *   given service type, `false` otherwise.
+   *   specified service type, `false` otherwise.
    */
   hasProviderFor<T>(kind: IType<T>): boolean {
     return this._providersByType.has(kind);
@@ -134,7 +142,7 @@ class ServiceRegistry {
    * returned each time a given service type is resolved.
    */
   resolve<T>(kind: IType<T>): Promise<T> {
-    return Private.resolveType(kind, this._providersByType, []);
+    return Private.resolve(kind, this._providersByType, []);
   }
 
   private _providersByID = Private.createProviderIDMap();
@@ -206,7 +214,7 @@ namespace Private {
    * #### Notes
    * The `requires` property of the extended provider will always be
    * specified. If the original provider does not have dependencies,
-   * the requires array will be empty.
+   * the `requires` array will be empty.
    */
   export
   function createProviderEx<T>(provider: IServiceProvider<T>): IProviderEx<T> {
@@ -264,7 +272,7 @@ namespace Private {
    *   type, or rejects if the instance cannot be created.
    */
   export
-  function resolveType<T>(kind: IType<T>, map: ProviderTypeMap, path: string[]): Promise<T> {
+  function resolve<T>(kind: IType<T>, map: ProviderTypeMap, path: string[]): Promise<T> {
     // Reject the promise if there is provider for the type.
     let pex = map.get(kind);
     if (!pex) {
@@ -304,7 +312,7 @@ namespace Private {
     path.push(pex.id);
 
     // Generate the resolver promises from the provider dependencies.
-    let reqs = pex.requires.map(kind => resolveType(kind, map, path));
+    let reqs = pex.requires.map(kind => resolve(kind, map, path));
 
     // Pop the provider id from the path stack.
     path.pop();
@@ -326,7 +334,7 @@ namespace Private {
     // The `any` cast is needed due to no `Function.name` on IE.
     let name = ((kind as any).name as string) || '';
     let head = `No registered provider for type: ${name}.`;
-    let tail = `Provider resolve path: ${path.join(' -> ')}.`;
+    let tail = `Provider resolution path: ${path.join(' -> ')}.`;
     return new Error(`${head} ${tail}`);
   }
 }
