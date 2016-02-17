@@ -15,6 +15,7 @@
     "../typings/fuzzysearch-js/fuzzysearch-js.d.ts",
     "core.ts",
     "index.ts",
+    "serviceregistry",
     "appshell/index.ts",
     "appshell/plugin.ts",
     "appshell/sidebar.ts",
