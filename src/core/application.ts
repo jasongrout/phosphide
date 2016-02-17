@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  ApplicationShell, IApplicationShell
+  ApplicationShell
 } from './applicationshell';
 
 import {
@@ -109,7 +109,7 @@ class Application {
    *
    * This is a read-only property.
    */
-  get shell(): IApplicationShell {
+  get shell(): ApplicationShell {
     return this._shell;
   }
 
@@ -390,13 +390,12 @@ class Application {
   /**
    * Create the shell widget for the application.
    *
-   * @returns A concrete implementation of an application shell.
+   * @returns An instance of an application shell.
    *
    * #### Notes
-   * A subclass may reimplement this this method to create a custom
-   * application shell.
+   * A subclass may reimplement this this method for a custom shell.
    */
-  protected createApplicationShell(): IApplicationShell {
+  protected createApplicationShell(): ApplicationShell {
     return new ApplicationShell();
   }
 
@@ -490,7 +489,7 @@ class Application {
 
   private _started = false;
   private _promise: Promise<void> = null;
-  private _shell: IApplicationShell = null;
+  private _shell: ApplicationShell = null;
   private _commands: ABCCommandRegistry = null;
   private _palette: ABCPaletteRegistry = null;
   private _shortcuts: ABCShortcutRegistry = null;
