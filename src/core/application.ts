@@ -314,15 +314,15 @@ class Application {
       this.resolveService(ABCCommandRegistry),
       this.resolveService(ABCPaletteRegistry),
       this.resolveService(ABCShortcutRegistry)
-    ];
+    ] as Promise<any>[];
 
     // Setup the promise for the rest of the bootstrapping.
     this._promise = Promise.all(promises).then(results => {
 
       // Store the resolved default services.
-      this._commands = results[0] as any as ABCCommandRegistry;
-      this._palette = results[1] as any as ABCPaletteRegistry;
-      this._shortcuts = results[2] as any as ABCShortcutRegistry;
+      this._commands = results[0] as ABCCommandRegistry;
+      this._palette = results[1] as ABCPaletteRegistry;
+      this._shortcuts = results[2] as ABCShortcutRegistry;
 
       // Compute the extension ids to activate.
       let extIDs: string[];
