@@ -320,9 +320,9 @@ class Application {
     this._promise = Promise.all(promises).then(results => {
 
       // Store the resolved default services.
-      this._commands = results[0];
-      this._palette = results[1];
-      this._shortcuts = results[2];
+      this._commands = results[0] as any as ABCCommandRegistry;
+      this._palette = results[1] as any as ABCPaletteRegistry;
+      this._shortcuts = results[2] as any as ABCShortcutRegistry;
 
       // Compute the extension ids to activate.
       let extIDs: string[];
