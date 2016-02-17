@@ -106,6 +106,15 @@ class ServiceRegistry {
   }
 
   /**
+   * List the IDs of all service providers in the registry.
+   *
+   * @returns A new array of all provider IDs in the registry.
+   */
+  listProviders(): string[] {
+    return Object.keys(this._providersByID);
+  }
+
+  /**
    * Test whether the registry has a provider with the given id.
    *
    * @param id - The id of the provider of interest.
