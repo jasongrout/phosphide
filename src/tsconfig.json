@@ -29,6 +29,7 @@
     "commandpalette/plugin.ts",
     "shortcutmanager/index.ts",
     "shortcutmanager/plugin.ts",
-    "services/commandregistry.ts"
+    "services/commandregistry.ts",
+    "services/shortcutregistry.ts"
   ]
 }
