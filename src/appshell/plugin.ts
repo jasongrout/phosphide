@@ -23,6 +23,10 @@ import {
 } from 'phosphor-dockpanel';
 
 import {
+  Message, sendMessage
+} from 'phosphor-messaging';
+
+import {
   Panel
 } from 'phosphor-panel';
 
@@ -428,6 +432,7 @@ class SideBarHandler {
     if (oldWidget) oldWidget.hide();
     if (newWidget) {
       newWidget.show();
+      sendMessage(newWidget, new Message('focus-request'));
       document.body.dataset[`${this._side}Area`] = newWidget.id;
     } else {
       delete document.body.dataset[`${this._side}Area`];
