@@ -282,7 +282,7 @@ namespace Private {
    */
   export
   function resolveService<T>(kind: IType<T>, map: ProviderTypeMap, path: string[]): Promise<T> {
-    // Reject the promise if there is provider for the type.
+    // Reject the promise if there is no provider for the type.
     let pex = map.get(kind);
     if (!pex) {
       return Promise.reject(missingProviderError(kind, path));
