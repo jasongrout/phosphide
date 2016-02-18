@@ -8,7 +8,7 @@
 'use strict';
 
 import {
-  AbstractPaletteModel, StandardPaletteModel
+  AbstractPaletteModel, StandardPaletteItem, StandardPaletteModel
 } from 'phosphor-commandpalette';
 
 import {
@@ -109,6 +109,8 @@ class PaletteRegistry extends ABCPaletteRegistry {
     super();
     this._commands = commands;
     this._shortcuts = shortcuts;
+    this._shortcuts.shortcutsAdded.connect(this._onShortcutsChanged, this);
+    this._shortcuts.shortcutsRemoved.connect(this._onShortcutsChanged, this);
   }
 
   /**
@@ -145,10 +147,12 @@ class PaletteRegistry extends ABCPaletteRegistry {
       return new DisposableDelegate(null);
     }
 
-    let paletteItems = this._model.addItems(optionsArray);
+    let boxes = this._model.addItems(optionsArray).map(item => ({ item }));
+    Array.prototype.push.apply(this._boxes, boxes);
 
     return new DisposableDelegate(() => {
-      this._model.removeItems(paletteItems);
+      this._model.removeItems(boxes.map(box => box.item));
+      this._boxes = this._boxes.filter(box => boxes.indexOf(box) === -1);
     });
   }
 
@@ -157,6 +161,41 @@ class PaletteRegistry extends ABCPaletteRegistry {
    */
   protected getModel(): AbstractPaletteModel {
     return this._model;
+  }
+
+  /**
+   * Update the shortcut for the given item pair.
+   */
+  private _updateShortcut(box: Private.IItemBox): void {
+    let seq = this._shortcuts.sequenceFor(box.item.args);
+    let shortcut = seq ? Private.formatSequence(seq) : '';
+
+    let options = {
+      handler: this._executeCommand,
+      args: box.item.args,
+      text: box.item.text,
+      shortcut: shortcut,
+      icon: box.item.icon,
+      caption: box.item.caption,
+      category: box.item.category
+    };
+
+    this._model.removeItem(box.item);
+
+    box.item = this._model.addItem(options);
+  }
+
+  /**
+   * A handler for shortcut registry signals.
+   */
+  private _onShortcutsChanged(sender: ABCShortcutRegistry, commands: string[]): void {
+    let changed: { [id: string]: boolean } = Object.create(null);
+    commands.forEach(id => { changed[id] = true; });
+
+    for (let box of this._boxes) {
+      let relevant = box.item.args in changed;
+      if (relevant) this._updateShortcut(box);
+    }
   }
 
   /**
@@ -170,6 +209,7 @@ class PaletteRegistry extends ABCPaletteRegistry {
   private _commands: ABCCommandRegistry;
   private _shortcuts: ABCShortcutRegistry;
   private _model = new StandardPaletteModel();
+  private _boxes: Private.IItemBox[] = [];
 }
 
 
@@ -196,6 +236,17 @@ namespace Private {
    */
   export
   const commandTriggeredSignal = new Signal<ABCPaletteRegistry, string>();
+
+  /**
+   *
+   */
+  export
+  interface IItemBox {
+    /**
+     *
+     */
+    item: StandardPaletteItem;
+  }
 
   /**
    *
