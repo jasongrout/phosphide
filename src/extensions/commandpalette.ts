@@ -60,12 +60,10 @@ function activateCommandPalette(app: Application): Promise<void> {
   }
 
   function togglePalette(): void {
-    if (!widget.isHidden) {
-      app.shell.collapseLeft();
-      return;
+    if (widget.isHidden) {
+      activatePalette();
+    } else {
+      hidePalette();
     }
-    app.shell.activateLeft(widget.id);
-    widget.inputNode.focus();
-    widget.inputNode.select();
   }
 }
