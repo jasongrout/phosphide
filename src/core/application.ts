@@ -461,8 +461,8 @@ class Application {
    * A subclass may reimplement this method as needed.
    */
   protected addEventsListeners(): void {
-    document.addEventListener('resize', this);
     document.addEventListener('keydown', this);
+    window.addEventListener('resize', this);
   }
 
   /**
