@@ -326,12 +326,15 @@ class Application {
 
       // Compute the extension ids to activate.
       let extIDs: string[];
-      if (options.activateExtensions === true) {
+      let optVal = options.activateExtensions;
+      if (optVal === true) {
         extIDs = this.listExtensions();
-      } else if (options.activateExtensions) {
-        extIDs = options.activateExtensions as string[];
-      } else {
+      } else if (optVal === false) {
         extIDs = [];
+      } else if (optVal) {
+        extIDs = optVal as string[];
+      } else {
+        extIDs = this.listExtensions();
       }
 
       // Activate the initial extensions.

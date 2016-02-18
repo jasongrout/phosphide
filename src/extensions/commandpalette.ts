@@ -15,22 +15,13 @@ import {
   Application
 } from '../core/application';
 
-import {
-  ABCCommandRegistry
-} from '../services/commandregistry';
-
-import {
-  ABCPaletteRegistry
-} from '../services/paletteregistry';
-
 
 /**
  * The default commmand palette extension.
  */
 export
 const commandPaletteExtension = {
-  name: 'phosphide.extensions.commandPalette',
-  requires: [ABCCommandRegistry, ABCPaletteRegistry],
+  id: 'phosphide.extensions.commandPalette',
   activate: activateCommandPalette
 };
 
@@ -38,17 +29,20 @@ const commandPaletteExtension = {
 /**
  *
  */
-function activateCommandPalette(app: Application, commands: ABCCommandRegistry, palette: ABCPaletteRegistry): Promise<void> {
+function activateCommandPalette(app: Application): Promise<void> {
   let widget = new CommandPalette();
-  widget.title.text = 'Commands';
-  widget.model = palette.model;
   widget.id = 'command-palette';
+  widget.title.text = 'Commands';
+  widget.model = app.palette.model;
 
-  commands.add([
-    { id: 'command-palette:activate', handler: activatePalette }
+  app.commands.add([
+    { id: 'command-palette:activate', handler: activatePalette },
+    { id: 'command-palette:hide', handler: hidePalette }
   ]);
 
-  palette.commandTriggered.connect(hidePalette);
+  app.palette.commandTriggered.connect(() => {
+    app.commands.execute('command-palette:hide');
+  });
 
   app.shell.addToLeftArea(widget);
 
