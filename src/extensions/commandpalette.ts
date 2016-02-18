@@ -21,7 +21,7 @@ import {
  */
 export
 const commandPaletteExtension = {
-  name: 'phosphide.extensions.commandPalette',
+  id: 'phosphide.extensions.commandPalette',
   activate: activateCommandPalette
 };
 
