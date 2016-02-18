@@ -15,6 +15,11 @@
     "../typings/fuzzysearch-js/fuzzysearch-js.d.ts",
     "core.ts",
     "index.ts",
+    "core/application.ts",
+    "core/applicationshell.ts",
+    "core/extensionregistry.ts",
+    "core/serviceregistry.ts",
+    "core/sidebar.ts",
     "appshell/index.ts",
     "appshell/plugin.ts",
     "appshell/sidebar.ts",
@@ -22,7 +27,10 @@
     "commandregistry/plugin.ts",
     "commandpalette/index.ts",
     "commandpalette/plugin.ts",
+    "extensions/commandpalette.ts",
     "shortcutmanager/index.ts",
-    "shortcutmanager/plugin.ts"
+    "shortcutmanager/plugin.ts",
+    "services/commandregistry.ts",
+    "services/shortcutregistry.ts"
   ]
 }
