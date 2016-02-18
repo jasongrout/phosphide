@@ -36,10 +36,13 @@ function activateCommandPalette(app: Application): Promise<void> {
   widget.model = app.palette.model;
 
   app.commands.add([
-    { id: 'command-palette:activate', handler: activatePalette }
+    { id: 'command-palette:activate', handler: activatePalette },
+    { id: 'command-palette:hide', handler: hidePalette }
   ]);
 
-  app.palette.commandTriggered.connect(hidePalette);
+  app.palette.commandTriggered.connect(() => {
+    app.commands.execute('command-palette:hide');
+  });
 
   app.shell.addToLeftArea(widget);
 

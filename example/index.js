@@ -27,30 +27,12 @@ app.run().then(() => {
       command: 'command-palette:activate',
       sequence: ['Accel Shift P'],
       selector: '*'
+    },
+    {
+      command: 'command-palette:hide',
+      sequence: ['Escape'],
+      selector: '[data-left-area="command-palette"]'
     }
   ]);
 
-  app.commands.add([
-    {
-      id: 'app:collapse-left',
-      handler: () => { app.shell.collapseLeft(); }
-    },
-    {
-      id: 'app:collapse-right',
-      handler: () => { app.shell.collapseRight(); }
-    }
-  ]);
-
-  app.shortcuts.add([
-    {
-      command: 'app:collapse-left',
-      sequence: ['Escape'],
-      selector: '[data-left-area]'
-    },
-    {
-      command: 'app:collapse-right',
-      sequence: ['Escape'],
-      selector: '[data-right-area]'
-    }
-  ]);
 });
