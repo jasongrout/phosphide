@@ -1,6 +1,6 @@
 {
   "name": "phosphide",
-  "version": "0.6.0",
+  "version": "0.9.0",
   "description": "Slightly opinionated scaffolding for building plugin-based IDE-style applications.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
