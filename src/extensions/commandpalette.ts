@@ -36,6 +36,7 @@ function activateCommandPalette(app: Application): Promise<void> {
   widget.model = app.palette.model;
 
   app.commands.add([
+    { id: 'command-palette:toggle', handler: togglePalette },
     { id: 'command-palette:activate', handler: activatePalette },
     { id: 'command-palette:hide', handler: hidePalette }
   ]);
@@ -56,5 +57,13 @@ function activateCommandPalette(app: Application): Promise<void> {
 
   function hidePalette(): void {
     if (!widget.isHidden) app.shell.collapseLeft();
+  }
+
+  function togglePalette(): void {
+    if (widget.isHidden) {
+      activatePalette();
+    } else {
+      hidePalette();
+    }
   }
 }

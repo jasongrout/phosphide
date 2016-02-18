@@ -24,7 +24,7 @@ app.run().then(() => {
 
   app.shortcuts.add([
     {
-      command: 'command-palette:activate',
+      command: 'command-palette:toggle',
       sequence: ['Accel Shift P'],
       selector: '*'
     },
