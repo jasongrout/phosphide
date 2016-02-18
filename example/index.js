@@ -7,21 +7,50 @@
 |----------------------------------------------------------------------------*/
 'use strict';
 
-var phosphide = require('phosphide');
-var di = require('phosphor-di');
+var phosphide = require('phosphide/lib/core/application');
 
+var app = new phosphide.Application({
+  extensions: [
+    require('phosphide/lib/extensions/commandpalette').commandPaletteExtension,
+    require('blue/index').blueExtension,
+    require('green/index').greenExtension,
+    require('red/index').redExtension,
+    require('yellow/index').yellowExtension,
+    require('editor/index').editorExtension
+  ]
+});
 
-phosphide.loadPlugins(new di.Container(), [
-  require('phosphide/lib/appshell/plugin'),
-  require('phosphide/lib/commandregistry/plugin'),
-  require('phosphide/lib/commandpalette/plugin'),
-  require('phosphide/lib/shortcutmanager/plugin'),
-  require('application/index'),
-  require('red/index'),
-  require('blue/index'),
-  require('green/index'),
-  require('yellow/index'),
-  require('editor/index')
-]).then(function() {
-  console.log('loading finished');
+app.run().then(() => {
+
+  app.shortcuts.add([
+    {
+      command: 'command-palette:activate',
+      sequence: ['Accel Shift P'],
+      selector: '*'
+    }
+  ]);
+
+  app.commands.add([
+    {
+      id: 'app:collapse-left',
+      handler: () => { app.shell.collapseLeft(); }
+    },
+    {
+      id: 'app:collapse-right',
+      handler: () => { app.shell.collapseRight(); }
+    }
+  ]);
+
+  app.shortcuts.add([
+    {
+      command: 'app:collapse-left',
+      sequence: ['Escape'],
+      selector: '[data-left-area]'
+    },
+    {
+      command: 'app:collapse-right',
+      sequence: ['Escape'],
+      selector: '[data-right-area]'
+    }
+  ]);
 });

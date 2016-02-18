@@ -8,16 +8,8 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
-} from 'phosphide';
-
-import {
-  Container
-} from 'phosphor-di';
-
-import {
-  IDisposable
-} from 'phosphor-disposable';
+  Application
+} from 'phosphide/lib/core/application';
 
 import {
   Widget
@@ -25,108 +17,86 @@ import {
 
 
 export
-function resolve(container: Container): Promise<void> {
-  return container.resolve(YellowHandler).then(handler => { handler.run(); });
+const yellowExtension = {
+  id: 'phosphide.example.yellow',
+  activate: activateYellow
+};
+
+
+function createCommandItem(id: string, message: string) {
+  return { id, handler: () => { console.log(`COMMAND: ${message}`); } };
 }
 
-function createHandler(): (args: any) => void {
-  return (message: string) => { console.log(`COMMAND: ${message}`); };
-}
 
+function activateYellow(app: Application): Promise<void> {
+  let widget = new Widget();
+  widget.id = 'yellow';
+  widget.title.text = 'Yellow';
+  widget.addClass('yellow-content');
 
-class YellowHandler {
+  let commandItems = [
+    createCommandItem('yellow:show-0', 'Yellow is best!'),
+    createCommandItem('yellow:show-1', 'Yellow number one'),
+    createCommandItem('yellow:show-2', 'Yellow number two'),
+    createCommandItem('yellow:show-3', 'Yellow number three'),
+    createCommandItem('yellow:show-4', 'Yellow number four'),
+    createCommandItem('yellow:show-5', 'Yellow number five')
+  ];
 
-  static requires = [IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager];
+  let paletteItems = [
+    {
+      command: 'yellow:show-0',
+      text: 'Yellow 0',
+      caption: 'Yellow is best!',
+      category: 'All Colours'
+    },
+    {
+      command: 'yellow:show-1',
+      text: 'Yellow 1',
+      caption: 'Yellow number one',
+      category: 'Yellow'
+    },
+    {
+      command: 'yellow:show-2',
+      text: 'Yellow 2',
+      caption: 'Yellow number two',
+      category: 'Yellow'
+    },
+    {
+      command: 'yellow:show-3',
+      text: 'Yellow 3',
+      caption: 'Yellow number three',
+      category: 'Yellow'
+    },
+    {
+      command: 'yellow:show-4',
+      text: 'Yellow 4',
+      caption: 'Yellow number four',
+      category: 'Yellow'
+    },
+    {
+      command: 'yellow:show-5',
+      text: 'Yellow 5',
+      caption: 'Yellow number five',
+      category: 'Yellow'
+    }
+  ];
 
-  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): YellowHandler {
-    return new YellowHandler(shell, palette, registry, shortcuts);
-  }
+  let shortcutItems = [
+    {
+      sequence: ['Ctrl Y'],
+      selector: '*',
+      command: 'yellow:show-0'
+    }
+  ];
 
-  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager) {
-    this._shell = shell;
-    this._palette = palette;
-    this._registry = registry;
-    this._shortcuts = shortcuts;
-  }
+  app.commands.add(commandItems);
 
-  run(): void {
-    let widget = new Widget();
-    widget.id = 'yellow';
-    widget.addClass('yellow-content');
-    widget.title.text = 'Yellow';
-    this._shell.addToLeftArea(widget, { rank: 20 });
-    let registryItems = [
-      { id: 'yellow:show-0', handler: createHandler() },
-      { id: 'yellow:show-1', handler: createHandler() },
-      { id: 'yellow:show-2', handler: createHandler() },
-      { id: 'yellow:show-3', handler: createHandler() },
-      { id: 'yellow:show-4', handler: createHandler() },
-      { id: 'yellow:show-5', handler: createHandler() }
-    ];
-    let paletteItems = [
-      {
-        id: 'yellow:show-0',
-        args: 'Yellow is best!',
-        text: 'Yellow 0',
-        caption: 'Yellow is best!',
-        category: 'All Colours'
-      },
-      {
-        id: 'yellow:show-1',
-        args: 'Yellow number one',
-        text: 'Yellow 1',
-        caption: 'Yellow number one',
-        category: 'Yellow'
-      },
-      {
-        id: 'yellow:show-2',
-        args: 'Yellow number two',
-        text: 'Yellow 2',
-        caption: 'Yellow number two',
-        category: 'Yellow'
-      },
-      {
-        id: 'yellow:show-3',
-        args: 'Yellow number three',
-        text: 'Yellow 3',
-        caption: 'Yellow number three',
-        category: 'Yellow'
-      },
-      {
-        id: 'yellow:show-4',
-        args: 'Yellow number four',
-        text: 'Yellow 4',
-        caption: 'Yellow number four',
-        category: 'Yellow'
-      },
-      {
-        id: 'yellow:show-5',
-        args: 'Yellow number five',
-        text: 'Yellow 5',
-        caption: 'Yellow number five',
-        category: 'Yellow'
-      }
-    ];
-    let shortcutItems = [
-      {
-        sequence: ['Ctrl Y'],
-        selector: '*',
-        command: paletteItems[0].id,
-        args: paletteItems[0].args
-      }
-    ];
+  app.shortcuts.add(shortcutItems);
 
-    // Add commands to registry.
-    this._registry.add(registryItems);
-    // Add shortcuts to shortcut manager.
-    this._shortcuts.add(shortcutItems);
-    // Add commands to palette.
-    this._palette.add(paletteItems);
-  }
+  app.palette.add(paletteItems);
 
-  private _commandDisposable: IDisposable;
-  private _shell: IAppShell;
-  private _palette: ICommandPalette;
-  private _registry: ICommandRegistry;
-  private _shortcuts: IShortcutManager;
+  app.shell.addToLeftArea(widget, { rank: 20 });
+
+  return Promise.resolve<void>();
 }

@@ -8,16 +8,8 @@
 'use strict';
 
 import {
-  IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager
-} from 'phosphide';
-
-import {
-  Container
-} from 'phosphor-di';
-
-import {
-  IDisposable
-} from 'phosphor-disposable';
+  Application
+} from 'phosphide/lib/core/application';
 
 import {
   Widget
@@ -25,109 +17,86 @@ import {
 
 
 export
-function resolve(container: Container): Promise<void> {
-  return container.resolve(BlueHandler).then(handler => { handler.run(); });
+const blueExtension = {
+  id: 'phosphide.example.blue',
+  activate: activateBlue
+};
+
+
+function createCommandItem(id: string, message: string) {
+  return { id, handler: () => { console.log(`COMMAND: ${message}`); } };
 }
 
 
-function createHandler(): (args: any) => void {
-  return (message: string) => { console.log(`COMMAND: ${message}`); };
-}
+function activateBlue(app: Application): Promise<void> {
+  let widget = new Widget();
+  widget.id = 'blue';
+  widget.title.text = 'Blue';
+  widget.addClass('blue-content');
 
+  let commandItems = [
+    createCommandItem('blue:show-0', 'Blue is best!'),
+    createCommandItem('blue:show-1', 'Blue number one'),
+    createCommandItem('blue:show-2', 'Blue number two'),
+    createCommandItem('blue:show-3', 'Blue number three'),
+    createCommandItem('blue:show-4', 'Blue number four'),
+    createCommandItem('blue:show-5', 'Blue number five')
+  ];
 
-class BlueHandler {
+  let paletteItems = [
+    {
+      command: 'blue:show-0',
+      text: 'Blue 0',
+      caption: 'Blue is best!',
+      category: 'All Colours'
+    },
+    {
+      command: 'blue:show-1',
+      text: 'Blue 1',
+      caption: 'Blue number one',
+      category: 'Blue'
+    },
+    {
+      command: 'blue:show-2',
+      text: 'Blue 2',
+      caption: 'Blue number two',
+      category: 'Blue'
+    },
+    {
+      command: 'blue:show-3',
+      text: 'Blue 3',
+      caption: 'Blue number three',
+      category: 'Blue'
+    },
+    {
+      command: 'blue:show-4',
+      text: 'Blue 4',
+      caption: 'Blue number four',
+      category: 'Blue'
+    },
+    {
+      command: 'blue:show-5',
+      text: 'Blue 5',
+      caption: 'Blue number five',
+      category: 'Blue'
+    }
+  ];
 
-  static requires = [IAppShell, ICommandPalette, ICommandRegistry, IShortcutManager];
+  let shortcutItems = [
+    {
+      sequence: ['Ctrl B'],
+      selector: '*',
+      command: 'blue:show-0'
+    }
+  ];
 
-  static create(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager): BlueHandler {
-    return new BlueHandler(shell, palette, registry, shortcuts);
-  }
+  app.commands.add(commandItems);
 
-  constructor(shell: IAppShell, palette: ICommandPalette, registry: ICommandRegistry, shortcuts: IShortcutManager) {
-    this._shell = shell;
-    this._palette = palette;
-    this._registry = registry;
-    this._shortcuts = shortcuts;
-  }
+  app.shortcuts.add(shortcutItems);
 
-  run(): void {
-    let widget = new Widget();
-    widget.id = 'blue';
-    widget.addClass('blue-content');
-    widget.title.text = 'Blue';
-    this._shell.addToLeftArea(widget, { rank: 10 });
-    let registryItems = [
-      { id: 'blue:show-0', handler: createHandler() },
-      { id: 'blue:show-1', handler: createHandler() },
-      { id: 'blue:show-2', handler: createHandler() },
-      { id: 'blue:show-3', handler: createHandler() },
-      { id: 'blue:show-4', handler: createHandler() },
-      { id: 'blue:show-5', handler: createHandler() }
-    ];
-    let paletteItems = [
-      {
-        id: 'blue:show-0',
-        args: 'Blue is best!',
-        text: 'Blue 0',
-        caption: 'Blue is best!',
-        category: 'All Colours'
-      },
-      {
-        id: 'blue:show-1',
-        args: 'Blue number one',
-        text: 'Blue 1',
-        caption: 'Blue number one',
-        category: 'Blue'
-      },
-      {
-        id: 'blue:show-2',
-        args: 'Blue number two',
-        text: 'Blue 2',
-        caption: 'Blue number two',
-        category: 'Blue'
-      },
-      {
-        id: 'blue:show-3',
-        args: 'Blue number three',
-        text: 'Blue 3',
-        caption: 'Blue number three',
-        category: 'Blue'
-      },
-      {
-        id: 'blue:show-4',
-        args: 'Blue number four',
-        text: 'Blue 4',
-        caption: 'Blue number four',
-        category: 'Blue'
-      },
-      {
-        id: 'blue:show-5',
-        args: 'Blue number five',
-        text: 'Blue 5',
-        caption: 'Blue number five',
-        category: 'Blue'
-      }
-    ];
-    let shortcutItems = [
-      {
-        sequence: ['Ctrl B'],
-        selector: '*',
-        command: paletteItems[0].id,
-        args: paletteItems[0].args
-      }
-    ];
+  app.palette.add(paletteItems);
 
-    // Add commands to registry.
-    this._registry.add(registryItems);
-    // Add commands to palette.
-    this._palette.add(paletteItems);
-    // Add shortcuts to shortcut manager.
-    this._shortcuts.add(shortcutItems);
-  }
+  app.shell.addToLeftArea(widget, { rank: 10 });
 
-  private _commandDisposable: IDisposable;
-  private _shell: IAppShell;
-  private _palette: ICommandPalette;
-  private _registry: ICommandRegistry;
-  private _shortcuts: IShortcutManager;
+  return Promise.resolve<void>();
 }

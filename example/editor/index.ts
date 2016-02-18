@@ -10,12 +10,8 @@
 import CodeMirror = require('codemirror');
 
 import {
-  IAppShell
-} from 'phosphide';
-
-import {
-  Container
-} from 'phosphor-di';
+  Application
+} from 'phosphide/lib/core/application';
 
 import {
   Message
@@ -30,31 +26,18 @@ import 'codemirror/mode/javascript/javascript.js';
 
 
 export
-function resolve(container: Container): Promise<void> {
-  return container.resolve(EditorHandler).then(handler => { handler.run(); });
-}
+const editorExtension = {
+  id: 'phosphide.example.editor',
+  activate: activateEditor
+};
 
 
-class EditorHandler {
-
-  static requires = [IAppShell];
-
-  static create(shell: IAppShell): EditorHandler {
-    return new EditorHandler(shell);
+function activateEditor(app: Application): Promise<void> {
+  for (let i = 0; i < 5; ++i) {
+    let editor = createEditor(i);
+    app.shell.addToMainArea(editor);
   }
-
-  constructor(shell: IAppShell) {
-    this._shell = shell;
-  }
-
-  run(): void {
-    for (let i = 0; i < 5; ++i) {
-      let editor = createEditor(i);
-      this._shell.addToMainArea(editor);
-    }
-  }
-
-  private _shell: IAppShell;
+  return Promise.resolve<void>();
 }
 
 
