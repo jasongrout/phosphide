@@ -234,12 +234,11 @@ describe('phosphide', () => {
           args: 0
         };
         short2 = {
-          sequence: ['Ctrl J'],
+          sequence: ['Accel J'],
           selector: '*',
           command: 'cmd:test',
           args: 1
         };
-
       });
 
       it('should return all valid sequences', () => {
@@ -252,7 +251,7 @@ describe('phosphide', () => {
         let results1 = shortcuts.getSequences('cmd:test', 1);
         expect(results1.length).to.be(1);
         expect(results1[0].length).to.be(1);
-        expect(results1[0][0]).to.be('Ctrl J');
+        expect(results1[0][0]).to.be('Accel J');
       });
 
       it('should perform deep equality test before adding', () => {

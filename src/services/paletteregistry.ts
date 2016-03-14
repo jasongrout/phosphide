@@ -249,10 +249,21 @@ namespace Private {
   }
 
   /**
+   * A flag indicating whether the platform is Mac.
+   */
+  let IS_MAC = !!navigator.platform.match(/Mac/i);
+
+  /**
+   * How to format Accel (Cmd on Mac, Ctrl elsewhere)
+   */
+  let ACCEL = IS_MAC ? 'Cmd' : 'Ctrl';
+
+  /**
    *
    */
   export
   function formatSequence(seq: string[]): string {
-    return seq.map(s => s.trim().replace(/\s+/g, '-')).join(' ');
+    
+    return seq.map(s => s.trim().replace(/\s+/g, '-').replace('Accel', ACCEL)).join(' ');
   }
 }
