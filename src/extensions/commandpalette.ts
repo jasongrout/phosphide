@@ -41,10 +41,6 @@ function activateCommandPalette(app: Application): Promise<void> {
     { id: 'command-palette:hide', handler: hidePalette }
   ]);
 
-  app.palette.commandTriggered.connect(() => {
-    app.commands.execute('command-palette:hide');
-  });
-
   app.shell.addToLeftArea(widget);
 
   return Promise.resolve<void>();
