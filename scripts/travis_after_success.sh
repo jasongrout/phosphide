@@ -23,6 +23,7 @@ then
     git add -A
     git commit -m "autocommit docs"
     git push origin gh-pages
+    echo "Build complete"
 else
     echo "-- will only push docs from master --"
 fi
