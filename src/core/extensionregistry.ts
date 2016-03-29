@@ -35,7 +35,9 @@ interface IExtension<T> {
    * specified by the `requires` property. This function will not be
    * called unless all requirements can be fulfilled.
    *
-   * The returned promise should resolve when activation is complete.
+   * If a promise is returned, the promise should resolve when the activation
+   * is complete. This allows a plugin to perform asynchronous actions (such
+   * as loading files) during its activation.
    */
   activate: (context: T, ...args: any[]) => Promise<void> | void;
 }
