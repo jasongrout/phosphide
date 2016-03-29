@@ -37,7 +37,7 @@ interface IExtension<T> {
    *
    * The returned promise should resolve when activation is complete.
    */
-  activate: (context: T, ...args: any[]) => Promise<void>;
+  activate: (context: T, ...args: any[]) => Promise<void> | void;
 }
 
 
